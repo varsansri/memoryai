@@ -365,7 +365,8 @@ textarea.fi{resize:none;height:90px}
 // ══════════════════════════════════════════════════
 // ── Phone backend connection ──────────────────────────────────────
 const BACKEND_KEY = 'memoryai_backend_url';
-let backendUrl = localStorage.getItem(BACKEND_KEY) || '';
+const DEFAULT_BACKEND = 'https://black-shared-weeks-civilization.trycloudflare.com';
+let backendUrl = localStorage.getItem(BACKEND_KEY) || DEFAULT_BACKEND;
 
 function updateConnBar() {
   const dot = document.getElementById('connDot');
