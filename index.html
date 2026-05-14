@@ -169,6 +169,30 @@ textarea.fi{resize:none;height:90px}
 .narrative-box em{color:var(--accent);font-style:normal;font-weight:600}
 .narrative-gen-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
 
+/* ── Phone backend connect ── */
+.conn-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:10px;font-size:12px}
+.conn-bar-inner{max-width:960px;margin:0 auto;width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.conn-dot.live{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.conn-dot.err{background:var(--err)}
+.conn-label{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conn-btn{padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.conn-btn:hover{border-color:var(--accent);color:#a78bfa}
+.conn-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.conn-modal.open{opacity:1;pointer-events:all}
+.conn-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:480px}
+.conn-box h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.conn-box p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.conn-steps{background:var(--card);border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;line-height:2;color:var(--muted);font-family:monospace}
+.conn-steps b{color:var(--text)}
+.conn-input-row{display:flex;gap:8px}
+.conn-input{flex:1;padding:11px 13px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;outline:none}
+.conn-input:focus{border-color:var(--accent)}
+.conn-save-btn{padding:11px 16px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.conn-save-btn:disabled{opacity:.5}
+.conn-disc-btn{width:100%;margin-top:10px;padding:9px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;cursor:pointer}
+.conn-disc-btn:hover{border-color:var(--err);color:var(--err)}
+
 /* ── Chat FAB & Panel ── */
 .chat-fab{position:fixed;bottom:90px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(99,102,241,.5);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;z-index:40}
 .chat-fab:hover{transform:scale(1.08)}.chat-fab:active{transform:scale(.96)}
@@ -204,6 +228,39 @@ textarea.fi{resize:none;height:90px}
     </div>
   </div>
 </header>
+
+<!-- Backend connection bar -->
+<div class="conn-bar" id="connBar">
+  <div class="conn-bar-inner">
+    <div class="conn-dot" id="connDot"></div>
+    <span class="conn-label" id="connLabel">No phone backend connected — using browser AI (no video download)</span>
+    <button class="conn-btn" onclick="openConnModal()">📱 Connect Phone</button>
+  </div>
+</div>
+
+<!-- Connect modal -->
+<div class="conn-modal" id="connModal">
+  <div class="conn-box">
+    <h2>📱 Connect Your Phone</h2>
+    <p>Run MemoryAI on your phone (Termux) and expose it with a tunnel. Then paste the public URL here — this site will use your phone as the backend for full video download + Whisper + frame analysis.</p>
+    <div class="conn-steps">
+      <b>1. Start backend on phone:</b><br>
+      &nbsp;&nbsp;cd ~/memoryai &amp;&amp; bash start.sh<br><br>
+      <b>2. Install &amp; run tunnel (pick one):</b><br>
+      &nbsp;&nbsp;pkg install cloudflared<br>
+      &nbsp;&nbsp;cloudflared tunnel --url http://localhost:8000<br><br>
+      &nbsp;&nbsp;<span style="color:var(--muted)">— or —</span><br><br>
+      &nbsp;&nbsp;Download ngrok for Android → run:<br>
+      &nbsp;&nbsp;./ngrok http 8000<br><br>
+      <b>3. Copy the https://... URL and paste below</b>
+    </div>
+    <div class="conn-input-row">
+      <input class="conn-input" id="connUrlIn" placeholder="https://abc123.ngrok.io" type="url" autocomplete="off">
+      <button class="conn-save-btn" id="connSaveBtn" onclick="connectBackend()">Connect</button>
+    </div>
+    <button class="conn-disc-btn" onclick="disconnectBackend()">Disconnect &amp; use browser AI</button>
+  </div>
+</div>
 
 <main class="main">
   <div class="stats-bar"><div class="stats-text" id="statsEl">Loading…</div></div>
@@ -306,6 +363,84 @@ textarea.fi{resize:none;height:90px}
 // ══════════════════════════════════════════════════
 //  GROQ — dual key, XOR-encoded, auto-rotate
 // ══════════════════════════════════════════════════
+// ── Phone backend connection ──────────────────────────────────────
+const BACKEND_KEY = 'memoryai_backend_url';
+let backendUrl = localStorage.getItem(BACKEND_KEY) || '';
+
+function updateConnBar() {
+  const dot = document.getElementById('connDot');
+  const lbl = document.getElementById('connLabel');
+  if (backendUrl) {
+    dot.className = 'conn-dot live';
+    lbl.textContent = '📱 Phone connected: ' + backendUrl.replace(/https?:\/\//, '').split('/')[0];
+    lbl.style.color = '#22c55e';
+  } else {
+    dot.className = 'conn-dot';
+    lbl.textContent = 'No phone backend — using browser AI (no video download)';
+    lbl.style.color = '';
+  }
+}
+
+async function connectBackend() {
+  const raw = document.getElementById('connUrlIn').value.trim().replace(/\/$/, '');
+  if (!raw.startsWith('http')) { toast('URL must start with https://', true); return; }
+  const btn = document.getElementById('connSaveBtn');
+  btn.disabled = true; btn.textContent = 'Testing…';
+  try {
+    const r = await fetch(raw + '/api/memories', { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error('Server returned ' + r.status);
+    backendUrl = raw;
+    localStorage.setItem(BACKEND_KEY, backendUrl);
+    updateConnBar();
+    document.getElementById('connModal').classList.remove('open');
+    toast('✅ Phone connected! Full video pipeline active.');
+    await load();
+  } catch(e) {
+    toast('Could not reach server: ' + e.message, true);
+  } finally { btn.disabled = false; btn.textContent = 'Connect'; }
+}
+
+function disconnectBackend() {
+  backendUrl = ''; localStorage.removeItem(BACKEND_KEY);
+  updateConnBar();
+  document.getElementById('connModal').classList.remove('open');
+  toast('Disconnected — back to browser AI');
+  load();
+}
+
+function openConnModal() {
+  document.getElementById('connUrlIn').value = backendUrl;
+  document.getElementById('connModal').classList.add('open');
+  setTimeout(() => document.getElementById('connUrlIn').focus(), 200);
+}
+
+// Hybrid API: use backend if connected, else Groq direct
+async function backendCall(path, options = {}) {
+  const url = backendUrl + path;
+  const r = await fetch(url, options);
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.detail || 'Backend error');
+  return d;
+}
+
+// Normalize backend memory to frontend format
+function normBackend(m) {
+  m.summary   = m.summary || m.ai_summary || '';
+  m.tags      = m.tags    || m.auto_tags  || [];
+  m.url       = m.url     || m.source_url || '';
+  m.thumbnail = m.thumbnail || m.thumbnail_url || '';
+  m.type      = m.type    || m.media_type || 'article';
+  m.rich      = m.rich    || {};
+  if (!m.platform) {
+    const u = m.url || '';
+    if (/youtu/.test(u))      m.platform = 'youtube';
+    else if (/instagram/.test(u)) m.platform = 'instagram';
+    else if (m.type === 'note')   m.platform = 'note';
+    else                          m.platform = 'web';
+  }
+  return m;
+}
+
 const _x = a => a.map(n => String.fromCharCode(n^42)).join('');
 const KEYS = [
   _x([77,89,65,117,80,66,88,95,115,108,125,105,109,124,102,105,98,107,83,114,72,99,125,69,125,109,78,83,72,25,108,115,115,92,115,82,70,31,66,24,124,103,100,126,69,97,102,79,19,110,94,67,127,92,102,73]),
@@ -885,7 +1020,21 @@ function updateStats(shown) {
   const notes = allMems.filter(m=>m.type==='note').length;
   el.innerHTML = `<b>${total}</b> memories · ${yt} YouTube${ig?' · '+ig+' Instagram':''} · ${notes} notes`;
 }
-function load() { allMems = getMems(); render(allMems); updateStats(allMems); }
+async function load() {
+  if (backendUrl) {
+    try {
+      const mems = await backendCall('/api/memories');
+      allMems = mems.map(normBackend);
+      setMems(allMems); // keep local copy in sync
+    } catch(e) {
+      toast('Backend unreachable — showing local cache', true);
+      allMems = getMems();
+    }
+  } else {
+    allMems = getMems();
+  }
+  render(allMems); updateStats(allMems);
+}
 
 // ── Search ──
 let stimer = null;
@@ -901,8 +1050,18 @@ sClear.onclick = () => { sIn.value=''; sClear.style.display='none'; searching=fa
 async function runSearch(q) {
   searching=true; sLabel.style.display='block'; sLabel.textContent=`🤖 Searching "${q}"…`;
   document.getElementById('grid').innerHTML='';
-  try { const ids=await aiSearch(q,allMems); const map=Object.fromEntries(allMems.map(m=>[m.id,m])); const res=ids.map(id=>map[id]).filter(Boolean); sLabel.textContent=`✨ Results for "${q}"`; render(res); updateStats(res); }
-  catch(e) { toast(e.message,true); sLabel.style.display='none'; searching=false; }
+  try {
+    let res;
+    if (backendUrl) {
+      const data = await backendCall('/api/search?q='+encodeURIComponent(q));
+      res = data.map(normBackend);
+    } else {
+      const ids = await aiSearch(q,allMems);
+      const map = Object.fromEntries(allMems.map(m=>[m.id,m]));
+      res = ids.map(id=>map[id]).filter(Boolean);
+    }
+    sLabel.textContent=`✨ Results for "${q}"`; render(res); updateStats(res);
+  } catch(e) { toast(e.message,true); sLabel.style.display='none'; searching=false; }
 }
 
 // ══════════════════════════════════════════════════
@@ -1171,6 +1330,30 @@ function setBusy(btn, busy) {
   btn.innerHTML = busy ? '<div class="spin"></div><span>Analyzing…</span>' : '<span>Deep Analyze &amp; Save</span>';
 }
 
+// ── Progress for backend mode ─────────────────────────────────────
+const _beMsgs = ['Downloading video…','Extracting audio…','Running Whisper transcription…','Extracting frames with ffmpeg…','AI vision on frames…','Building complete breakdown…','Almost done…'];
+let _beTimer = null, _beMsgIdx = 0, _beStart = 0;
+
+function startBackendProgress() {
+  _beStart = Date.now(); _beMsgIdx = 0;
+  document.getElementById('progBox').style.display = 'block';
+  document.getElementById('p1t').textContent = _beMsgs[0];
+  document.getElementById('p2t').textContent = 'Whisper real transcription…';
+  document.getElementById('p3t').textContent = 'Frame-by-frame AI vision…';
+  document.getElementById('p4t').textContent = 'Comprehensive AI breakdown…';
+  document.getElementById('p5t').textContent = 'Saving memory…';
+  setStep(1, 'active');
+  _beTimer = setInterval(() => {
+    const s = Math.floor((Date.now()-_beStart)/1000);
+    _beMsgIdx = Math.min(Math.floor(s/15), _beMsgs.length-1);
+    const stepN = Math.min(Math.floor(s/20)+1, 5);
+    [1,2,3,4,5].forEach(n => {
+      if (n < stepN) setStep(n,'done');
+      else if (n === stepN) setStep(n,'active', _beMsgs[_beMsgIdx]||'');
+    });
+  }, 1000);
+}
+
 async function doSaveUrl() {
   const url = document.getElementById('urlIn').value.trim();
   const note = document.getElementById('urlNote').value.trim();
@@ -1181,32 +1364,42 @@ async function doSaveUrl() {
   setBusy(btn, true);
   const isYT = /youtu\.?be|youtube\.com/.test(url);
   const isIG = /instagram\.com\/(reel|p|tv)\//.test(url);
+  const isVid = isYT || isIG || /tiktok|vimeo|twitter|x\.com/.test(url);
 
-  if (isYT || isIG) {
-    document.getElementById('progBox').style.display = 'block';
+  // ── Backend mode (phone connected) ──
+  if (backendUrl) {
+    if (isVid) startBackendProgress();
+    try {
+      const d = await backendCall('/api/save', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({url, user_note: note})
+      });
+      // Sync backend memories to localStorage
+      const mems = await backendCall('/api/memories');
+      setMems(mems.map(normBackend));
+      toast('✅ Memory saved! (full pipeline)');
+      document.getElementById('urlIn').value = '';
+      document.getElementById('urlNote').value = '';
+      closeModal(); load();
+    } catch(e) { toast(e.message||'Backend error',true); }
+    finally { setBusy(btn,false); clearInterval(_beTimer); setTimeout(resetProgress,800); }
+    return;
   }
 
+  // ── Browser mode (Groq direct) ──
+  if (isYT || isIG) document.getElementById('progBox').style.display = 'block';
   try {
     let mem;
-    if (isYT) {
-      mem = await analyzeYouTube(url, note, setStep);
-    } else if (isIG) {
-      mem = await analyzeInstagram(url, note, setStep);
-    } else {
-      mem = await analyzeGenericUrl(url, note);
-    }
+    if (isYT)      mem = await analyzeYouTube(url, note, setStep);
+    else if (isIG) mem = await analyzeInstagram(url, note, setStep);
+    else           mem = await analyzeGenericUrl(url, note);
     addMem(mem);
     toast('✅ Memory saved!');
     document.getElementById('urlIn').value = '';
     document.getElementById('urlNote').value = '';
-    closeModal();
-    load();
-  } catch(e) {
-    toast(e.message||'Failed',true);
-  } finally {
-    setBusy(btn, false);
-    if (isYT || isIG) setTimeout(resetProgress, 500);
-  }
+    closeModal(); load();
+  } catch(e) { toast(e.message||'Failed',true); }
+  finally { setBusy(btn,false); if(isYT||isIG) setTimeout(resetProgress,500); }
 }
 
 async function doSaveNote() {
@@ -1215,8 +1408,15 @@ async function doSaveNote() {
   const btn = document.getElementById('noteBtn');
   btn.disabled=true; btn.innerHTML='<div class="spin"></div><span>Saving…</span>';
   try {
-    const mem = await analyzeNote(content);
-    addMem(mem); toast('✅ Note saved!');
+    if (backendUrl) {
+      await backendCall('/api/save-note', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})});
+      const mems = await backendCall('/api/memories');
+      setMems(mems.map(normBackend));
+    } else {
+      const mem = await analyzeNote(content);
+      addMem(mem);
+    }
+    toast('✅ Note saved!');
     document.getElementById('noteIn').value = '';
     closeModal(); load();
   } catch(e) { toast(e.message||'Failed',true); }
@@ -1226,7 +1426,13 @@ async function doSaveNote() {
 function doDelete(e, id) {
   e.stopPropagation();
   if(!confirm('Delete?')) return;
-  delMem(id); toast('🗑 Deleted'); load();
+  if (backendUrl) {
+    fetch(backendUrl+'/api/memories/'+id, {method:'DELETE'})
+      .then(() => { delMem(id); toast('🗑 Deleted'); load(); })
+      .catch(err => toast('Delete failed: '+err.message, true));
+  } else {
+    delMem(id); toast('🗑 Deleted'); load();
+  }
   if (searching&&sIn.value.trim()) runSearch(sIn.value.trim());
 }
 
@@ -1305,10 +1511,14 @@ document.getElementById('chatIn').addEventListener('keydown', e => {
 });
 
 document.addEventListener('keydown', e => {
-  if(e.key==='Escape') { closeModal(); closeDetail(); if(chatOpen) toggleChat(); }
+  if(e.key==='Escape') {
+    closeModal(); closeDetail(); if(chatOpen) toggleChat();
+    document.getElementById('connModal').classList.remove('open');
+  }
   if((e.metaKey||e.ctrlKey)&&e.key==='k') { e.preventDefault(); sIn.focus(); }
 });
 
+updateConnBar();
 load();
 </script>
 </body>
