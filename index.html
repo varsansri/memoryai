@@ -685,6 +685,9 @@ async function backendPost(path,body) {
 function norm(m) {
   m.summary=m.summary||m.ai_summary||''; m.tags=m.tags||m.auto_tags||[];
   m.url=m.url||m.source_url||''; m.thumbnail=m.thumbnail||m.thumbnail_url||'';
+  if(typeof m.auto_tags==='string'){try{m.tags=JSON.parse(m.auto_tags);}catch{m.tags=[];}}
+  if(typeof m.rich_data==='string'){try{m.rich=JSON.parse(m.rich_data);}catch{m.rich={};}}
+  m.rich=m.rich||{};
   m.type=m.type||m.media_type||'article'; m.rich=m.rich||{};
   if (!m.platform) {
     const u=m.url||'';
@@ -919,30 +922,38 @@ function appendMsg(role, html) {
 }
 
 function renderAIResponse(reply, sources) {
-  // Format reply text into paragraphs
-  const paras = reply.split('\n').filter(l=>l.trim()).map(l=>`<p>${esc(l)}</p>`).join('');
+  // Auto-linkify URLs in the reply text
+  const linkify = t => esc(t).replace(
+    /https?:\/\/[^\s<>"]+/g,
+    u => `<a href="${u}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all">${u}</a>`
+  );
+  const paras = reply.split('\n').filter(l=>l.trim()).map(l=>`<p>${linkify(l)}</p>`).join('');
   let html = `<div class="ai-text">${paras}</div>`;
 
   if (sources && sources.length) {
     html += '<div class="sources">';
     sources.forEach(s => {
       const m = allMems.find(x=>x.id===s.id) || {};
+      const typeIcon = {video:'🎬',note:'📝',photo:'📷',article:'📄'}[s.type||m.type] || '🔗';
       const thumb = (s.thumbnail||m.thumbnail)
         ? `<img class="source-thumb" src="${esc(s.thumbnail||m.thumbnail)}" onerror="this.style.display='none'">`
-        : `<div class="source-thumb-ph">${s.type==='note'?'📝':s.type==='video'?'🎬':'📄'}</div>`;
-      // Highlight the key phrase in snippet
-      let snippet = esc(s.snippet||'');
+        : `<div class="source-thumb-ph">${typeIcon}</div>`;
+      let snippet = s.snippet || m.summary || '';
+      let snippetHtml = esc(snippet);
       if (s.highlight) {
         const hEsc = esc(s.highlight);
-        snippet = snippet.replace(new RegExp(hEsc.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), `<mark>${hEsc}</mark>`);
+        snippetHtml = snippetHtml.replace(new RegExp(hEsc.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), `<mark>${hEsc}</mark>`);
       }
+      const srcUrl = s.url || m.url || '';
+      const urlRow = srcUrl ? `<div style="margin-top:5px"><a href="${esc(srcUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;color:var(--accent);word-break:break-all;opacity:.8">${esc(srcUrl.replace(/^https?:\/\//,'').slice(0,60))}</a></div>` : '';
       html += `<div class="source-card" onclick="openDetail(${s.id||m.id||0})">
         <div class="source-card-inner">
           ${thumb}
           <div class="source-body">
-            <div class="source-type">${esc(s.type||m.type||'memory')}</div>
+            <div class="source-type">${typeIcon} ${esc(s.type||m.type||'memory')}</div>
             <div class="source-title">${esc(s.title||m.title||'Memory')}</div>
-            <div class="source-snippet">${snippet}</div>
+            <div class="source-snippet">${snippetHtml}</div>
+            ${urlRow}
           </div>
         </div>
       </div>`;
@@ -1026,11 +1037,32 @@ async function sendQuery() {
       reply = d.reply; sources = d.sources||[];
     } else {
       // Browser Groq fallback
-      const memCtx = allMems.slice(0,40).map(m=>
-        `ID:${m.id}|[${m.type}]"${m.title}"|${m.summary.slice(0,120)}|note:${(m.user_note||'').slice(0,150)}|tags:${(m.tags||[]).join(',')}|date:${(m.created_at||'').slice(0,10)}`
-      ).join('\n');
-      const sys = `You are NoteSorb, a personal memory assistant. User has ${allMems.length} saved memories:\n${memCtx}\n\nAlways respond in this EXACT JSON format (no markdown, no extra text):\n{"reply":"your conversational answer here","sources":[{"id":<memory_id>,"snippet":"exact quote","highlight":"key phrase"}]}\nFor greetings or off-topic messages, still return JSON with a helpful reply and empty sources array.`;
-      const text = await groq([{role:'system',content:sys},...chatHistory.slice(-6)], 800);
+      const now = new Date();
+      const nowStr = now.toISOString().slice(0,16).replace('T',' ');
+      const hour1ago = new Date(now-3600000).toISOString().slice(0,16).replace('T',' ');
+      const memCtx = allMems.slice(0,80).map(m=>{
+        const r = m.rich||{};
+        let line = `ID:${m.id}|[${m.type}]"${m.title}"|saved:${(m.created_at||'').slice(0,16)}`;
+        if(m.url) line += `|url:${m.url}`;
+        if(m.summary) line += `|summary:${m.summary.slice(0,180)}`;
+        if(m.user_note) line += `|note:${(m.user_note||'').slice(0,250)}`;
+        if(m.tags?.length) line += `|tags:${m.tags.slice(0,6).join(',')}`;
+        if(r.key_points?.length) line += `|key_points:${r.key_points.slice(0,3).join(' | ')}`;
+        if(r.what_you_learn) line += `|takeaway:${String(r.what_you_learn).slice(0,120)}`;
+        if(r.text_content && r.text_content!=='none') line += `|text_in_image:${String(r.text_content).slice(0,120)}`;
+        if(r.key_info) line += `|key_info:${String(r.key_info).slice(0,120)}`;
+        if(r.transcript_full) line += `|transcript:${String(r.transcript_full).slice(0,200)}`;
+        return line;
+      }).join('\n');
+      const sys = `You are NoteSorb, a personal AI memory assistant. Right now: ${nowStr}.
+User has ${allMems.length} saved memories with full details including URLs, notes, transcripts, and key info:
+${memCtx}
+
+CRITICAL: "last hour" = saved after ${hour1ago}. When asked for links/URLs, use the url: field. Combine info across memories when asked. Never say you don't have access.
+
+Return ONLY valid JSON (no markdown):
+{"reply":"direct answer mentioning specific titles/URLs/facts","sources":[{"id":<id>,"snippet":"exact relevant quote","highlight":"key fact or URL"}]}`;
+      const text = await groq([{role:'system',content:sys},...chatHistory.slice(-6)], 1200);
       const parsed = parseJSON(text);
       reply = (parsed && parsed.reply) ? parsed.reply : (text || 'Sorry, no response.');
       sources = (parsed && parsed.sources||[]).map(s=>{
