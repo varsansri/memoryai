@@ -1184,7 +1184,7 @@ async function scrapeYTPage(videoId){
   const re=(p,d='')=>{try{return(html.match(p)||[,d])[1];}catch{return d;}};
   let vd={},mf={};
   try{const m=html.match(/ytInitialPlayerResponse\s*=\s*(\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\})*)*\}))*\})/);if(m){const pd=JSON.parse(m[1]);vd=pd.videoDetails||{};mf=pd.microformat?.playerMicroformatRenderer||{};}}catch{}
-  return{title:vd.title||re(/<title>([^<]+)<\/title>/).replace(/ - YouTube$/,''),author:vd.author||re(/"author":"([^"]+)"/),viewCount:vd.viewCount||re(/"viewCount":"(\d+)"/),likeCount:re(/"label":"([^"]+) likes"/),'',lengthSeconds:parseInt(vd.lengthSeconds||'0'),keywords:vd.keywords||[],category:mf.category||'',publishDate:mf.publishDate||'',subscriberCount:re(/"subscriberCountText":\{"simpleText":"([^"]+)"/),'',description:(vd.shortDescription||'').slice(0,800)};
+  return{title:vd.title||re(/<title>([^<]+)<\/title>/).replace(/ - YouTube$/,''),author:vd.author||re(/"author":"([^"]+)"/),viewCount:vd.viewCount||re(/"viewCount":"(\d+)"/),likeCount:re(/"label":"([^"]+) likes"/),lengthSeconds:parseInt(vd.lengthSeconds||'0'),keywords:vd.keywords||[],category:mf.category||'',publishDate:mf.publishDate||'',subscriberCount:re(/"subscriberCountText":\{"simpleText":"([^"]+)"/),description:(vd.shortDescription||'').slice(0,800)};
 }
 
 async function fetchTranscript(videoId){
