@@ -3,349 +3,378 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>MemoryAI – Deep Video Intelligence</title>
+<title>MemoryAI</title>
 <style>
-:root{--bg:#080810;--surface:#111118;--card:#18181f;--border:#2a2a35;--accent:#7c3aed;--accent2:#4f46e5;--glow:rgba(124,58,237,.15);--text:#e2e8f0;--muted:#64748b;--tag-bg:rgba(124,58,237,.15);--tag:#a78bfa;--ok:#10b981;--err:#ef4444;--warn:#f59e0b}
+:root{
+  --bg:#212121;--sidebar:#171717;--surface:#2f2f2f;--surface2:#3d3d3d;
+  --border:rgba(255,255,255,.08);--accent:#10a37f;--accent2:#0d8c6d;
+  --text:#ececec;--muted:#8e8ea0;--tag-bg:rgba(16,163,127,.15);--tag:#10a37f;
+  --ok:#10b981;--err:#ef4444;--mark:#fbbf24;--mark-bg:rgba(251,191,36,.18);
+  --user-bubble:#2f2f2f;--ai-bubble:transparent;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text)}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 
-/* ── Header ── */
-.hdr{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 16px}
-.hdr-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:12px}
-.logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px}
-.logo-text{font-size:18px;font-weight:700;letter-spacing:-.5px}.logo-text span{color:#a78bfa}
-.sw{flex:1;position:relative}
-.sw input{width:100%;padding:9px 36px 9px 38px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
-.sw input:focus{border-color:var(--accent)}.sw input::placeholder{color:var(--muted)}
-.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
-.sc{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;display:none}
+/* ── Layout ── */
+.app{display:flex;height:100vh;width:100vw;overflow:hidden}
 
-/* ── Main ── */
-.main{max-width:960px;margin:0 auto;padding:20px 16px 100px}
-.stats-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.stats-text{font-size:13px;color:var(--muted)}.stats-text b{color:#a78bfa;font-weight:600}
-.sl{display:none;font-size:13px;color:var(--muted);margin-bottom:14px;padding:8px 12px;background:var(--surface);border-radius:8px;border-left:3px solid var(--accent)}
-.empty{display:none;text-align:center;padding:70px 20px}
-.empty-icon{font-size:52px;margin-bottom:16px}.empty-title{font-size:20px;font-weight:600;margin-bottom:8px}
-.empty-desc{font-size:14px;color:var(--muted);line-height:1.7}
-.empty-cta{margin-top:20px;display:inline-flex;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer}
-.no-res{display:none;text-align:center;padding:40px 20px;color:var(--muted)}
+/* ── Sidebar ── */
+.sidebar{width:280px;min-width:280px;background:var(--sidebar);display:flex;flex-direction:column;border-right:1px solid var(--border);transition:transform .25s;overflow:hidden}
+.sidebar-top{padding:12px;flex-shrink:0}
+.new-chat-btn{width:100%;padding:10px 14px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s}
+.new-chat-btn:hover{background:var(--surface)}
+.new-chat-btn svg{opacity:.7}
+.sidebar-search{padding:0 12px 10px;flex-shrink:0}
+.sidebar-search input{width:100%;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none}
+.sidebar-search input::placeholder{color:var(--muted)}
+.sidebar-search input:focus{border-color:var(--accent)}
+.sidebar-sections{flex:1;overflow-y:auto;padding:0 8px 80px}
+.sidebar-sections::-webkit-scrollbar{width:4px}.sidebar-sections::-webkit-scrollbar-track{background:transparent}.sidebar-sections::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px}
+.section-hdr{display:flex;align-items:center;gap:6px;padding:10px 6px 6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;cursor:pointer;user-select:none}
+.section-hdr svg{transition:transform .2s;opacity:.6}
+.section-hdr.collapsed svg{transform:rotate(-90deg)}
+.section-items{display:flex;flex-direction:column;gap:2px}
+.section-items.hidden{display:none}
+.sitem{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:8px;cursor:pointer;transition:background .12s;min-width:0}
+.sitem:hover{background:var(--surface)}
+.sitem.active{background:var(--surface2)}
+.sitem-thumb{width:40px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--surface2)}
+.sitem-thumb-ph{width:40px;height:28px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sitem-info{flex:1;min-width:0}
+.sitem-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.sitem-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-bottom{position:absolute;bottom:0;left:0;width:280px;padding:12px;background:var(--sidebar);border-top:1px solid var(--border)}
+.add-mem-btn{width:100%;padding:11px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.add-mem-btn:hover{opacity:.88}
+.conn-chip{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface);border-radius:8px;font-size:11px;color:var(--muted);margin-bottom:8px;cursor:pointer;transition:background .15s}
+.conn-chip:hover{background:var(--surface2)}
+.conn-chip-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.conn-chip-dot.live{background:#22c55e;box-shadow:0 0 5px #22c55e}
 
-/* ── Grid & Cards ── */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
-.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 4px 24px var(--glow)}
-.thumb-wrap{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden}
-.thumb{width:100%;height:100%;object-fit:cover;background:var(--surface);display:block}
-.thumb-ph{width:100%;height:100%;background:linear-gradient(135deg,var(--surface),#1e1e2a);display:flex;align-items:center;justify-content:center;font-size:36px}
-.duration-badge{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.8);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
-.card-body{padding:12px}
-.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.byt{background:rgba(239,68,68,.15);color:#f87171}.bw{background:rgba(16,185,129,.15);color:#34d399}.bn{background:rgba(245,158,11,.15);color:#fbbf24}.big{background:rgba(168,85,247,.15);color:#c084fc}.btt{background:rgba(0,0,0,.3);color:#94a3b8}
-.card-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:5px}
-.card-meta{font-size:11px;color:var(--muted);margin-bottom:7px;display:flex;gap:8px;flex-wrap:wrap}
-.card-meta span{display:flex;align-items:center;gap:3px}
-.card-sum{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tags{display:flex;flex-wrap:wrap;gap:4px}
-.tag{font-size:11px;padding:3px 8px;border-radius:100px;background:var(--tag-bg);color:var(--tag)}
-.color-dots{display:flex;gap:4px;margin-top:8px}
-.cdot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.1)}
-.card-foot{padding:8px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-date{font-size:11px;color:var(--muted)}
-.foot-r{display:flex;align-items:center;gap:8px}
-.open-link{color:var(--muted);font-size:11px;text-decoration:none}.open-link:hover{color:#a78bfa}
-.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px;border-radius:6px;transition:color .15s,background .15s}
-.del-btn:hover{color:var(--err);background:rgba(239,68,68,.1)}
+/* ── Main area ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
 
-/* ── FAB ── */
-.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,.5);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;z-index:40}
-.fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(124,58,237,.7)}.fab:active{transform:scale(.96)}
+/* ── Top bar (mobile) ── */
+.topbar{display:none;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.topbar-menu{background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;padding:4px;line-height:1}
+.topbar-title{font-size:16px;font-weight:700;flex:1}
 
-/* ── Save Overlay ── */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+/* ── Welcome screen ── */
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;overflow-y:auto}
+.welcome-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#0d8c6d);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 20px}
+.welcome-title{font-size:26px;font-weight:700;margin-bottom:8px}
+.welcome-sub{font-size:15px;color:var(--muted);max-width:480px;line-height:1.6;margin-bottom:32px}
+.welcome-examples{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px;width:100%}
+.example-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:left;cursor:pointer;transition:background .15s,border-color .15s}
+.example-card:hover{background:var(--surface2);border-color:var(--accent)}
+.example-card p{font-size:13px;color:var(--muted);line-height:1.5}
+.example-card span{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── Chat area ── */
+.chat-area{flex:1;overflow-y:auto;padding:0;display:none;scroll-behavior:smooth}
+.chat-area::-webkit-scrollbar{width:6px}.chat-area::-webkit-scrollbar-track{background:transparent}.chat-area::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
+.chat-inner{max-width:760px;margin:0 auto;padding:24px 20px 120px}
+.msg{margin-bottom:24px;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg-user{display:flex;justify-content:flex-end}
+.msg-user .bubble{background:var(--surface);border-radius:18px 18px 4px 18px;padding:12px 16px;max-width:80%;font-size:15px;line-height:1.6}
+.msg-ai{display:flex;gap:14px;align-items:flex-start}
+.ai-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#0d8c6d);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:2px}
+.ai-body{flex:1;min-width:0}
+.ai-text{font-size:15px;line-height:1.75;color:var(--text);margin-bottom:14px}
+.ai-text p{margin-bottom:10px}.ai-text p:last-child{margin-bottom:0}
+
+/* ── Source cards (inline in chat) ── */
+.sources{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.source-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s;cursor:pointer}
+.source-card:hover{border-color:var(--accent)}
+.source-card-inner{display:flex;gap:0}
+.source-thumb{width:90px;min-width:90px;aspect-ratio:16/9;object-fit:cover;background:var(--surface2)}
+.source-thumb-ph{width:90px;min-width:90px;aspect-ratio:16/9;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:24px}
+.source-body{padding:12px;flex:1;min-width:0}
+.source-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:4px}
+.source-title{font-size:13px;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.source-snippet{font-size:12px;color:var(--muted);line-height:1.6}
+.source-snippet mark{background:var(--mark-bg);color:var(--mark);border-radius:3px;padding:0 2px;font-weight:600}
+.typing-dots{display:flex;gap:5px;padding:4px 0}
+.typing-dots span{width:8px;height:8px;border-radius:50%;background:var(--muted);animation:blink 1.4s infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+/* ── Input bar ── */
+.input-bar{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;background:linear-gradient(transparent,var(--bg) 35%)}
+.input-inner{max-width:760px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;display:flex;align-items:flex-end;gap:0;transition:border-color .2s;box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.input-inner:focus-within{border-color:var(--accent)}
+.input-inner textarea{flex:1;background:transparent;border:none;outline:none;padding:14px 16px;color:var(--text);font-size:15px;font-family:inherit;resize:none;max-height:200px;line-height:1.5;min-height:52px}
+.input-inner textarea::placeholder{color:var(--muted)}
+.input-actions{padding:8px 8px 8px 0;display:flex;align-items:flex-end;gap:6px}
+.send-btn{width:38px;height:38px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0}
+.send-btn:hover{opacity:.85}.send-btn:disabled{background:var(--surface2);cursor:not-allowed}
+.attach-btn{width:38px;height:38px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.attach-btn:hover{background:var(--surface2);color:var(--text)}
+.input-hint{text-align:center;font-size:11px;color:var(--muted);margin-top:8px}
+
+/* ── Save overlay ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov.open{opacity:1;pointer-events:all}
-.modal{width:100%;max-width:600px;background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;transform:translateY(100%);transition:transform .3s ease;max-height:88vh;overflow-y:auto}
-.ov.open .modal{transform:translateY(0)}
-.mhandle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
-.mtitle{font-size:18px;font-weight:700;margin-bottom:16px}
-.tabs2{display:flex;gap:4px;background:var(--card);border-radius:10px;padding:4px;margin-bottom:16px}
-.tab2{flex:1;padding:8px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
-.tab2.active{background:var(--accent);color:#fff}
+.save-sheet{width:100%;max-width:600px;background:var(--sidebar);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;transform:translateY(100%);transition:transform .3s;max-height:90vh;overflow-y:auto}
+.ov.open .save-sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--surface2);border-radius:2px;margin:0 auto 18px}
+.sheet-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.sheet-tabs{display:flex;gap:4px;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:16px}
+.stab{flex:1;padding:8px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
+.stab.active{background:var(--accent);color:#fff}
 .fg{margin-bottom:14px}
 .fl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
-.fi{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;font-family:inherit}
+.fi{width:100%;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;font-family:inherit}
 .fi:focus{border-color:var(--accent)}.fi::placeholder{color:var(--muted)}
 textarea.fi{resize:none;height:90px}
-.hint{font-size:11px;color:var(--muted);margin-top:4px}
-.sbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;margin-top:4px}
-.sbtn:hover{opacity:.92}.sbtn:disabled{opacity:.5;cursor:not-allowed}
+.fi-hint{font-size:11px;color:var(--muted);margin-top:4px}
+.save-btn{width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
+.save-btn:hover{opacity:.9}.save-btn:disabled{opacity:.5;cursor:not-allowed}
+.progress-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;display:none}
+.prog-row{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px;color:var(--muted)}
+.prog-row.done{color:var(--ok)}.prog-row.active{color:var(--text)}.prog-row.fail{color:var(--err)}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--surface2);flex-shrink:0}
+.prog-row.done .pdot{background:var(--ok)}.prog-row.active .pdot{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ── Progress steps ── */
-.progress-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;display:none}
-.pstep{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:var(--muted)}
-.pstep.done{color:var(--ok)}.pstep.active{color:var(--text)}.pstep.fail{color:var(--err)}
-.pdot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
-.pstep.done .pdot{background:var(--ok)}.pstep.active .pdot{background:var(--accent);animation:pulse 1s infinite}
-.pstep.fail .pdot{background:var(--err)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ── Detail Overlay ── */
-.dov{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+/* ── Detail modal ── */
+.dov{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
 .dov.open{opacity:1;pointer-events:all}
-.dmodal{width:100%;max-width:780px;max-height:90vh;background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transform:scale(.96);transition:transform .25s}
+.dmodal{width:100%;max-width:760px;max-height:90vh;background:var(--sidebar);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transform:scale(.97);transition:transform .22s}
 .dov.open .dmodal{transform:scale(1)}
-.dmodal-scroll{overflow-y:auto;flex:1}
-.dhero{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden}
+.dhero{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden;flex-shrink:0}
 .dhero img{width:100%;height:100%;object-fit:cover}
-.dhero-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.7);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.dframes{position:absolute;bottom:0;left:0;right:0;display:flex;gap:4px;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
-.dframe{width:70px;height:40px;border-radius:4px;object-fit:cover;border:1px solid rgba(255,255,255,.2);cursor:pointer;transition:border-color .15s}
-.dframe:hover{border-color:#a78bfa}
-.dinfo{padding:16px}
-.dtitle{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:10px}
-.dstats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px;padding:12px;background:var(--card);border-radius:10px}
-.dstat{display:flex;flex-direction:column;gap:2px}
-.dstat-val{font-size:16px;font-weight:700;color:var(--text)}
-.dstat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.dtabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
-.dtab{padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);white-space:nowrap;transition:all .15s}
+.dhero-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.7);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dhero-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,.25)}
+.dhero-play:hover{background:rgba(0,0,0,.1)}
+.play-circle{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.7);border:3px solid rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:26px}
+.dhero-embed{width:100%;aspect-ratio:16/9;background:#000;display:none;flex-shrink:0}
+.dhero-embed iframe{width:100%;height:100%;border:none}
+.dscroll{overflow-y:auto;flex:1}
+.dscroll::-webkit-scrollbar{width:4px}.dscroll::-webkit-scrollbar-thumb{background:var(--surface2)}
+.dinfo{padding:18px}
+.dtitle{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:12px}
+.dbadge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.byt{background:rgba(239,68,68,.15);color:#f87171}.bw{background:rgba(16,185,129,.15);color:#34d399}.bn{background:rgba(251,191,36,.15);color:#fbbf24}.big{background:rgba(139,92,246,.15);color:#a78bfa}
+.dstats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px;background:var(--surface);border-radius:10px}
+.dstat-val{font-size:15px;font-weight:700}.dstat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase}
+.dtabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto}
+.dtab{padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--muted);white-space:nowrap}
 .dtab.active{background:var(--accent);color:#fff}
 .dpanel{display:none}.dpanel.active{display:block}
-.section{margin-bottom:18px}
-.section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.dsec{margin-bottom:18px}
+.dsec-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.dsec-title::after{content:'';flex:1;height:1px;background:var(--border)}
 .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kv{background:var(--card);border-radius:8px;padding:10px}
-.kv-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.kv-value{font-size:13px;font-weight:500}
-.key-points{list-style:none;display:flex;flex-direction:column;gap:6px}
-.key-points li{font-size:13px;color:var(--muted);padding-left:16px;position:relative;line-height:1.5}
-.key-points li::before{content:'›';position:absolute;left:0;color:var(--accent)}
-.frames-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.frame-card{border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-.frame-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
-.frame-label{font-size:10px;color:var(--muted);padding:4px 6px;background:var(--card)}
-.color-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.color-chip{display:flex;align-items:center;gap:6px;background:var(--card);border-radius:6px;padding:6px 10px}
-.color-swatch{width:20px;height:20px;border-radius:4px;border:1px solid rgba(255,255,255,.1)}
-.color-name{font-size:12px}
-.transcript-box{background:var(--card);border-radius:10px;padding:12px;max-height:300px;overflow-y:auto}
+.kv{background:var(--surface);border-radius:8px;padding:10px}
+.kv-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.kv-v{font-size:13px;font-weight:500}
+.kps{list-style:none;display:flex;flex-direction:column;gap:5px}
+.kps li{font-size:13px;color:var(--muted);padding-left:16px;position:relative;line-height:1.5}
+.kps li::before{content:'›';position:absolute;left:0;color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px}
+.tag{font-size:11px;padding:3px 8px;border-radius:100px;background:var(--tag-bg);color:var(--tag)}
+.tbox{background:var(--surface);border-radius:10px;padding:12px;max-height:280px;overflow-y:auto}
 .tseg{display:flex;gap:10px;padding:4px 0;font-size:13px;line-height:1.5}
-.tseg-time{color:var(--accent);font-size:11px;font-weight:600;min-width:36px;padding-top:2px;flex-shrink:0}
-.tseg-text{color:var(--muted)}
-.no-data{font-size:13px;color:var(--muted);font-style:italic;text-align:center;padding:20px}
-.creator-card{background:var(--card);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px}
-.creator-icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.creator-name{font-size:16px;font-weight:700;margin-bottom:2px}
-.creator-sub{font-size:12px;color:var(--muted)}
-.topics-row{display:flex;flex-wrap:wrap;gap:6px}
-.topic-chip{padding:5px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500}
-.aesthetic-bar{background:var(--card);border-radius:10px;padding:12px;margin-bottom:10px}
-.abar-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.abar-value{font-size:14px;font-weight:600}
+.tseg-t{color:var(--accent);font-size:11px;font-weight:600;min-width:36px;flex-shrink:0}
+.tseg-x{color:var(--muted)}
+.frames-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.frame-card img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block}
+.frame-lbl{font-size:10px;color:var(--muted);padding:3px 0}
+.color-row{display:flex;gap:6px;flex-wrap:wrap}
+.color-chip{display:flex;align-items:center;gap:6px;background:var(--surface);border-radius:6px;padding:5px 10px}
+.cswatch{width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.1)}
+.note-content{background:var(--surface);border-radius:10px;padding:16px;font-size:14px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.no-data{font-size:13px;color:var(--muted);text-align:center;padding:30px;font-style:italic}
+.narr-btn{width:100%;padding:13px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+.narr-box{background:var(--surface);border-radius:12px;padding:18px;line-height:1.85;font-size:14px}
 
-/* ── Spinner / Toast ── */
-.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
-.toasts{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:td .3s ease;white-space:nowrap}
-.toast.ok{background:var(--ok);color:#fff}.toast.err{background:var(--err);color:#fff}
-@keyframes td{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-
-@media(max-width:500px){.grid{grid-template-columns:1fr 1fr;gap:10px}.card-body{padding:10px}.dframes{display:none}.kv-grid{grid-template-columns:1fr}.frames-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:340px){.grid{grid-template-columns:1fr}}
-
-/* ── Video embed in detail hero ── */
-.dhero-embed{position:relative;width:100%;aspect-ratio:16/9;background:#000;display:none}
-.dhero-embed iframe{width:100%;height:100%;border:none}
-.dhero-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,.3);transition:background .15s}
-.dhero-play-overlay:hover{background:rgba(0,0,0,.15)}
-.play-btn{width:68px;height:68px;border-radius:50%;background:rgba(0,0,0,.75);border:3px solid rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center;font-size:28px;transition:transform .15s}
-.dhero-play-overlay:hover .play-btn{transform:scale(1.1)}
-
-/* ── Narrative (Story) panel ── */
-.narrative-box{background:var(--card);border-radius:12px;padding:18px;line-height:1.85;font-size:14px;color:var(--text);white-space:pre-wrap}
-.narrative-box em{color:var(--accent);font-style:normal;font-weight:600}
-.narrative-gen-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
-
-/* ── Phone backend connect ── */
-.conn-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:10px;font-size:12px}
-.conn-bar-inner{max-width:960px;margin:0 auto;width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
-.conn-dot.live{background:#22c55e;box-shadow:0 0 6px #22c55e}
-.conn-dot.err{background:var(--err)}
-.conn-label{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.conn-btn{padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
-.conn-btn:hover{border-color:var(--accent);color:#a78bfa}
-.conn-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
-.conn-modal.open{opacity:1;pointer-events:all}
-.conn-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:480px}
+/* ── Connect modal ── */
+.conn-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.conn-ov.open{opacity:1;pointer-events:all}
+.conn-box{background:var(--sidebar);border:1px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:480px}
 .conn-box h2{font-size:18px;font-weight:700;margin-bottom:6px}
 .conn-box p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
-.conn-steps{background:var(--card);border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;line-height:2;color:var(--muted);font-family:monospace}
-.conn-steps b{color:var(--text)}
-.conn-input-row{display:flex;gap:8px}
-.conn-input{flex:1;padding:11px 13px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;outline:none}
+.conn-steps{background:var(--surface);border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;line-height:2.2;color:var(--muted);font-family:monospace}
+.conn-steps b{color:var(--text);font-family:sans-serif}
+.conn-row{display:flex;gap:8px}
+.conn-input{flex:1;padding:11px 13px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;outline:none}
 .conn-input:focus{border-color:var(--accent)}
-.conn-save-btn{padding:11px 16px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-.conn-save-btn:disabled{opacity:.5}
-.conn-disc-btn{width:100%;margin-top:10px;padding:9px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;cursor:pointer}
-.conn-disc-btn:hover{border-color:var(--err);color:var(--err)}
+.conn-go{padding:11px 18px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.conn-go:disabled{opacity:.5}
+.conn-disc{width:100%;margin-top:10px;padding:9px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;cursor:pointer}
+.conn-disc:hover{border-color:var(--err);color:var(--err)}
 
-/* ── Chat FAB & Panel ── */
-.chat-fab{position:fixed;bottom:90px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(99,102,241,.5);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;z-index:40}
-.chat-fab:hover{transform:scale(1.08)}.chat-fab:active{transform:scale(.96)}
-.chat-panel{position:fixed;bottom:150px;right:16px;width:340px;max-width:calc(100vw - 32px);height:480px;background:var(--surface);border:1px solid var(--border);border-radius:18px;display:flex;flex-direction:column;box-shadow:0 16px 64px rgba(0,0,0,.6);z-index:41;transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s}
-.chat-panel.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all}
-.chat-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.chat-hdr-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
-.chat-hdr-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
-.chat-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:6px}
-.chat-close:hover{color:var(--text);background:var(--card)}
-.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
-.cmsg{max-width:88%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.6;word-wrap:break-word}
-.cmsg-u{align-self:flex-end;background:var(--accent);color:#fff;border-radius:14px 14px 4px 14px}
-.cmsg-a{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-radius:14px 14px 14px 4px;color:var(--text)}
-.cmsg.typing{color:var(--muted);font-style:italic}
-.chat-input-row{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
-.chat-input{flex:1;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;outline:none;font-family:inherit;resize:none}
-.chat-input:focus{border-color:var(--accent)}
-.chat-send{padding:10px 14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:16px;cursor:pointer;transition:opacity .15s;flex-shrink:0}
-.chat-send:hover{opacity:.85}.chat-send:disabled{opacity:.4;cursor:not-allowed}
-@media(max-width:420px){.chat-panel{width:calc(100vw - 16px);right:8px;bottom:140px}}
+/* ── Utils ── */
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toasts{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:tin .3s ease;white-space:nowrap}
+.toast.ok{background:var(--ok);color:#fff}.toast.err{background:var(--err);color:#fff}
+@keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Mobile overlay sidebar ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+
+@media(max-width:720px){
+  .topbar{display:flex}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  .sidebar-bottom{width:100%}
+  .welcome-examples{grid-template-columns:1fr}
+  .kv-grid{grid-template-columns:1fr}
+  .frames-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 
-<header class="hdr">
-  <div class="hdr-inner">
-    <a class="logo" href="#"><div class="logo-icon">🧠</div><span class="logo-text">Memory<span>AI</span></span></a>
-    <div class="sw">
-      <span class="si">🔍</span>
-      <input type="text" id="sIn" placeholder="Search memories…" autocomplete="off">
-      <button class="sc" id="sClear">✕</button>
+<div class="app">
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <button class="new-chat-btn" onclick="newChat()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        New Chat
+      </button>
     </div>
-  </div>
-</header>
+    <div class="sidebar-search">
+      <input type="text" id="filterIn" placeholder="Filter memories…" oninput="filterSidebar(this.value)">
+    </div>
+    <div class="sidebar-sections" id="sidebarSections">
+      <div class="section-hdr" onclick="toggleSection('media',this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        📹 Media
+        <span id="mediaCount" style="margin-left:auto;font-size:10px;background:var(--surface);padding:1px 6px;border-radius:10px"></span>
+      </div>
+      <div class="section-items" id="mediaSidebar"></div>
+      <div class="section-hdr" onclick="toggleSection('notes',this)" style="margin-top:6px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        📝 Notes
+        <span id="notesCount" style="margin-left:auto;font-size:10px;background:var(--surface);padding:1px 6px;border-radius:10px"></span>
+      </div>
+      <div class="section-items" id="notesSidebar"></div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="conn-chip" onclick="openConnModal()" id="connChip">
+        <div class="conn-chip-dot" id="connDot"></div>
+        <span id="connLabel" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Connect phone backend</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.4"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <button class="add-mem-btn" onclick="openSave()">+ Save Memory</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- Backend connection bar -->
-<div class="conn-bar" id="connBar">
-  <div class="conn-bar-inner">
-    <div class="conn-dot" id="connDot"></div>
-    <span class="conn-label" id="connLabel">No phone backend connected — using browser AI (no video download)</span>
-    <button class="conn-btn" onclick="openConnModal()">📱 Connect Phone</button>
+  <!-- ── Main ── -->
+  <div class="main" id="main">
+    <div class="topbar">
+      <button class="topbar-menu" onclick="openSidebar()">☰</button>
+      <span class="topbar-title">🧠 MemoryAI</span>
+      <button class="attach-btn" onclick="openSave()" style="margin-left:auto">+</button>
+    </div>
+
+    <!-- Welcome -->
+    <div class="welcome" id="welcome">
+      <div class="welcome-logo">🧠</div>
+      <div class="welcome-title">What can I help you find?</div>
+      <div class="welcome-sub">Ask about anything you've saved — videos, notes, articles. I remember everything and can find specific details, quotes, and dates.</div>
+      <div class="welcome-examples" id="welcomeExamples">
+        <div class="example-card" onclick="useExample(this)">
+          <span>Memory search</span>
+          <p>I think I saved something about biryani this month, what was it?</p>
+        </div>
+        <div class="example-card" onclick="useExample(this)">
+          <span>Specific detail</span>
+          <p>I talked to someone last week and they gave me a phone number, find it</p>
+        </div>
+        <div class="example-card" onclick="useExample(this)">
+          <span>Topic browse</span>
+          <p>Show me everything I've saved about travel and food</p>
+        </div>
+        <div class="example-card" onclick="useExample(this)">
+          <span>Summary</span>
+          <p>What are the main topics I've been interested in lately?</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-area" id="chatArea">
+      <div class="chat-inner" id="chatInner"></div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <div class="input-inner">
+        <textarea id="queryIn" placeholder="Ask about your memories…" rows="1" onkeydown="inputKey(event)" oninput="autoResize(this)"></textarea>
+        <div class="input-actions">
+          <button class="attach-btn" onclick="openSave()" title="Save new memory">📎</button>
+          <button class="send-btn" id="sendBtn" onclick="sendQuery()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint">MemoryAI can make mistakes. Verify important info.</div>
+    </div>
   </div>
 </div>
 
-<!-- Connect modal -->
-<div class="conn-modal" id="connModal">
-  <div class="conn-box">
-    <h2>📱 Connect Your Phone</h2>
-    <p>Run MemoryAI on your phone (Termux) and expose it with a tunnel. Then paste the public URL here — this site will use your phone as the backend for full video download + Whisper + frame analysis.</p>
-    <div class="conn-steps">
-      <b>1. Start backend on phone:</b><br>
-      &nbsp;&nbsp;cd ~/memoryai &amp;&amp; bash start.sh<br><br>
-      <b>2. Install &amp; run tunnel (pick one):</b><br>
-      &nbsp;&nbsp;pkg install cloudflared<br>
-      &nbsp;&nbsp;cloudflared tunnel --url http://localhost:8000<br><br>
-      &nbsp;&nbsp;<span style="color:var(--muted)">— or —</span><br><br>
-      &nbsp;&nbsp;Download ngrok for Android → run:<br>
-      &nbsp;&nbsp;./ngrok http 8000<br><br>
-      <b>3. Copy the https://... URL and paste below</b>
+<!-- ── Save Sheet ── -->
+<div class="ov" id="saveOv" onclick="savOvClick(event)">
+  <div class="save-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Save to Memory</div>
+    <div class="sheet-tabs">
+      <button class="stab active" onclick="swSaveTab('url',this)">🔗 URL / Video</button>
+      <button class="stab" onclick="swSaveTab('note',this)">📝 Note</button>
     </div>
-    <div class="conn-input-row">
-      <input class="conn-input" id="connUrlIn" placeholder="https://abc123.ngrok.io" type="url" autocomplete="off">
-      <button class="conn-save-btn" id="connSaveBtn" onclick="connectBackend()">Connect</button>
-    </div>
-    <button class="conn-disc-btn" onclick="disconnectBackend()">Disconnect &amp; use browser AI</button>
-  </div>
-</div>
-
-<main class="main">
-  <div class="stats-bar"><div class="stats-text" id="statsEl">Loading…</div></div>
-  <div class="sl" id="sLabel"></div>
-  <div class="empty" id="emptyEl">
-    <div class="empty-icon">🧠</div>
-    <div class="empty-title">Your memory vault is empty</div>
-    <div class="empty-desc">Paste any YouTube link for a complete AI breakdown —<br>transcript, frame analysis, stats, aesthetics, everything.</div>
-    <button class="empty-cta" onclick="openModal()">+ Save your first memory</button>
-  </div>
-  <div class="no-res" id="noRes"><div style="font-size:36px;margin-bottom:10px">🔎</div><div>Nothing found for "<strong id="noResQ"></strong>"</div></div>
-  <div class="grid" id="grid"></div>
-</main>
-
-<button class="fab" onclick="openModal()">+</button>
-
-<!-- ─── Chat FAB ─── -->
-<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Ask AI about your memories">💬</button>
-<div class="chat-panel" id="chatPanel">
-  <div class="chat-hdr">
-    <div class="chat-hdr-title"><div class="chat-hdr-dot"></div>Ask about your memories</div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-msgs" id="chatMsgs"></div>
-  <div class="chat-input-row">
-    <input class="chat-input" id="chatIn" placeholder="Ask anything…" autocomplete="off">
-    <button class="chat-send" id="chatSend" onclick="sendChat()">➤</button>
-  </div>
-</div>
-
-<!-- ─── Save Modal ─── -->
-<div class="ov" id="ov" onclick="ovClick(event)">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mtitle">Save to Memory</div>
-    <div class="tabs2">
-      <button class="tab2 active" onclick="swTab('url',this)">🔗 URL</button>
-      <button class="tab2" onclick="swTab('note',this)">📝 Note</button>
-    </div>
-
-    <!-- Progress -->
     <div class="progress-box" id="progBox">
-      <div class="pstep" id="p1"><div class="pdot"></div><span id="p1t">Fetching video info…</span></div>
-      <div class="pstep" id="p2"><div class="pdot"></div><span id="p2t">Getting engagement stats…</span></div>
-      <div class="pstep" id="p3"><div class="pdot"></div><span id="p3t">Analyzing video frames with AI vision…</span></div>
-      <div class="pstep" id="p4"><div class="pdot"></div><span id="p4t">Extracting transcript…</span></div>
-      <div class="pstep" id="p5"><div class="pdot"></div><span id="p5t">Building complete breakdown…</span></div>
+      <div class="prog-row active" id="pr1"><div class="pdot"></div><span id="pr1t">Downloading video…</span></div>
+      <div class="prog-row" id="pr2"><div class="pdot"></div><span id="pr2t">Extracting audio…</span></div>
+      <div class="prog-row" id="pr3"><div class="pdot"></div><span id="pr3t">Whisper transcription…</span></div>
+      <div class="prog-row" id="pr4"><div class="pdot"></div><span id="pr4t">Frame analysis…</span></div>
+      <div class="prog-row" id="pr5"><div class="pdot"></div><span id="pr5t">AI breakdown…</span></div>
     </div>
-
     <div id="urlTab">
       <div class="fg">
         <label class="fl">Paste any link</label>
         <input class="fi" type="url" id="urlIn" placeholder="https://youtube.com/watch?v=… or any URL" autocomplete="off">
-        <div class="hint">YouTube & Instagram get full breakdown: visual analysis · stats · aesthetics · creator info · AI summary</div>
+        <div class="fi-hint" id="urlHint">Video links: full download → Whisper transcript → frame analysis → deleted after</div>
       </div>
       <div class="fg">
         <label class="fl">Your note (optional)</label>
-        <textarea class="fi" id="urlNote" placeholder="Why saving this? Context, reminder…"></textarea>
+        <textarea class="fi" id="urlNote" placeholder="Why saving this?"></textarea>
       </div>
-      <button class="sbtn" id="urlBtn" onclick="doSaveUrl()"><span>Deep Analyze &amp; Save</span></button>
+      <button class="save-btn" id="urlBtn" onclick="doSaveUrl()"><span>Analyze &amp; Save</span></button>
     </div>
-
     <div id="noteTab" style="display:none">
       <div class="fg">
         <label class="fl">Write anything</label>
-        <textarea class="fi" id="noteIn" placeholder="Business idea, thought, reminder…" style="height:130px"></textarea>
+        <textarea class="fi" id="noteIn" placeholder="Idea, reminder, conversation notes…" style="height:130px"></textarea>
       </div>
-      <button class="sbtn" id="noteBtn" onclick="doSaveNote()"><span>Save &amp; Analyze</span></button>
+      <button class="save-btn" id="noteBtn" onclick="doSaveNote()"><span>Save &amp; Analyze</span></button>
     </div>
   </div>
 </div>
 
-<!-- ─── Detail Modal ─── -->
-<div class="dov" id="dov" onclick="dOvClick(event)">
-  <div class="dmodal" id="dmodal">
-    <div class="dhero" id="dhero">
-      <img id="dHeroImg" src="" alt="">
-      <div id="dPlayOverlay" class="dhero-play-overlay" style="display:none" onclick="embedVideo()">
-        <div class="play-btn">▶</div>
+<!-- ── Detail Modal ── -->
+<div class="dov" id="dov" onclick="if(event.target.id==='dov')closeDetail()">
+  <div class="dmodal">
+    <div id="dheroWrap">
+      <div class="dhero" id="dhero">
+        <img id="dHeroImg" src="" alt="">
+        <div id="dPlayBtn" class="dhero-play" style="display:none" onclick="embedVideo()"><div class="play-circle">▶</div></div>
+        <button class="dhero-close" onclick="closeDetail()">✕</button>
       </div>
-      <div class="dframes" id="dFrames"></div>
-      <button class="dhero-close" onclick="closeDetail()">✕</button>
+      <div class="dhero-embed" id="dEmbed"></div>
     </div>
-    <div class="dhero-embed" id="dVideoEmbed"></div>
-    <div class="dmodal-scroll">
+    <div class="dscroll">
       <div class="dinfo">
         <div id="dBadge" style="margin-bottom:8px"></div>
         <div class="dtitle" id="dTitle"></div>
@@ -357,121 +386,60 @@ textarea.fi{resize:none;height:90px}
   </div>
 </div>
 
+<!-- ── Connect Modal ── -->
+<div class="conn-ov" id="connOv" onclick="if(event.target.id==='connOv')closeConnModal()">
+  <div class="conn-box">
+    <h2>📱 Connect Your Phone</h2>
+    <p>Run MemoryAI backend on your device and expose it with a tunnel for full video download + Whisper transcription.</p>
+    <div class="conn-steps">
+      <b>1. Start backend:</b><br>
+      &nbsp;&nbsp;cd ~/memoryai &amp;&amp; bash start.sh<br><br>
+      <b>2. Create tunnel:</b><br>
+      &nbsp;&nbsp;cloudflared tunnel --url http://localhost:8000<br><br>
+      <b>3. Paste the https://… URL below</b>
+    </div>
+    <div class="conn-row">
+      <input class="conn-input" id="connIn" placeholder="https://abc.trycloudflare.com" type="url">
+      <button class="conn-go" id="connGo" onclick="connectBackend()">Connect</button>
+    </div>
+    <button class="conn-disc" onclick="disconnectBackend()">Disconnect — use browser AI only</button>
+  </div>
+</div>
+
 <div class="toasts" id="toasts"></div>
 
 <script>
 // ══════════════════════════════════════════════════
-//  GROQ — dual key, XOR-encoded, auto-rotate
+//  GROQ (browser-direct, for when no backend)
 // ══════════════════════════════════════════════════
-// ── Phone backend connection ──────────────────────────────────────
-const BACKEND_KEY = 'memoryai_backend_url';
-const DEFAULT_BACKEND = 'https://black-shared-weeks-civilization.trycloudflare.com';
-let backendUrl = localStorage.getItem(BACKEND_KEY) || DEFAULT_BACKEND;
-
-function updateConnBar() {
-  const dot = document.getElementById('connDot');
-  const lbl = document.getElementById('connLabel');
-  if (backendUrl) {
-    dot.className = 'conn-dot live';
-    lbl.textContent = '📱 Phone connected: ' + backendUrl.replace(/https?:\/\//, '').split('/')[0];
-    lbl.style.color = '#22c55e';
-  } else {
-    dot.className = 'conn-dot';
-    lbl.textContent = 'No phone backend — using browser AI (no video download)';
-    lbl.style.color = '';
-  }
-}
-
-async function connectBackend() {
-  const raw = document.getElementById('connUrlIn').value.trim().replace(/\/$/, '');
-  if (!raw.startsWith('http')) { toast('URL must start with https://', true); return; }
-  const btn = document.getElementById('connSaveBtn');
-  btn.disabled = true; btn.textContent = 'Testing…';
-  try {
-    const r = await fetch(raw + '/api/memories', { signal: AbortSignal.timeout(8000) });
-    if (!r.ok) throw new Error('Server returned ' + r.status);
-    backendUrl = raw;
-    localStorage.setItem(BACKEND_KEY, backendUrl);
-    updateConnBar();
-    document.getElementById('connModal').classList.remove('open');
-    toast('✅ Phone connected! Full video pipeline active.');
-    await load();
-  } catch(e) {
-    toast('Could not reach server: ' + e.message, true);
-  } finally { btn.disabled = false; btn.textContent = 'Connect'; }
-}
-
-function disconnectBackend() {
-  backendUrl = ''; localStorage.removeItem(BACKEND_KEY);
-  updateConnBar();
-  document.getElementById('connModal').classList.remove('open');
-  toast('Disconnected — back to browser AI');
-  load();
-}
-
-function openConnModal() {
-  document.getElementById('connUrlIn').value = backendUrl;
-  document.getElementById('connModal').classList.add('open');
-  setTimeout(() => document.getElementById('connUrlIn').focus(), 200);
-}
-
-// Hybrid API: use backend if connected, else Groq direct
-async function backendCall(path, options = {}) {
-  const url = backendUrl + path;
-  const r = await fetch(url, options);
-  const d = await r.json();
-  if (!r.ok) throw new Error(d.detail || 'Backend error');
-  return d;
-}
-
-// Normalize backend memory to frontend format
-function normBackend(m) {
-  m.summary   = m.summary || m.ai_summary || '';
-  m.tags      = m.tags    || m.auto_tags  || [];
-  m.url       = m.url     || m.source_url || '';
-  m.thumbnail = m.thumbnail || m.thumbnail_url || '';
-  m.type      = m.type    || m.media_type || 'article';
-  m.rich      = m.rich    || {};
-  if (!m.platform) {
-    const u = m.url || '';
-    if (/youtu/.test(u))      m.platform = 'youtube';
-    else if (/instagram/.test(u)) m.platform = 'instagram';
-    else if (m.type === 'note')   m.platform = 'note';
-    else                          m.platform = 'web';
-  }
-  return m;
-}
-
 const _x = a => a.map(n => String.fromCharCode(n^42)).join('');
 const KEYS = [
   _x([77,89,65,117,80,66,88,95,115,108,125,105,109,124,102,105,98,107,83,114,72,99,125,69,125,109,78,83,72,25,108,115,115,92,115,82,70,31,66,24,124,103,100,126,69,97,102,79,19,110,94,67,127,92,102,73]),
   _x([77,89,65,117,24,105,120,89,24,78,26,26,92,28,96,123,122,93,105,123,66,105,19,111,125,109,78,83,72,25,108,115,69,82,125,94,83,83,122,68,96,78,107,65,120,103,100,103,122,124,78,104,104,90,111,111])
 ];
-const TXT_MDL  = 'llama-3.3-70b-versatile';
-const VIS_MDL  = 'meta-llama/llama-4-scout-17b-16e-instruct';
+const TXT_MDL = 'llama-3.3-70b-versatile';
+const VIS_MDL = 'meta-llama/llama-4-scout-17b-16e-instruct';
 let ki = 0;
 
-async function groqCall(messages, maxTok = 1000, model = TXT_MDL) {
-  for (let a = 0; a < KEYS.length * 2; a++) {
+async function groqCall(messages, maxTok=1000, model=TXT_MDL) {
+  for (let a=0; a<KEYS.length*2; a++) {
     const key = KEYS[ki % KEYS.length];
     try {
       const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer '+key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, messages, max_tokens: maxTok, temperature: 0.15 })
+        method:'POST', headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+        body: JSON.stringify({model, messages, max_tokens:maxTok, temperature:0.15})
       });
-      if (r.status === 429) { ki++; await sleep(900); continue; }
-      if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'API '+r.status); }
+      if (r.status===429) { ki++; await sleep(900); continue; }
+      if (!r.ok) { const e=await r.json(); throw new Error(e.error?.message||'API '+r.status); }
       return (await r.json()).choices[0].message.content.trim();
-    } catch(e) { if (a === KEYS.length*2-1) throw e; ki++; }
+    } catch(e) { if(a===KEYS.length*2-1) throw e; ki++; }
   }
-  throw new Error('Both keys rate-limited. Wait a moment.');
+  throw new Error('Keys rate-limited');
 }
-
-const groq = (msgs, tok=1000) => groqCall(msgs, tok, TXT_MDL);
-const groqVision = (msgs, tok=1200) => groqCall(msgs, tok, VIS_MDL);
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const parseJSON = t => { const m = t.match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : {}; };
+const groq = (msgs,tok=1000) => groqCall(msgs,tok,TXT_MDL);
+const groqVision = (msgs,tok=1200) => groqCall(msgs,tok,VIS_MDL);
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const parseJSON = t => { const m=t.match(/\{[\s\S]*\}/); return m?JSON.parse(m[0]):{} };
 
 // ══════════════════════════════════════════════════
 //  STORAGE
@@ -479,1048 +447,661 @@ const parseJSON = t => { const m = t.match(/\{[\s\S]*\}/); return m ? JSON.parse
 const SKEY = 'memoryai_v2';
 const getMems = () => { try { return JSON.parse(localStorage.getItem(SKEY)||'[]'); } catch { return []; } };
 const setMems = m => localStorage.setItem(SKEY, JSON.stringify(m));
-function addMem(m) { const a = getMems(); m.id = Date.now(); m.created_at = new Date().toISOString(); a.unshift(m); setMems(a); return m; }
-const delMem = id => setMems(getMems().filter(m => m.id !== id));
+function addMem(m) { const a=getMems(); m.id=Date.now(); m.created_at=new Date().toISOString(); a.unshift(m); setMems(a); }
+const delMem = id => setMems(getMems().filter(m=>m.id!==id));
 
 // ══════════════════════════════════════════════════
-//  YOUTUBE EXTRACTION
+//  BACKEND CONNECTION
 // ══════════════════════════════════════════════════
-function getYTId(url) {
-  const m = url.match(/(?:v=|\/embed\/|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
-  return m ? m[1] : null;
+const BK = 'memoryai_backend_url';
+const DEFAULT_BACKEND = 'https://black-shared-weeks-civilization.trycloudflare.com';
+let backendUrl = localStorage.getItem(BK) || DEFAULT_BACKEND;
+
+function updateConnUI() {
+  const dot = document.getElementById('connDot');
+  const lbl = document.getElementById('connLabel');
+  if (backendUrl) {
+    dot.className = 'conn-chip-dot live';
+    lbl.textContent = backendUrl.replace(/https?:\/\//,'').split('/')[0].slice(0,30);
+    document.getElementById('urlHint').textContent = 'Phone connected: full download → Whisper → frames → deleted';
+  } else {
+    dot.className = 'conn-chip-dot';
+    lbl.textContent = 'Connect phone backend';
+    document.getElementById('urlHint').textContent = 'Video links get deep AI analysis (no actual download without phone)';
+  }
 }
 
-async function fetchWithProxy(url, timeout=12000) {
-  const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`
-  ];
-  for (const p of proxies) {
+async function connectBackend() {
+  const raw = document.getElementById('connIn').value.trim().replace(/\/$/,'');
+  if (!raw.startsWith('http')) { toast('URL must start with https://','err'); return; }
+  const btn = document.getElementById('connGo');
+  btn.disabled=true; btn.textContent='Testing…';
+  try {
+    const r = await fetch(raw+'/api/memories', {signal:AbortSignal.timeout(8000)});
+    if (!r.ok) throw new Error('Server error '+r.status);
+    backendUrl = raw; localStorage.setItem(BK, raw);
+    updateConnUI(); closeConnModal();
+    toast('✅ Phone connected — full pipeline active');
+    await loadAll();
+  } catch(e) { toast('Cannot reach server: '+e.message,'err'); }
+  finally { btn.disabled=false; btn.textContent='Connect'; }
+}
+
+function disconnectBackend() {
+  backendUrl=''; localStorage.removeItem(BK);
+  updateConnUI(); closeConnModal();
+  toast('Disconnected — using browser AI');
+  loadAll();
+}
+
+function openConnModal() { document.getElementById('connIn').value=backendUrl||''; document.getElementById('connOv').classList.add('open'); }
+function closeConnModal() { document.getElementById('connOv').classList.remove('open'); }
+
+async function backendGet(path) {
+  const r = await fetch(backendUrl+path);
+  const d = await r.json(); if(!r.ok) throw new Error(d.detail||'Error'); return d;
+}
+async function backendPost(path,body) {
+  const r = await fetch(backendUrl+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d = await r.json(); if(!r.ok) throw new Error(d.detail||'Error'); return d;
+}
+
+// ══════════════════════════════════════════════════
+//  NORMALIZE
+// ══════════════════════════════════════════════════
+function norm(m) {
+  m.summary=m.summary||m.ai_summary||''; m.tags=m.tags||m.auto_tags||[];
+  m.url=m.url||m.source_url||''; m.thumbnail=m.thumbnail||m.thumbnail_url||'';
+  m.type=m.type||m.media_type||'article'; m.rich=m.rich||{};
+  if (!m.platform) {
+    const u=m.url||'';
+    if(/youtu/.test(u)) m.platform='youtube';
+    else if(/instagram/.test(u)) m.platform='instagram';
+    else if(m.type==='note') m.platform='note';
+    else m.platform='web';
+  }
+  return m;
+}
+
+// ══════════════════════════════════════════════════
+//  LOAD & SIDEBAR
+// ══════════════════════════════════════════════════
+let allMems = [], filterQ = '';
+
+async function loadAll() {
+  if (backendUrl) {
     try {
-      const r = await fetch(p, { signal: AbortSignal.timeout(timeout) });
-      if (r.ok) return await r.text();
-    } catch {}
+      const data = await backendGet('/api/memories');
+      allMems = data.map(norm);
+      setMems(allMems);
+    } catch(e) { allMems = getMems().map(norm); }
+  } else {
+    allMems = getMems().map(norm);
   }
-  return '';
+  renderSidebar();
 }
 
-async function getYTOEmbed(url) {
-  try {
-    const r = await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');
-    if (r.ok) return await r.json();
-  } catch {}
-  return {};
+function filterSidebar(q) { filterQ=q.toLowerCase(); renderSidebar(); }
+
+function toggleSection(id, hdr) {
+  const el = document.getElementById(id==='media'?'mediaSidebar':'notesSidebar');
+  el.classList.toggle('hidden'); hdr.classList.toggle('collapsed');
 }
 
-async function scrapeYTPage(videoId) {
-  const html = await fetchWithProxy('https://www.youtube.com/watch?v='+videoId, 18000);
-  if (!html) return {};
+function renderSidebar() {
+  const media = allMems.filter(m=>m.type!=='note'&&(!filterQ||m.title.toLowerCase().includes(filterQ)||m.summary.toLowerCase().includes(filterQ)));
+  const notes = allMems.filter(m=>m.type==='note'&&(!filterQ||m.title.toLowerCase().includes(filterQ)||(m.user_note||'').toLowerCase().includes(filterQ)));
 
-  const re = (pat, def='') => { try { return (html.match(pat)||[,def])[1]; } catch { return def; } };
+  document.getElementById('mediaCount').textContent = media.length;
+  document.getElementById('notesCount').textContent = notes.length;
 
-  // Extract from ytInitialPlayerResponse
-  let vd = {}, mf = {};
-  try {
-    const m = html.match(/ytInitialPlayerResponse\s*=\s*(\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\})*)*\}))*\})/);
-    if (m) {
-      const pd = JSON.parse(m[1]);
-      vd = pd.videoDetails || {};
-      mf = pd.microformat?.playerMicroformatRenderer || {};
-    }
-  } catch {
-    // fallback to targeted regex
-  }
-
-  const views      = vd.viewCount     || re(/"viewCount":"(\d+)"/)  || re(/"views":"([^"]+)"/);
-  const title      = vd.title         || re(/<title>([^<]+)<\/title>/).replace(/ - YouTube$/,'');
-  const author     = vd.author        || re(/"author":"([^"]+)"/);
-  const channelId  = vd.channelId     || re(/"channelId":"([^"]+)"/);
-  const desc       = (vd.shortDescription || re(/"shortDescription":"((?:[^"\\]|\\.)*)"/)).slice(0,1000);
-  const lenSec     = parseInt(vd.lengthSeconds || re(/"lengthSeconds":"(\d+)"/) || '0');
-  const keywords   = vd.keywords      || [];
-  const category   = mf.category      || re(/"category":"([^"]+)"/);
-  const pubDate    = mf.publishDate   || re(/"publishDate":"([^"]+)"/);
-  const likeCount  = re(/"label":"([^"]+) likes"/) || re(/"accessibilityText":"([^"]+) likes"/) || '';
-  const subs       = re(/"subscriberCountText":\{"simpleText":"([^"]+)"/) ||
-                     re(/"subscriberCountText":\{"runs":\[\{"text":"([^"]+)"/) || '';
-  const isLive     = vd.isLiveContent || false;
-
-  return { title, author, channelId, description: desc, viewCount: views,
-    lengthSeconds: lenSec, keywords, category, publishDate: pubDate,
-    likeCount, subscriberCount: subs, isLive };
-}
-
-async function fetchTranscript(videoId) {
-  const langs = ['en','en-US','en-GB',''];
-  for (const lang of langs) {
-    const url = `https://www.youtube.com/api/timedtext?v=${videoId}${lang?'&lang='+lang:''}&fmt=json3&xorb=2&xobt=3&xovt=3`;
-    const txt = await fetchWithProxy(url, 8000);
-    if (!txt) continue;
-    try {
-      const d = JSON.parse(txt);
-      if (!d.events?.length) continue;
-      const segments = d.events.filter(e=>e.segs).map(e=>({
-        time: fmtSec(e.tStartMs/1000),
-        text: e.segs.map(s=>s.utf8||'').join('').replace(/\n/g,' ').trim()
-      })).filter(s=>s.text);
-      if (segments.length > 5) return { segments, full: segments.map(s=>s.text).join(' ') };
-    } catch {}
-  }
-  return { segments: [], full: '' };
-}
-
-// ══════════════════════════════════════════════════
-//  VISUAL ANALYSIS — Groq Vision on YT frame thumbnails
-// ══════════════════════════════════════════════════
-async function analyzeFrames(videoId) {
-  const urls = [0,1,2,3].map(i => `https://img.youtube.com/vi/${videoId}/${i}.jpg`);
-  const maxRes = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-
-  const imgContent = urls.map(u => ({ type:'image_url', image_url:{ url: u } }));
-
-  const text = await groqVision([{
-    role:'user',
-    content:[
-      { type:'text', text:`You are analyzing 4 frame thumbnails extracted from a YouTube video.
-Provide a detailed visual breakdown. Return ONLY this exact JSON (no markdown):
-{
-  "main_subject": "primary person/object/action visible",
-  "side_subjects": ["other notable elements"],
-  "setting": "location or environment description",
-  "dominant_colors": ["color name 1","color name 2","color name 3"],
-  "color_mood": "warm|cool|neutral|vibrant|muted|dark|moody|bright",
-  "aesthetic": "cinematic|documentary|vlog|tutorial|music-video|animation|news|sports|gaming|comedy|other",
-  "lighting": "natural daylight|golden hour|studio|ring-light|dramatic|low-key|neon|mixed",
-  "production_quality": "professional|semi-pro|amateur|lo-fi",
-  "visual_style": "detailed 1-sentence description of the overall visual style",
-  "composition": "wide-shot|close-up|talking-head|action|product-shot|landscape|mixed",
-  "text_on_screen": "any visible text overlays or titles, or 'none'",
-  "faces": "number of people visible and their apparent expressions",
-  "objects": ["key objects visible"],
-  "shapes_patterns": "notable geometric or design patterns visible",
-  "mood": "energetic|calm|dramatic|funny|tense|inspiring|educational|melancholic|hype",
-  "brand_style": "any visible brand elements or style signatures"
-}` },
-      ...imgContent
-    ]
-  }], 1200);
-
-  return parseJSON(text);
-}
-
-// ══════════════════════════════════════════════════
-//  COMPREHENSIVE AI BREAKDOWN
-// ══════════════════════════════════════════════════
-async function buildBreakdown(page, caption, visual, url, userNote) {
-  const ctx = [
-    page.title       && `Title: ${page.title}`,
-    page.author      && `Creator: ${page.author}`,
-    page.subscriberCount && `Subscribers: ${page.subscriberCount}`,
-    page.viewCount   && `Views: ${fmtNum(page.viewCount)}`,
-    page.likeCount   && `Likes: ${page.likeCount}`,
-    page.lengthSeconds&&`Duration: ${fmtSec(page.lengthSeconds)}`,
-    page.publishDate && `Published: ${page.publishDate}`,
-    page.category    && `Category: ${page.category}`,
-    page.description && `Description: ${page.description.slice(0,600)}`,
-    page.keywords?.length && `Keywords: ${page.keywords.slice(0,15).join(', ')}`,
-    caption.full     && `Transcript excerpt: ${caption.full.slice(0,2500)}`,
-    visual.main_subject  && `Visual main subject: ${visual.main_subject}`,
-    visual.aesthetic     && `Visual aesthetic: ${visual.aesthetic}`,
-    visual.mood          && `Visual mood: ${visual.mood}`,
-    visual.setting       && `Setting: ${visual.setting}`,
-    userNote         && `User note: ${userNote}`,
-  ].filter(Boolean).join('\n');
-
-  const text = await groq([{
-    role:'system',
-    content:'You are an expert media analyst. Return ONLY valid JSON with no markdown.'
-  },{
-    role:'user',
-    content:`Perform a complete deep breakdown of this content:\n\n${ctx}\n\nReturn ONLY this JSON:
-{
-  "title": "concise descriptive title (max 9 words)",
-  "summary": "3-4 sentence comprehensive summary of what this content is, what happens, and why it matters",
-  "main_topic": "the single primary topic",
-  "subtopics": ["topic2","topic3","topic4"],
-  "category": "Food|Tech|Fashion|Travel|Education|Entertainment|Music|Sports|Gaming|News|Finance|Health|Art|Science|Comedy|Lifestyle|Other",
-  "sub_category": "more specific niche",
-  "content_type": "Tutorial|Review|Vlog|Documentary|Music Video|Reaction|Commentary|News|Podcast|Entertainment|Cooking|Fitness|Other",
-  "target_audience": "who this content is for",
-  "tone": "Casual|Professional|Humorous|Educational|Inspirational|Controversial|Emotional|Informative",
-  "language": "detected primary language",
-  "key_points": ["main insight 1","main insight 2","main insight 3","main insight 4"],
-  "what_you_learn": "1 sentence on the takeaway",
-  "why_popular": "1 sentence guess at why this gets views",
-  "tags": ["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"],
-  "creator_niche": "description of this creator's style and niche",
-  "content_quality": "High|Medium|Low",
-  "sentiment": "Positive|Negative|Neutral|Mixed",
-  "has_call_to_action": "yes|no",
-  "pacing": "Fast|Medium|Slow",
-  "similar_to": ["similar creator or show 1","similar creator or show 2"]
-}`
-  }], 1400);
-
-  return parseJSON(text);
-}
-
-// ══════════════════════════════════════════════════
-//  FULL YOUTUBE PIPELINE
-// ══════════════════════════════════════════════════
-async function analyzeYouTube(url, userNote, setStep) {
-  const videoId = getYTId(url);
-  if (!videoId) throw new Error('Could not extract YouTube video ID from URL');
-
-  setStep(1, 'active');
-  const [oEmbed, page] = await Promise.all([ getYTOEmbed(url), scrapeYTPage(videoId) ]);
-  const mergedPage = { ...page, title: page.title || oEmbed.title || '', author: page.author || oEmbed.author_name || '', thumbnail: oEmbed.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` };
-  setStep(1, 'done', `✓ Video info: "${(mergedPage.title||'').slice(0,40)}"`);
-
-  setStep(2, 'active');
-  // Stats already in page scrape
-  setStep(2, 'done', `✓ Stats: ${fmtNum(mergedPage.viewCount||'0')} views${mergedPage.likeCount?' · '+mergedPage.likeCount+' likes':''}`);
-
-  setStep(3, 'active');
-  let visual = {};
-  try { visual = await analyzeFrames(videoId); setStep(3,'done',`✓ Frames analyzed: ${visual.aesthetic||''} · ${visual.mood||''}`); }
-  catch(e) { setStep(3,'fail','⚠ Frame analysis skipped'); console.warn(e); }
-
-  setStep(4, 'active');
-  let caption = { segments:[], full:'' };
-  try { caption = await fetchTranscript(videoId); setStep(4,'done',`✓ Transcript: ${caption.segments.length} segments`); }
-  catch(e) { setStep(4,'fail','⚠ Transcript not available'); }
-
-  setStep(5, 'active');
-  const breakdown = await buildBreakdown(mergedPage, caption, visual, url, userNote);
-  setStep(5,'done','✓ Complete breakdown ready!');
-
-  const frames = [0,1,2,3].map(i=>`https://img.youtube.com/vi/${videoId}/${i}.jpg`);
-
-  return {
-    type: 'video', platform: 'youtube', url,
-    thumbnail: mergedPage.thumbnail,
-    title: breakdown.title || mergedPage.title || '',
-    summary: breakdown.summary || '',
-    tags: breakdown.tags || [],
-    user_note: userNote,
-    rich: {
-      video_id: videoId,
-      creator: mergedPage.author,
-      channel_id: mergedPage.channelId,
-      subscriber_count: mergedPage.subscriberCount,
-      views: mergedPage.viewCount,
-      likes: mergedPage.likeCount,
-      duration: mergedPage.lengthSeconds,
-      published_at: mergedPage.publishDate,
-      description: mergedPage.description,
-      keywords: mergedPage.keywords,
-      category: breakdown.category || mergedPage.category,
-      sub_category: breakdown.sub_category,
-      content_type: breakdown.content_type,
-      main_topic: breakdown.main_topic,
-      subtopics: breakdown.subtopics || [],
-      key_points: breakdown.key_points || [],
-      tone: breakdown.tone,
-      target_audience: breakdown.target_audience,
-      language: breakdown.language,
-      content_quality: breakdown.content_quality,
-      sentiment: breakdown.sentiment,
-      creator_niche: breakdown.creator_niche,
-      similar_to: breakdown.similar_to || [],
-      what_you_learn: breakdown.what_you_learn,
-      why_popular: breakdown.why_popular,
-      frames,
-      visual,
-      transcript_segments: caption.segments,
-      transcript_full: caption.full,
-    }
-  };
-}
-
-// ══════════════════════════════════════════════════
-//  INSTAGRAM PIPELINE
-// ══════════════════════════════════════════════════
-function getIGShortcode(url) {
-  const m = url.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
-  return m ? m[1] : null;
-}
-
-async function scrapeIGPage(url) {
-  const html = await fetchWithProxy(url, 18000);
-  if (!html) return {};
-  const re = (pat, def='') => { try { return (html.match(pat)||[,def])[1]?.trim()||def; } catch { return def; } };
-  const title = re(/og:title["\s]+content="([^"]+)"/i) || re(/<title[^>]*>([^<]+)/i, '');
-  const desc  = re(/og:description["\s]+content="([^"]+)"/i) || '';
-  const thumb = re(/og:image["\s]+content="([^"]+)"/i) || '';
-  let creator = '', caption = desc;
-  const cm = desc.match(/^(.+?) on Instagram[:\s]*"?([\s\S]*)/i);
-  if (cm) { creator = cm[1].trim(); caption = cm[2].replace(/"$/, '').trim(); }
-  const views = re(/"video_view_count":(\d+)/) || re(/"playCount":(\d+)/) || '';
-  const likes = re(/"like_count":(\d+)/) || re(/"edge_liked_by":\{"count":(\d+)/) || '';
-  const subs  = re(/"edge_followed_by":\{"count":(\d+)/) || '';
-  return { title, description: caption || desc, thumbnail: thumb, creator, views, likes, subscriberCount: subs };
-}
-
-async function analyzeIGVisual(thumbnailUrl) {
-  if (!thumbnailUrl) return {};
-  const text = await groqVision([{ role:'user', content:[
-    { type:'text', text:`Analyze this Instagram reel thumbnail/poster frame. Return ONLY this exact JSON (no markdown):
-{
-  "main_subject": "primary person/object/action visible",
-  "side_subjects": ["other notable elements"],
-  "setting": "location or environment description",
-  "dominant_colors": ["color1","color2","color3"],
-  "color_mood": "warm|cool|neutral|vibrant|muted|dark|moody|bright",
-  "aesthetic": "cinematic|aesthetic|vlog|tutorial|fashion|food|travel|fitness|comedy|dance|art|lifestyle|other",
-  "lighting": "natural daylight|golden hour|studio|ring-light|dramatic|low-key|neon|outdoor|mixed",
-  "production_quality": "professional|semi-pro|amateur|lo-fi",
-  "visual_style": "1-sentence description of the overall visual style",
-  "composition": "wide-shot|close-up|talking-head|action|product-shot|landscape|selfie|mixed",
-  "text_on_screen": "any visible text overlays or captions, or none",
-  "faces": "number of people visible and their apparent expressions",
-  "objects": ["key objects visible"],
-  "mood": "energetic|calm|dramatic|funny|romantic|tense|inspiring|trendy|chill",
-  "brand_style": "any visible brand elements, aesthetic signatures, or influencer style markers"
-}` },
-    { type:'image_url', image_url:{ url: thumbnailUrl } }
-  ]}], 1000);
-  return parseJSON(text);
-}
-
-async function buildIGBreakdown(page, visual, url, userNote) {
-  const ctx = [
-    page.creator         && `Creator: @${page.creator}`,
-    page.title           && `Post title/caption: ${page.title}`,
-    page.description     && `Caption: ${page.description.slice(0,700)}`,
-    page.views           && `Views: ${fmtNum(page.views)}`,
-    page.likes           && `Likes: ${page.likes}`,
-    page.subscriberCount && `Followers: ${page.subscriberCount}`,
-    visual.main_subject  && `Visual main subject: ${visual.main_subject}`,
-    visual.aesthetic     && `Visual aesthetic: ${visual.aesthetic}`,
-    visual.mood          && `Visual mood: ${visual.mood}`,
-    visual.setting       && `Setting: ${visual.setting}`,
-    visual.visual_style  && `Visual style: ${visual.visual_style}`,
-    `Platform: Instagram Reel`,
-    userNote             && `User note: ${userNote}`,
-  ].filter(Boolean).join('\n');
-
-  const text = await groq([{
-    role:'system', content:'You are an expert social media analyst. Return ONLY valid JSON with no markdown.'
-  },{
-    role:'user',
-    content:`Analyze this Instagram Reel:\n\n${ctx}\n\nReturn ONLY this JSON:
-{
-  "title": "concise descriptive title (max 9 words)",
-  "summary": "3-4 sentence summary of what this reel is about, the creator style, and why it is worth saving",
-  "main_topic": "single primary topic",
-  "subtopics": ["topic2","topic3","topic4"],
-  "category": "Fashion|Food|Travel|Fitness|Music|Comedy|Education|Art|Beauty|Lifestyle|Tech|Business|Sports|Gaming|Entertainment|Other",
-  "sub_category": "more specific niche",
-  "content_type": "Tutorial|Comedy Skit|Dance|Aesthetic|Vlog|Review|Motivation|Story|Educational|Transformation|Behind-the-Scenes|Trend|Other",
-  "target_audience": "who this reel is for",
-  "tone": "Casual|Humorous|Aesthetic|Educational|Inspirational|Emotional|Trendy|Raw",
-  "language": "detected primary language",
-  "key_points": ["insight 1","insight 2","insight 3"],
-  "what_you_learn": "1 sentence on what makes this memorable or useful",
-  "why_popular": "1 sentence on why this type of content gets engagement",
-  "tags": ["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"],
-  "creator_niche": "description of this creator style and niche",
-  "content_quality": "High|Medium|Low",
-  "sentiment": "Positive|Negative|Neutral|Mixed",
-  "pacing": "Fast|Medium|Slow",
-  "similar_to": ["similar creator or account 1","similar creator or account 2"]
-}`
-  }], 1200);
-  return parseJSON(text);
-}
-
-async function analyzeInstagram(url, userNote, setStep) {
-  document.getElementById('p1t').textContent = 'Fetching reel metadata…';
-  document.getElementById('p2t').textContent = 'AI visual analysis of thumbnail…';
-  document.getElementById('p3t').textContent = 'Building deep content breakdown…';
-  document.getElementById('p4t').textContent = 'Finalizing…';
-  document.getElementById('p5').style.display = 'none';
-
-  setStep(1, 'active');
-  const shortcode = getIGShortcode(url);
-  const page = await scrapeIGPage(url);
-  setStep(1, 'done', `✓ Reel: ${page.creator ? '@'+page.creator : shortcode || 'fetched'}`);
-
-  setStep(2, 'active');
-  let visual = {};
-  try {
-    visual = await analyzeIGVisual(page.thumbnail);
-    setStep(2, 'done', `✓ Visual: ${visual.aesthetic||''} · ${visual.mood||''}`);
-  } catch(e) { setStep(2, 'fail', '⚠ Visual analysis skipped'); }
-
-  setStep(3, 'active');
-  const breakdown = await buildIGBreakdown(page, visual, url, userNote);
-  setStep(3, 'done', '✓ Complete breakdown ready!');
-  setStep(4, 'done', '✓ Saved to memory!');
-  document.getElementById('p5').style.display = '';
-
-  return {
-    type: 'video', platform: 'instagram', url,
-    thumbnail: page.thumbnail || '',
-    title: breakdown.title || page.title || 'Instagram Reel',
-    summary: breakdown.summary || '',
-    tags: breakdown.tags || [],
-    user_note: userNote,
-    rich: {
-      video_id: shortcode,
-      creator: page.creator,
-      views: page.views,
-      likes: page.likes,
-      subscriber_count: page.subscriberCount,
-      description: page.description,
-      category: breakdown.category || '',
-      sub_category: breakdown.sub_category,
-      content_type: breakdown.content_type,
-      main_topic: breakdown.main_topic,
-      subtopics: breakdown.subtopics || [],
-      key_points: breakdown.key_points || [],
-      tone: breakdown.tone,
-      target_audience: breakdown.target_audience,
-      language: breakdown.language,
-      content_quality: breakdown.content_quality,
-      sentiment: breakdown.sentiment,
-      creator_niche: breakdown.creator_niche,
-      similar_to: breakdown.similar_to || [],
-      what_you_learn: breakdown.what_you_learn,
-      why_popular: breakdown.why_popular,
-      frames: page.thumbnail ? [page.thumbnail] : [],
-      visual,
-      transcript_segments: [],
-      transcript_full: '',
-    }
-  };
-}
-
-// ══════════════════════════════════════════════════
-//  GENERIC URL / NOTE ANALYSIS
-// ══════════════════════════════════════════════════
-async function analyzeGenericUrl(url, userNote) {
-  let title = url, desc = '', thumb = '', channel = '';
-  try {
-    const html = await fetchWithProxy(url, 10000);
-    if (html) {
-      title = (html.match(/<title[^>]*>([^<]+)/i)||[])[1]?.trim().replace(/ - .*$/,'') || url;
-      const metas = [
-        html.match(/og:description["\s]+content="([^"]+)"/i),
-        html.match(/name="description"[^>]+content="([^"]+)"/i),
-        html.match(/content="([^"]+)"[^>]+name="description"/i)
-      ];
-      desc = (metas.find(Boolean)||[])[1]?.trim().slice(0,800) || '';
-      thumb = (html.match(/og:image["\s]+content="([^"]+)"/i)||[])[1]?.trim() || '';
-      channel = (new URL(url)).hostname;
-    }
-  } catch {}
-  const ctx = `URL: ${url}\nTitle: ${title}\nHost: ${channel}\nDescription: ${desc}\nNote: ${userNote}`;
-  const result = await groq([{ role:'user', content:`Analyze this saved content:\n\n${ctx}\n\nReturn ONLY this JSON:\n{"title":"short title","summary":"2-3 sentences about what this is","tags":["t1","t2","t3","t4","t5"],"category":"category name"}` }], 600);
-  const a = parseJSON(result);
-  return { type:'article', platform:'web', url, thumbnail:thumb, title:a.title||title, summary:a.summary||'', tags:a.tags||[], user_note:userNote, rich:{creator:channel, category:a.category} };
-}
-
-async function analyzeNote(content) {
-  const result = await groq([{ role:'user', content:`Analyze this personal note:\n\n${content.slice(0,1500)}\n\nReturn ONLY this JSON:\n{"title":"short title","summary":"1-2 sentences","tags":["t1","t2","t3","t4","t5"]}` }], 500);
-  const a = parseJSON(result);
-  return { type:'note', platform:'note', url:'', thumbnail:'', title:a.title||'Note', summary:a.summary||'', tags:a.tags||[], user_note:content, rich:{} };
-}
-
-// ══════════════════════════════════════════════════
-//  SEARCH
-// ══════════════════════════════════════════════════
-async function aiSearch(query, mems) {
-  if (!mems.length) return [];
-  const list = mems.map(m=>
-    `ID:${m.id}|${m.title}|${m.summary}|${(m.tags||[]).join(',')}|${m.rich?.main_topic||''}|${m.rich?.category||''}`
-  ).join('\n');
-  const t = await groq([{ role:'user', content:`Find memories matching query. Be flexible.\n\nQuery: "${query}"\n\nMemories:\n${list}\n\nReturn ONLY a JSON array of matching IDs by relevance. Example: [1700001,1700002]\nIf none match return [].` }], 300);
-  const m = t.match(/\[[\s\S]*?\]/);
-  return m ? JSON.parse(m[0]) : [];
-}
-
-// ══════════════════════════════════════════════════
-//  RENDER
-// ══════════════════════════════════════════════════
-const fmtSec = s => { const m=Math.floor(s/60),ss=Math.floor(s%60); return `${m}:${ss.toString().padStart(2,'0')}`; };
-const fmtNum = n => { const x=parseInt(n||'0'); if(x>=1e9)return(x/1e9).toFixed(1)+'B'; if(x>=1e6)return(x/1e6).toFixed(1)+'M'; if(x>=1e3)return(x/1e3).toFixed(1)+'K'; return String(x||''); };
-const timeAgo = iso => { const d=Date.now()-new Date(iso).getTime(); if(d<60e3)return'just now'; if(d<3600e3)return Math.floor(d/60e3)+'m ago'; if(d<86400e3)return Math.floor(d/3600e3)+'h ago'; if(d<7*86400e3)return Math.floor(d/86400e3)+'d ago'; return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'}); };
-const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-function platformBadge(m) {
-  if (m.platform==='youtube')   return '<span class="badge byt">▶ YouTube</span>';
-  if (m.platform==='instagram') return '<span class="badge big">📸 Instagram</span>';
-  if (m.type==='note')          return '<span class="badge bn">📝 Note</span>';
-  if (m.platform==='web')       return '<span class="badge bw">🌐 Article</span>';
-  return '<span class="badge btt">📎 Saved</span>';
-}
-
-function colorDots(visual) {
-  if (!visual?.dominant_colors?.length) return '';
-  const map = { red:'#ef4444',blue:'#3b82f6',green:'#22c55e',yellow:'#eab308',orange:'#f97316',purple:'#a855f7',pink:'#ec4899',cyan:'#06b6d4',white:'#f8fafc',black:'#1e293b',gray:'#64748b',grey:'#64748b',brown:'#92400e',beige:'#d4c5a9',gold:'#f59e0b',silver:'#94a3b8',teal:'#14b8a6',indigo:'#6366f1',lime:'#84cc16',navy:'#1e3a8a' };
-  return '<div class="color-dots">'+visual.dominant_colors.slice(0,4).map(c=>{const k=c.toLowerCase().split(' ')[0];const col=map[k]||'#64748b';return`<div class="cdot" style="background:${col}" title="${esc(c)}"></div>`;}).join('')+'</div>';
-}
-
-function makeCard(m) {
-  const r = m.rich || {};
-  const tags = (m.tags||[]).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
-  const thumb = m.thumbnail
-    ? `<img class="thumb" src="${esc(m.thumbnail)}" loading="lazy" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="thumb-ph" style="display:none">🎬</div>`
-    : `<div class="thumb-ph">${m.type==='note'?'📝':m.platform==='youtube'?'🎬':'📄'}</div>`;
-  const durBadge = r.duration ? `<div class="duration-badge">${fmtSec(r.duration)}</div>` : '';
-  const metaParts = [];
-  if (r.creator) metaParts.push(`<span>👤 ${esc(r.creator.slice(0,20))}</span>`);
-  if (r.views) metaParts.push(`<span>👁 ${fmtNum(r.views)}</span>`);
-  if (r.category) metaParts.push(`<span>📂 ${esc(r.category)}</span>`);
-  const meta = metaParts.length ? `<div class="card-meta">${metaParts.join('')}</div>` : '';
-  const colors = colorDots(r.visual);
-
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.onclick = () => openDetail(m.id);
-  card.innerHTML = `
-    <div class="thumb-wrap">${thumb}${durBadge}</div>
-    <div class="card-body">
-      ${platformBadge(m)}
-      <div class="card-title">${esc(m.title||'Untitled')}</div>
-      ${meta}
-      <div class="card-sum">${esc(m.summary||'')}</div>
-      <div class="tags">${tags}</div>
-      ${colors}
-    </div>
-    <div class="card-foot">
-      <span class="card-date">${timeAgo(m.created_at)}</span>
-      <div class="foot-r">
-        ${m.url?`<a class="open-link" href="${esc(m.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>`:''}
-        <button class="del-btn" onclick="event.stopPropagation();doDelete(event,${m.id})">🗑</button>
+  document.getElementById('mediaSidebar').innerHTML = media.map(m => {
+    const thumb = m.thumbnail
+      ? `<img class="sitem-thumb" src="${esc(m.thumbnail)}" loading="lazy" onerror="this.style.display='none'">`
+      : `<div class="sitem-thumb-ph">${m.platform==='youtube'?'🎬':m.platform==='instagram'?'📸':'📄'}</div>`;
+    return `<div class="sitem" onclick="openDetail(${m.id})">
+      ${thumb}
+      <div class="sitem-info">
+        <div class="sitem-title">${esc(m.title||'Untitled')}</div>
+        <div class="sitem-sub">${esc((m.rich?.creator||m.rich?.category||m.platform||'').slice(0,28))}</div>
       </div>
     </div>`;
-  return card;
-}
+  }).join('') || '<div style="padding:10px 8px;font-size:12px;color:var(--muted)">No media saved yet</div>';
 
-let allMems = [], searching = false;
-function render(mems) {
-  const grid = document.getElementById('grid');
-  document.getElementById('emptyEl').style.display = 'none';
-  document.getElementById('noRes').style.display = 'none';
-  grid.innerHTML = '';
-  if (!mems.length) {
-    if (searching) { document.getElementById('noRes').style.display='block'; document.getElementById('noResQ').textContent=document.getElementById('sIn').value; }
-    else document.getElementById('emptyEl').style.display='block';
-    return;
-  }
-  mems.forEach(m => grid.appendChild(makeCard(m)));
-}
-function updateStats(shown) {
-  const total = allMems.length, el = document.getElementById('statsEl');
-  if (!total) { el.innerHTML='No memories yet'; return; }
-  if (searching) { el.innerHTML=`Found <b>${shown.length}</b> of <b>${total}</b>`; return; }
-  const yt = allMems.filter(m=>m.platform==='youtube').length;
-  const ig = allMems.filter(m=>m.platform==='instagram').length;
-  const notes = allMems.filter(m=>m.type==='note').length;
-  el.innerHTML = `<b>${total}</b> memories · ${yt} YouTube${ig?' · '+ig+' Instagram':''} · ${notes} notes`;
-}
-async function load() {
-  if (backendUrl) {
-    try {
-      const mems = await backendCall('/api/memories');
-      allMems = mems.map(normBackend);
-      setMems(allMems); // keep local copy in sync
-    } catch(e) {
-      toast('Backend unreachable — showing local cache', true);
-      allMems = getMems();
-    }
-  } else {
-    allMems = getMems();
-  }
-  render(allMems); updateStats(allMems);
-}
-
-// ── Search ──
-let stimer = null;
-const sIn = document.getElementById('sIn'), sClear = document.getElementById('sClear'), sLabel = document.getElementById('sLabel');
-sIn.addEventListener('input', () => {
-  const q = sIn.value.trim();
-  sClear.style.display = q?'block':'none';
-  clearTimeout(stimer);
-  if (!q) { searching=false; sLabel.style.display='none'; render(allMems); updateStats(allMems); return; }
-  stimer = setTimeout(() => runSearch(q), 700);
-});
-sClear.onclick = () => { sIn.value=''; sClear.style.display='none'; searching=false; sLabel.style.display='none'; render(allMems); updateStats(allMems); };
-async function runSearch(q) {
-  searching=true; sLabel.style.display='block'; sLabel.textContent=`🤖 Searching "${q}"…`;
-  document.getElementById('grid').innerHTML='';
-  try {
-    let res;
-    if (backendUrl) {
-      const data = await backendCall('/api/search?q='+encodeURIComponent(q));
-      res = data.map(normBackend);
-    } else {
-      const ids = await aiSearch(q,allMems);
-      const map = Object.fromEntries(allMems.map(m=>[m.id,m]));
-      res = ids.map(id=>map[id]).filter(Boolean);
-    }
-    sLabel.textContent=`✨ Results for "${q}"`; render(res); updateStats(res);
-  } catch(e) { toast(e.message,true); sLabel.style.display='none'; searching=false; }
-}
-
-// ══════════════════════════════════════════════════
-//  DETAIL MODAL
-// ══════════════════════════════════════════════════
-let _detailMem = null;
-function openDetail(id) {
-  const m = allMems.find(x=>x.id===id); if(!m) return;
-  _detailMem = m;
-  const r = m.rich || {}, v = r.visual || {};
-
-  // Reset embed
-  document.getElementById('dHeroImg').src = m.thumbnail || '';
-  document.getElementById('dHeroImg').style.display = '';
-  document.getElementById('dVideoEmbed').style.display = 'none';
-  document.getElementById('dVideoEmbed').innerHTML = '';
-
-  // Show play overlay for YouTube
-  const playEl = document.getElementById('dPlayOverlay');
-  playEl.style.display = (m.platform === 'youtube' && r.video_id) ? 'flex' : 'none';
-
-  document.getElementById('dTitle').textContent = m.title || 'Untitled';
-  document.getElementById('dBadge').innerHTML = platformBadge(m);
-
-  // Frames strip (only show multiple frames for YouTube)
-  const framesEl = document.getElementById('dFrames');
-  const showFrames = r.frames?.length > 1;
-  if (showFrames) {
-    framesEl.innerHTML = r.frames.map((f,i)=>`<img class="dframe" src="${esc(f)}" alt="Frame ${i+1}" onclick="document.getElementById('dHeroImg').src='${esc(f)}'"">`).join('');
-    framesEl.style.display = 'flex';
-  } else { framesEl.style.display = 'none'; }
-
-  // Stats
-  const stats = [];
-  if (r.views)        stats.push({ val:fmtNum(r.views), lbl:'Views' });
-  if (r.likes)        stats.push({ val:r.likes, lbl:'Likes' });
-  if (r.duration)     stats.push({ val:fmtSec(r.duration), lbl:'Duration' });
-  if (r.subscriber_count) stats.push({ val:r.subscriber_count, lbl:'Subscribers' });
-  if (r.published_at) stats.push({ val:r.published_at.slice(0,10), lbl:'Published' });
-  if (r.language)     stats.push({ val:r.language, lbl:'Language' });
-  document.getElementById('dStats').innerHTML = stats.map(s=>`<div class="dstat"><div class="dstat-val">${esc(s.val)}</div><div class="dstat-lbl">${esc(s.lbl)}</div></div>`).join('');
-
-  // Tabs
-  const tabs = ['Overview','Visual','Transcript','Creator','✨ Story'];
-  const tabsEl = document.getElementById('dTabs');
-  tabsEl.innerHTML = tabs.map((t,i)=>`<button class="dtab${i===0?' active':''}" onclick="switchDTab(${i},this)">${t}</button>`).join('');
-
-  // Panels
-  const panelsEl = document.getElementById('dPanels');
-  panelsEl.innerHTML = '';
-
-  // ─ Overview ─
-  const ov = document.createElement('div');
-  ov.className = 'dpanel active'; ov.id = 'dp0';
-  const kps = (r.key_points||[]).map(p=>`<li>${esc(p)}</li>`).join('');
-  const subs = (r.subtopics||[]).map(t=>`<span class="topic-chip">${esc(t)}</span>`).join('');
-  const sim = (r.similar_to||[]).map(t=>`<span class="topic-chip">${esc(t)}</span>`).join('');
-  ov.innerHTML = `
-    <div class="section"><div class="section-title">📝 Summary</div><p style="font-size:14px;line-height:1.7;color:var(--muted)">${esc(m.summary)}</p></div>
-    <div class="section"><div class="section-title">📂 Classification</div>
-      <div class="kv-grid">
-        ${r.category?`<div class="kv"><div class="kv-label">Category</div><div class="kv-value">${esc(r.category)}</div></div>`:''}
-        ${r.sub_category?`<div class="kv"><div class="kv-label">Sub-Category</div><div class="kv-value">${esc(r.sub_category)}</div></div>`:''}
-        ${r.content_type?`<div class="kv"><div class="kv-label">Content Type</div><div class="kv-value">${esc(r.content_type)}</div></div>`:''}
-        ${r.tone?`<div class="kv"><div class="kv-label">Tone</div><div class="kv-value">${esc(r.tone)}</div></div>`:''}
-        ${r.sentiment?`<div class="kv"><div class="kv-label">Sentiment</div><div class="kv-value">${esc(r.sentiment)}</div></div>`:''}
-        ${r.target_audience?`<div class="kv"><div class="kv-label">Audience</div><div class="kv-value">${esc(r.target_audience)}</div></div>`:''}
-        ${r.content_quality?`<div class="kv"><div class="kv-label">Quality</div><div class="kv-value">${esc(r.content_quality)}</div></div>`:''}
-        ${r.main_topic?`<div class="kv"><div class="kv-label">Main Topic</div><div class="kv-value">${esc(r.main_topic)}</div></div>`:''}
+  document.getElementById('notesSidebar').innerHTML = notes.map(m => `
+    <div class="sitem" onclick="openDetail(${m.id})">
+      <div class="sitem-thumb-ph">📝</div>
+      <div class="sitem-info">
+        <div class="sitem-title">${esc(m.title||'Note')}</div>
+        <div class="sitem-sub">${esc((m.user_note||'').slice(0,30))}</div>
       </div>
     </div>
-    ${kps?`<div class="section"><div class="section-title">🔑 Key Points</div><ul class="key-points">${kps}</ul></div>`:''}
-    ${r.what_you_learn?`<div class="section"><div class="section-title">💡 Takeaway</div><p style="font-size:13px;color:var(--muted)">${esc(r.what_you_learn)}</p></div>`:''}
-    ${subs?`<div class="section"><div class="section-title">📌 Subtopics</div><div class="topics-row">${subs}</div></div>`:''}
-    ${sim?`<div class="section"><div class="section-title">🔗 Similar To</div><div class="topics-row">${sim}</div></div>`:''}
-    <div class="section"><div class="section-title">🏷 Tags</div><div class="tags">${(m.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div>
-  `;
-  panelsEl.appendChild(ov);
-
-  // ─ Visual ─
-  const vp = document.createElement('div');
-  vp.className = 'dpanel'; vp.id = 'dp1';
-  const colorMap = { red:'#ef4444',blue:'#3b82f6',green:'#22c55e',yellow:'#eab308',orange:'#f97316',purple:'#a855f7',pink:'#ec4899',cyan:'#06b6d4',white:'#f8fafc',black:'#1e293b',gray:'#64748b',grey:'#64748b',brown:'#92400e',beige:'#d4c5a9',gold:'#f59e0b',silver:'#94a3b8',teal:'#14b8a6',indigo:'#6366f1',lime:'#84cc16',navy:'#1e3a8a' };
-  const colChips = (v.dominant_colors||[]).map(c=>{const k=c.toLowerCase().split(' ')[0];const col=colorMap[k]||'#64748b';return`<div class="color-chip"><div class="color-swatch" style="background:${col}"></div><span class="color-name">${esc(c)}</span></div>`;}).join('');
-  const framesGrid = (r.frames||[]).map((f,i)=>`<div class="frame-card"><img src="${esc(f)}" alt="Frame ${i+1}" loading="lazy"><div class="frame-label">Frame ${i+1}</div></div>`).join('');
-  const objs = (v.objects||[]).map(o=>`<span class="topic-chip">${esc(o)}</span>`).join('');
-  vp.innerHTML = `
-    ${framesGrid?`<div class="section"><div class="section-title">🎬 Video Frames</div><div class="frames-grid">${framesGrid}</div></div>`:''}
-    ${colChips?`<div class="section"><div class="section-title">🎨 Color Palette</div><div class="color-row">${colChips}</div></div>`:''}
-    <div class="section"><div class="section-title">👁 Visual Breakdown</div>
-      <div class="kv-grid">
-        ${v.main_subject?`<div class="kv"><div class="kv-label">Main Subject</div><div class="kv-value">${esc(v.main_subject)}</div></div>`:''}
-        ${v.setting?`<div class="kv"><div class="kv-label">Setting</div><div class="kv-value">${esc(v.setting)}</div></div>`:''}
-        ${v.aesthetic?`<div class="kv"><div class="kv-label">Aesthetic</div><div class="kv-value">${esc(v.aesthetic)}</div></div>`:''}
-        ${v.lighting?`<div class="kv"><div class="kv-label">Lighting</div><div class="kv-value">${esc(v.lighting)}</div></div>`:''}
-        ${v.composition?`<div class="kv"><div class="kv-label">Composition</div><div class="kv-value">${esc(v.composition)}</div></div>`:''}
-        ${v.production_quality?`<div class="kv"><div class="kv-label">Production</div><div class="kv-value">${esc(v.production_quality)}</div></div>`:''}
-        ${v.mood?`<div class="kv"><div class="kv-label">Visual Mood</div><div class="kv-value">${esc(v.mood)}</div></div>`:''}
-        ${v.color_mood?`<div class="kv"><div class="kv-label">Color Mood</div><div class="kv-value">${esc(v.color_mood)}</div></div>`:''}
-        ${v.faces?`<div class="kv"><div class="kv-label">People</div><div class="kv-value">${esc(v.faces)}</div></div>`:''}
-        ${v.text_on_screen?`<div class="kv"><div class="kv-label">On-screen Text</div><div class="kv-value">${esc(v.text_on_screen)}</div></div>`:''}
-      </div>
-    </div>
-    ${v.visual_style?`<div class="section"><div class="section-title">🖼 Visual Style</div><p style="font-size:13px;color:var(--muted);line-height:1.6">${esc(v.visual_style)}</p></div>`:''}
-    ${objs?`<div class="section"><div class="section-title">📦 Objects Detected</div><div class="topics-row">${objs}</div></div>`:''}
-    ${(v.side_subjects||[]).length?`<div class="section"><div class="section-title">➕ Side Subjects</div><div class="topics-row">${(v.side_subjects||[]).map(s=>`<span class="topic-chip">${esc(s)}</span>`).join('')}</div></div>`:''}
-  `;
-  panelsEl.appendChild(vp);
-
-  // ─ Transcript ─
-  const tp = document.createElement('div');
-  tp.className = 'dpanel'; tp.id = 'dp2';
-  const segs = r.transcript_segments || [];
-  if (segs.length) {
-    tp.innerHTML = `<div class="section"><div class="section-title">📝 Full Transcript (${segs.length} segments)</div>
-      <div class="transcript-box">${segs.map(s=>`<div class="tseg"><span class="tseg-time">${esc(s.time)}</span><span class="tseg-text">${esc(s.text)}</span></div>`).join('')}</div></div>`;
-  } else {
-    tp.innerHTML = `<div class="no-data">No transcript available for this video.<br><br>This may be because auto-captions are disabled or the video has manual captions only.</div>`;
-  }
-  panelsEl.appendChild(tp);
-
-  // ─ Creator ─
-  const cp = document.createElement('div');
-  cp.className = 'dpanel'; cp.id = 'dp3';
-  const kwds = (r.keywords||[]).slice(0,20).map(k=>`<span class="topic-chip">${esc(k)}</span>`).join('');
-  cp.innerHTML = `
-    ${r.creator?`<div class="section"><div class="section-title">👤 Creator</div>
-      <div class="creator-card">
-        <div class="creator-icon">🎬</div>
-        <div><div class="creator-name">${esc(r.creator)}</div>
-          <div class="creator-sub">${r.subscriber_count?esc(r.subscriber_count)+' subscribers · ':''} ${r.creator_niche||''}</div>
-        </div>
-      </div></div>`:'' }
-    <div class="section"><div class="section-title">📋 Video Details</div>
-      <div class="kv-grid">
-        ${r.published_at?`<div class="kv"><div class="kv-label">Published</div><div class="kv-value">${esc(r.published_at.slice(0,10))}</div></div>`:''}
-        ${r.duration?`<div class="kv"><div class="kv-label">Duration</div><div class="kv-value">${fmtSec(r.duration)}</div></div>`:''}
-        ${r.views?`<div class="kv"><div class="kv-label">Views</div><div class="kv-value">${fmtNum(r.views)}</div></div>`:''}
-        ${r.likes?`<div class="kv"><div class="kv-label">Likes</div><div class="kv-value">${esc(r.likes)}</div></div>`:''}
-        ${r.language?`<div class="kv"><div class="kv-label">Language</div><div class="kv-value">${esc(r.language)}</div></div>`:''}
-        ${r.why_popular?`<div class="kv" style="grid-column:span 2"><div class="kv-label">Why It Gets Views</div><div class="kv-value" style="font-size:12px">${esc(r.why_popular)}</div></div>`:''}
-      </div>
-    </div>
-    ${r.description?`<div class="section"><div class="section-title">📄 Description</div><p style="font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-wrap">${esc(r.description.slice(0,600))}${r.description.length>600?'…':''}</p></div>`:''}
-    ${kwds?`<div class="section"><div class="section-title">🔖 Video Keywords</div><div class="topics-row">${kwds}</div></div>`:''}
-    ${m.user_note?`<div class="section"><div class="section-title">💬 Your Note</div><p style="font-size:13px;color:var(--muted);line-height:1.6;font-style:italic">${esc(m.user_note)}</p></div>`:''}
-  `;
-  panelsEl.appendChild(cp);
-
-  // ─ Story (Narrative) ─
-  const np = document.createElement('div');
-  np.className = 'dpanel'; np.id = 'dp4';
-  np.innerHTML = `
-    <button class="narrative-gen-btn" id="narBtn" onclick="generateNarrative()">✨ Generate Human Story</button>
-    <div id="narBox"></div>
-  `;
-  panelsEl.appendChild(np);
-
-  document.getElementById('dov').classList.add('open');
-}
-
-let _narrativeCache = {};
-async function generateNarrative() {
-  if (!_detailMem) return;
-  const m = _detailMem, r = m.rich || {}, v = r.visual || {};
-  if (_narrativeCache[m.id]) {
-    document.getElementById('narBox').innerHTML = `<div class="narrative-box">${esc(_narrativeCache[m.id]).replace(/\n/g,'<br>')}</div>`;
-    document.getElementById('narBtn').style.display = 'none';
-    return;
-  }
-  const btn = document.getElementById('narBtn');
-  btn.disabled = true; btn.innerHTML = '<div class="spin"></div><span>Writing story…</span>';
-  const ctx = [
-    m.title && `Title: ${m.title}`,
-    m.summary && `Summary: ${m.summary}`,
-    r.creator && `Creator: ${r.creator}`,
-    r.views && `Views: ${fmtNum(r.views)}`,
-    r.category && `Category: ${r.category}`,
-    r.content_type && `Content type: ${r.content_type}`,
-    r.tone && `Tone: ${r.tone}`,
-    r.target_audience && `Audience: ${r.target_audience}`,
-    (r.key_points||[]).length && `Key points: ${r.key_points.join(' | ')}`,
-    r.what_you_learn && `Takeaway: ${r.what_you_learn}`,
-    r.why_popular && `Why popular: ${r.why_popular}`,
-    v.aesthetic && `Visual aesthetic: ${v.aesthetic}`,
-    v.main_subject && `Visual subject: ${v.main_subject}`,
-    v.mood && `Visual mood: ${v.mood}`,
-    v.visual_style && `Visual style: ${v.visual_style}`,
-    r.transcript_full && `Transcript excerpt: ${r.transcript_full.slice(0,1000)}`,
-    m.user_note && `Saved because: ${m.user_note}`,
-  ].filter(Boolean).join('\n');
-  try {
-    const text = await groq([{
-      role:'system', content:'You are a brilliant storyteller who explains saved content in warm, engaging, human language. No jargon. Write like you are telling a friend about something fascinating you watched.'
-    },{
-      role:'user',
-      content:`Write a flowing human narrative about this saved content. Make it feel like you watched it yourself and are describing it to someone who has never seen it. Include what happens, what makes it interesting, the visual feel, who it is for, and what someone takes away from it. 3-5 rich paragraphs. No headers or bullet points — just flowing prose.\n\n${ctx}`
-    }], 900);
-    _narrativeCache[m.id] = text;
-    document.getElementById('narBox').innerHTML = `<div class="narrative-box">${esc(text).replace(/\n/g,'<br>')}</div>`;
-    btn.style.display = 'none';
-  } catch(e) {
-    btn.disabled = false; btn.innerHTML = '✨ Generate Human Story';
-    document.getElementById('narBox').innerHTML = `<div class="no-data">Generation failed. Try again.</div>`;
-  }
-}
-
-function embedVideo() {
-  if (!_detailMem) return;
-  const m = _detailMem;
-  if (m.platform !== 'youtube' || !m.rich?.video_id) return;
-  const embed = document.getElementById('dVideoEmbed');
-  embed.innerHTML = `<iframe src="https://www.youtube.com/embed/${m.rich.video_id}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-  embed.style.display = 'block';
-  document.getElementById('dhero').style.display = 'none';
-}
-
-function switchDTab(idx, btn) {
-  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
-  const p = document.getElementById('dp'+idx);
-  if(p) p.classList.add('active');
-}
-
-function closeDetail() {
-  document.getElementById('dov').classList.remove('open');
-  document.getElementById('dVideoEmbed').innerHTML = '';
-  document.getElementById('dVideoEmbed').style.display = 'none';
-  document.getElementById('dhero').style.display = '';
-  _detailMem = null;
-}
-function dOvClick(e) { if(e.target.id==='dov') closeDetail(); }
-
-// ══════════════════════════════════════════════════
-//  MODAL & SAVE
-// ══════════════════════════════════════════════════
-function openModal() { document.getElementById('ov').classList.add('open'); setTimeout(()=>document.getElementById('urlIn').focus(),300); }
-function closeModal() { document.getElementById('ov').classList.remove('open'); resetProgress(); }
-function ovClick(e) { if(e.target.id==='ov') closeModal(); }
-function swTab(name,btn) {
-  document.querySelectorAll('.tab2').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
-  document.getElementById('urlTab').style.display = name==='url'?'block':'none';
-  document.getElementById('noteTab').style.display = name==='note'?'block':'none';
-  setTimeout(()=>document.getElementById(name==='url'?'urlIn':'noteIn').focus(),50);
-}
-
-function setStep(n, state, label) {
-  const el = document.getElementById('p'+n), tEl = document.getElementById('p'+n+'t');
-  el.className = 'pstep '+state;
-  if (label) tEl.textContent = label;
-}
-
-function resetProgress() {
-  document.getElementById('progBox').style.display='none';
-  [1,2,3,4,5].forEach(n=>{ const el=document.getElementById('p'+n); el.className='pstep'; el.style.display=''; });
-  document.getElementById('p1t').textContent='Fetching video info…';
-  document.getElementById('p2t').textContent='Getting engagement stats…';
-  document.getElementById('p3t').textContent='Analyzing video frames with AI vision…';
-  document.getElementById('p4t').textContent='Extracting transcript…';
-  document.getElementById('p5t').textContent='Building complete breakdown…';
-}
-
-function setBusy(btn, busy) {
-  btn.disabled = busy;
-  btn.innerHTML = busy ? '<div class="spin"></div><span>Analyzing…</span>' : '<span>Deep Analyze &amp; Save</span>';
-}
-
-// ── Progress for backend mode ─────────────────────────────────────
-const _beMsgs = ['Downloading video…','Extracting audio…','Running Whisper transcription…','Extracting frames with ffmpeg…','AI vision on frames…','Building complete breakdown…','Almost done…'];
-let _beTimer = null, _beMsgIdx = 0, _beStart = 0;
-
-function startBackendProgress() {
-  _beStart = Date.now(); _beMsgIdx = 0;
-  document.getElementById('progBox').style.display = 'block';
-  document.getElementById('p1t').textContent = _beMsgs[0];
-  document.getElementById('p2t').textContent = 'Whisper real transcription…';
-  document.getElementById('p3t').textContent = 'Frame-by-frame AI vision…';
-  document.getElementById('p4t').textContent = 'Comprehensive AI breakdown…';
-  document.getElementById('p5t').textContent = 'Saving memory…';
-  setStep(1, 'active');
-  _beTimer = setInterval(() => {
-    const s = Math.floor((Date.now()-_beStart)/1000);
-    _beMsgIdx = Math.min(Math.floor(s/15), _beMsgs.length-1);
-    const stepN = Math.min(Math.floor(s/20)+1, 5);
-    [1,2,3,4,5].forEach(n => {
-      if (n < stepN) setStep(n,'done');
-      else if (n === stepN) setStep(n,'active', _beMsgs[_beMsgIdx]||'');
-    });
-  }, 1000);
-}
-
-async function doSaveUrl() {
-  const url = document.getElementById('urlIn').value.trim();
-  const note = document.getElementById('urlNote').value.trim();
-  if (!url) { toast('Please enter a URL',true); return; }
-  if (!url.startsWith('http')) { toast('URL must start with http',true); return; }
-
-  const btn = document.getElementById('urlBtn');
-  setBusy(btn, true);
-  const isYT = /youtu\.?be|youtube\.com/.test(url);
-  const isIG = /instagram\.com\/(reel|p|tv)\//.test(url);
-  const isVid = isYT || isIG || /tiktok|vimeo|twitter|x\.com/.test(url);
-
-  // ── Backend mode (phone connected) ──
-  if (backendUrl) {
-    if (isVid) startBackendProgress();
-    try {
-      const d = await backendCall('/api/save', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({url, user_note: note})
-      });
-      // Sync backend memories to localStorage
-      const mems = await backendCall('/api/memories');
-      setMems(mems.map(normBackend));
-      toast('✅ Memory saved! (full pipeline)');
-      document.getElementById('urlIn').value = '';
-      document.getElementById('urlNote').value = '';
-      closeModal(); load();
-    } catch(e) { toast(e.message||'Backend error',true); }
-    finally { setBusy(btn,false); clearInterval(_beTimer); setTimeout(resetProgress,800); }
-    return;
-  }
-
-  // ── Browser mode (Groq direct) ──
-  if (isYT || isIG) document.getElementById('progBox').style.display = 'block';
-  try {
-    let mem;
-    if (isYT)      mem = await analyzeYouTube(url, note, setStep);
-    else if (isIG) mem = await analyzeInstagram(url, note, setStep);
-    else           mem = await analyzeGenericUrl(url, note);
-    addMem(mem);
-    toast('✅ Memory saved!');
-    document.getElementById('urlIn').value = '';
-    document.getElementById('urlNote').value = '';
-    closeModal(); load();
-  } catch(e) { toast(e.message||'Failed',true); }
-  finally { setBusy(btn,false); if(isYT||isIG) setTimeout(resetProgress,500); }
-}
-
-async function doSaveNote() {
-  const content = document.getElementById('noteIn').value.trim();
-  if (!content) { toast('Write something first',true); return; }
-  const btn = document.getElementById('noteBtn');
-  btn.disabled=true; btn.innerHTML='<div class="spin"></div><span>Saving…</span>';
-  try {
-    if (backendUrl) {
-      await backendCall('/api/save-note', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})});
-      const mems = await backendCall('/api/memories');
-      setMems(mems.map(normBackend));
-    } else {
-      const mem = await analyzeNote(content);
-      addMem(mem);
-    }
-    toast('✅ Note saved!');
-    document.getElementById('noteIn').value = '';
-    closeModal(); load();
-  } catch(e) { toast(e.message||'Failed',true); }
-  finally { btn.disabled=false; btn.innerHTML='<span>Save &amp; Analyze</span>'; }
-}
-
-function doDelete(e, id) {
-  e.stopPropagation();
-  if(!confirm('Delete?')) return;
-  if (backendUrl) {
-    fetch(backendUrl+'/api/memories/'+id, {method:'DELETE'})
-      .then(() => { delMem(id); toast('🗑 Deleted'); load(); })
-      .catch(err => toast('Delete failed: '+err.message, true));
-  } else {
-    delMem(id); toast('🗑 Deleted'); load();
-  }
-  if (searching&&sIn.value.trim()) runSearch(sIn.value.trim());
-}
-
-// ── Toast ──
-function toast(msg, err=false) {
-  const t=document.createElement('div'); t.className='toast '+(err?'err':'ok'); t.textContent=msg;
-  document.getElementById('toasts').appendChild(t); setTimeout(()=>t.remove(),err?4500:2500);
+  `).join('') || '<div style="padding:10px 8px;font-size:12px;color:var(--muted)">No notes yet</div>';
 }
 
 // ══════════════════════════════════════════════════
 //  CHAT
 // ══════════════════════════════════════════════════
-let chatHistory = [];
-let chatOpen = false;
+let chatHistory = [], chatActive = false;
 
-function toggleChat() {
-  chatOpen = !chatOpen;
-  const panel = document.getElementById('chatPanel');
-  panel.classList.toggle('open', chatOpen);
-  if (chatOpen) {
-    if (chatHistory.length === 0) {
-      appendChatMsg('assistant', `Hi! I know everything about your ${allMems.length} saved memories. Ask me anything — "what food content did I save?", "summarise the cooking tutorial", "what are my top travel videos?"`);
-    }
-    setTimeout(() => document.getElementById('chatIn').focus(), 150);
-  }
+function newChat() {
+  chatHistory = []; chatActive = false;
+  document.getElementById('chatArea').style.display = 'none';
+  document.getElementById('welcome').style.display = '';
+  document.getElementById('chatInner').innerHTML = '';
+  document.getElementById('queryIn').value = '';
+  closeSidebar();
 }
 
-function appendChatMsg(role, text) {
-  const msgs = document.getElementById('chatMsgs');
+function useExample(el) {
+  document.getElementById('queryIn').value = el.querySelector('p').textContent;
+  sendQuery();
+}
+
+function autoResize(ta) {
+  ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,180)+'px';
+}
+
+function inputKey(e) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
+}
+
+function showChat() {
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('chatArea').style.display='block';
+  chatActive=true;
+}
+
+function appendMsg(role, html) {
+  showChat();
+  const inner = document.getElementById('chatInner');
   const div = document.createElement('div');
-  div.className = 'cmsg ' + (role === 'user' ? 'cmsg-u' : 'cmsg-a');
-  div.textContent = text;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  div.className = 'msg';
+  if (role==='user') {
+    div.className += ' msg-user';
+    div.innerHTML = `<div class="bubble">${esc(html).replace(/\n/g,'<br>')}</div>`;
+  } else {
+    div.className += ' msg-ai';
+    div.innerHTML = `<div class="ai-avatar">🧠</div><div class="ai-body">${html}</div>`;
+  }
+  inner.appendChild(div);
+  const ca=document.getElementById('chatArea');
+  ca.scrollTop=ca.scrollHeight;
   return div;
 }
 
-async function sendChat() {
-  const input = document.getElementById('chatIn');
-  const q = input.value.trim();
-  if (!q) return;
-  input.value = '';
-  appendChatMsg('user', q);
+function renderAIResponse(reply, sources) {
+  // Format reply text into paragraphs
+  const paras = reply.split('\n').filter(l=>l.trim()).map(l=>`<p>${esc(l)}</p>`).join('');
+  let html = `<div class="ai-text">${paras}</div>`;
 
-  const sendBtn = document.getElementById('chatSend');
-  sendBtn.disabled = true;
+  if (sources && sources.length) {
+    html += '<div class="sources">';
+    sources.forEach(s => {
+      const m = allMems.find(x=>x.id===s.id) || {};
+      const thumb = (s.thumbnail||m.thumbnail)
+        ? `<img class="source-thumb" src="${esc(s.thumbnail||m.thumbnail)}" onerror="this.style.display='none'">`
+        : `<div class="source-thumb-ph">${s.type==='note'?'📝':s.type==='video'?'🎬':'📄'}</div>`;
+      // Highlight the key phrase in snippet
+      let snippet = esc(s.snippet||'');
+      if (s.highlight) {
+        const hEsc = esc(s.highlight);
+        snippet = snippet.replace(new RegExp(hEsc.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), `<mark>${hEsc}</mark>`);
+      }
+      html += `<div class="source-card" onclick="openDetail(${s.id||m.id||0})">
+        <div class="source-card-inner">
+          ${thumb}
+          <div class="source-body">
+            <div class="source-type">${esc(s.type||m.type||'memory')}</div>
+            <div class="source-title">${esc(s.title||m.title||'Memory')}</div>
+            <div class="source-snippet">${snippet}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  return html;
+}
 
-  const mems = getMems();
-  const memCtx = mems.slice(0, 40).map(m =>
-    `[${m.platform||m.type}] "${m.title}" — ${(m.summary||'').slice(0,120)} | Tags: ${(m.tags||[]).join(', ')} | Category: ${m.rich?.category||''} | Topic: ${m.rich?.main_topic||''}`
-  ).join('\n');
+async function sendQuery() {
+  const ta = document.getElementById('queryIn');
+  const q = ta.value.trim(); if (!q) return;
+  ta.value=''; autoResize(ta);
+  document.getElementById('sendBtn').disabled = true;
 
-  const system = `You are a personal memory assistant for a MemoryAI app. The user has ${mems.length} saved memories. Here are their memories:\n\n${memCtx}\n\nAnswer questions about their saved content naturally and helpfully. Reference specific titles when relevant. Be conversational, warm, and concise (2-4 sentences max unless asked for more).`;
+  appendMsg('user', q);
+  chatHistory.push({role:'user', content:q});
 
-  chatHistory.push({ role: 'user', content: q });
-  const typing = appendChatMsg('assistant', '…');
-  typing.classList.add('typing');
-  document.getElementById('chatMsgs').scrollTop = document.getElementById('chatMsgs').scrollHeight;
+  // Typing indicator
+  const typingDiv = appendMsg('ai', '<div class="typing-dots"><span></span><span></span><span></span></div>');
 
   try {
-    const msgs = [{ role:'system', content: system }, ...chatHistory.slice(-8)];
-    const reply = await groqCall(msgs, 600, TXT_MDL);
-    typing.remove();
-    chatHistory.push({ role: 'assistant', content: reply });
-    appendChatMsg('assistant', reply);
+    let reply, sources=[];
+
+    if (backendUrl) {
+      // Use backend — has access to full rich data + highlights
+      const d = await backendPost('/api/chat', {messages: chatHistory.slice(-8), memory_count: allMems.length});
+      reply = d.reply; sources = d.sources||[];
+    } else {
+      // Browser Groq fallback
+      const memCtx = allMems.slice(0,40).map(m=>
+        `ID:${m.id}|[${m.type}]"${m.title}"|${m.summary.slice(0,120)}|note:${(m.user_note||'').slice(0,150)}|tags:${(m.tags||[]).join(',')}|date:${(m.created_at||'').slice(0,10)}`
+      ).join('\n');
+      const sys = `You are a personal memory assistant. User has ${allMems.length} saved memories:\n${memCtx}\n\nReturn ONLY this JSON:\n{"reply":"conversational answer 2-4 sentences","sources":[{"id":<id>,"snippet":"exact quote from note/summary that answers question","highlight":"specific key phrase to highlight (name/number/date/fact)"}]}`;
+      const text = await groq([{role:'system',content:sys},...chatHistory.slice(-6)], 800);
+      const parsed = parseJSON(text);
+      reply = parsed.reply || text;
+      sources = (parsed.sources||[]).map(s=>{
+        const m=allMems.find(x=>x.id===s.id)||{};
+        return {...s, title:m.title||'', thumbnail:m.thumbnail||'', type:m.type||''};
+      });
+    }
+
+    typingDiv.remove();
+    chatHistory.push({role:'assistant', content:reply});
+    appendMsg('ai', renderAIResponse(reply, sources));
+
   } catch(e) {
-    typing.remove();
-    appendChatMsg('assistant', 'Sorry, hit an error — try again in a moment.');
+    typingDiv.remove();
+    appendMsg('ai', renderAIResponse('Sorry, I hit an error: '+e.message, []));
   } finally {
-    sendBtn.disabled = false;
+    document.getElementById('sendBtn').disabled=false;
   }
 }
 
-document.getElementById('chatIn').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-});
+// ══════════════════════════════════════════════════
+//  SAVE
+// ══════════════════════════════════════════════════
+function openSave() { document.getElementById('saveOv').classList.add('open'); setTimeout(()=>document.getElementById('urlIn').focus(),300); }
+function closeSave() { document.getElementById('saveOv').classList.remove('open'); resetProg(); }
+function savOvClick(e) { if(e.target.id==='saveOv') closeSave(); }
+function swSaveTab(n,btn) {
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.getElementById('urlTab').style.display=n==='url'?'block':'none';
+  document.getElementById('noteTab').style.display=n==='note'?'block':'none';
+}
 
-document.addEventListener('keydown', e => {
-  if(e.key==='Escape') {
-    closeModal(); closeDetail(); if(chatOpen) toggleChat();
-    document.getElementById('connModal').classList.remove('open');
+function setPr(n, state, lbl) {
+  const el=document.getElementById('pr'+n); el.className='prog-row '+state;
+  if(lbl) document.getElementById('pr'+n+'t').textContent=lbl;
+}
+function resetProg() {
+  document.getElementById('progBox').style.display='none';
+  [1,2,3,4,5].forEach(n=>{const el=document.getElementById('pr'+n);el.className='prog-row';});
+  document.getElementById('pr1t').textContent='Downloading video…';
+  document.getElementById('pr2t').textContent='Extracting audio…';
+  document.getElementById('pr3t').textContent='Whisper transcription…';
+  document.getElementById('pr4t').textContent='Frame analysis…';
+  document.getElementById('pr5t').textContent='AI breakdown…';
+}
+
+let _beTimer=null;
+function startBEProgress() {
+  const steps=['Downloading video…','Extracting audio…','Running Whisper…','Analyzing frames…','Building breakdown…'];
+  document.getElementById('progBox').style.display='block';
+  setPr(1,'active'); let si=0, stepN=1;
+  _beTimer=setInterval(()=>{
+    const s=++si;
+    stepN=Math.min(Math.floor(s/14)+1,5);
+    [1,2,3,4,5].forEach(n=>{
+      if(n<stepN) setPr(n,'done');
+      else if(n===stepN) setPr(n,'active',steps[n-1]);
+      else setPr(n,'','');
+    });
+  },1000);
+}
+
+// YouTube/Instagram browser analysis (same as before)
+async function doSaveUrl() {
+  const url=document.getElementById('urlIn').value.trim(), note=document.getElementById('urlNote').value.trim();
+  if(!url){toast('Enter a URL','err');return;}
+  if(!url.startsWith('http')){toast('Must start with http','err');return;}
+  const btn=document.getElementById('urlBtn');
+  btn.disabled=true; btn.innerHTML='<div class="spin"></div><span>Processing…</span>';
+  const isVid=/youtu\.?be|youtube\.com|instagram\.com|tiktok\.com|vimeo/.test(url);
+
+  if (backendUrl) {
+    if(isVid) startBEProgress();
+    try {
+      await backendPost('/api/save',{url,user_note:note});
+      const mems=await backendGet('/api/memories');
+      allMems=mems.map(norm); setMems(allMems);
+      toast('✅ Saved with full pipeline!'); document.getElementById('urlIn').value=''; document.getElementById('urlNote').value='';
+      closeSave(); renderSidebar();
+    } catch(e){toast(e.message||'Failed','err');}
+    finally{btn.disabled=false;btn.innerHTML='<span>Analyze &amp; Save</span>';clearInterval(_beTimer);setTimeout(resetProg,600);}
+    return;
   }
-  if((e.metaKey||e.ctrlKey)&&e.key==='k') { e.preventDefault(); sIn.focus(); }
+
+  // Browser mode
+  const isYT=/youtu\.?be|youtube\.com/.test(url), isIG=/instagram\.com\/(reel|p|tv)\//.test(url);
+  if(isYT||isIG) document.getElementById('progBox').style.display='block';
+  try {
+    let mem;
+    if(isYT) mem=await analyzeYouTube(url,note,setPr);
+    else if(isIG) mem=await analyzeInstagram(url,note,setPr);
+    else mem=await analyzeGenericUrl(url,note);
+    addMem(mem); allMems=getMems().map(norm);
+    toast('✅ Memory saved!'); document.getElementById('urlIn').value=''; document.getElementById('urlNote').value='';
+    closeSave(); renderSidebar();
+  } catch(e){toast(e.message||'Failed','err');}
+  finally{btn.disabled=false;btn.innerHTML='<span>Analyze &amp; Save</span>';if(isYT||isIG)setTimeout(resetProg,500);}
+}
+
+async function doSaveNote() {
+  const content=document.getElementById('noteIn').value.trim();
+  if(!content){toast('Write something first','err');return;}
+  const btn=document.getElementById('noteBtn');
+  btn.disabled=true; btn.innerHTML='<div class="spin"></div><span>Saving…</span>';
+  try {
+    if(backendUrl){
+      await backendPost('/api/save-note',{content});
+      const mems=await backendGet('/api/memories');
+      allMems=mems.map(norm); setMems(allMems);
+    } else {
+      const a=parseJSON(await groq([{role:'user',content:`Analyze this note:\n\n${content.slice(0,1500)}\n\nReturn JSON:\n{"title":"short title","summary":"1-2 sentences","tags":["t1","t2","t3","t4","t5"]}`}],500));
+      addMem({type:'note',platform:'note',url:'',thumbnail:'',title:a.title||'Note',summary:a.summary||'',tags:a.tags||[],user_note:content,rich:{}});
+      allMems=getMems().map(norm);
+    }
+    toast('✅ Note saved!'); document.getElementById('noteIn').value='';
+    closeSave(); renderSidebar();
+  } catch(e){toast(e.message||'Failed','err');}
+  finally{btn.disabled=false;btn.innerHTML='<span>Save &amp; Analyze</span>';}
+}
+
+// ══════════════════════════════════════════════════
+//  DETAIL MODAL
+// ══════════════════════════════════════════════════
+let _dm=null, _nc={};
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtSec=s=>{const m=Math.floor(s/60),ss=Math.floor(s%60);return`${m}:${ss.toString().padStart(2,'0')}`};
+const fmtNum=n=>{const x=parseInt(n||'0');if(x>=1e6)return(x/1e6).toFixed(1)+'M';if(x>=1e3)return(x/1e3).toFixed(1)+'K';return x?String(x):''};
+
+function openDetail(id) {
+  const m=allMems.find(x=>x.id===id); if(!m) return;
+  _dm=m; const r=m.rich||{}, v=r.visual||{};
+  document.getElementById('dHeroImg').src=m.thumbnail||'';
+  document.getElementById('dHeroImg').style.display='';
+  document.getElementById('dhero').style.display='';
+  document.getElementById('dEmbed').innerHTML=''; document.getElementById('dEmbed').style.display='none';
+  document.getElementById('dPlayBtn').style.display=(m.platform==='youtube'&&r.video_id)?'flex':'none';
+  document.getElementById('dTitle').textContent=m.title||'Untitled';
+
+  const badge=m.platform==='youtube'?'<span class="dbadge byt">▶ YouTube</span>':m.platform==='instagram'?'<span class="dbadge big">📸 Instagram</span>':m.type==='note'?'<span class="dbadge bn">📝 Note</span>':'<span class="dbadge bw">🌐 Web</span>';
+  document.getElementById('dBadge').innerHTML=badge;
+
+  // Stats
+  const stats=[];
+  if(r.views) stats.push({v:fmtNum(r.views),l:'Views'});
+  if(r.likes) stats.push({v:fmtNum(r.likes),l:'Likes'});
+  if(r.duration) stats.push({v:fmtSec(r.duration),l:'Duration'});
+  if(r.subscriber_count) stats.push({v:String(r.subscriber_count),l:'Subscribers'});
+  if(r.published_at) stats.push({v:String(r.published_at).slice(0,10),l:'Published'});
+  if(r.language) stats.push({v:r.language,l:'Language'});
+  if(r.frames_count) stats.push({v:r.frames_count+' analyzed',l:'Frames'});
+  document.getElementById('dStats').innerHTML=stats.length?stats.map(s=>`<div class="dstat"><div class="dstat-val">${esc(s.v)}</div><div class="dstat-lbl">${esc(s.l)}</div></div>`).join(''):'';
+  if(!stats.length) document.getElementById('dStats').style.display='none';
+  else document.getElementById('dStats').style.display='';
+
+  // Tabs — show note content instead of transcript for notes
+  const isNote=m.type==='note';
+  const tabs=isNote?['Overview','✨ Story']:['Overview','Visual','Transcript','Creator','✨ Story'];
+  document.getElementById('dTabs').innerHTML=tabs.map((t,i)=>`<button class="dtab${i===0?' active':''}" onclick="swDTab(${i},this)">${t}</button>`).join('');
+
+  const panels=document.getElementById('dPanels'); panels.innerHTML='';
+
+  // Overview
+  const ov=document.createElement('div'); ov.className='dpanel active'; ov.id='dp0';
+  const kps=(r.key_points||[]).map(p=>`<li>${esc(p)}</li>`).join('');
+  ov.innerHTML=`
+    ${m.summary?`<div class="dsec"><div class="dsec-title">📝 Summary</div><p style="font-size:14px;line-height:1.75;color:var(--muted)">${esc(m.summary)}</p></div>`:''}
+    ${isNote&&m.user_note?`<div class="dsec"><div class="dsec-title">📄 Note Content</div><div class="note-content">${esc(m.user_note)}</div></div>`:''}
+    ${!isNote?`<div class="dsec"><div class="dsec-title">📂 Classification</div>
+      <div class="kv-grid">
+        ${r.category?`<div class="kv"><div class="kv-l">Category</div><div class="kv-v">${esc(r.category)}</div></div>`:''}
+        ${r.sub_category?`<div class="kv"><div class="kv-l">Sub-Category</div><div class="kv-v">${esc(r.sub_category)}</div></div>`:''}
+        ${r.content_type?`<div class="kv"><div class="kv-l">Type</div><div class="kv-v">${esc(r.content_type)}</div></div>`:''}
+        ${r.tone?`<div class="kv"><div class="kv-l">Tone</div><div class="kv-v">${esc(r.tone)}</div></div>`:''}
+        ${r.sentiment?`<div class="kv"><div class="kv-l">Sentiment</div><div class="kv-v">${esc(r.sentiment)}</div></div>`:''}
+        ${r.target_audience?`<div class="kv"><div class="kv-l">Audience</div><div class="kv-v">${esc(r.target_audience)}</div></div>`:''}
+        ${r.main_topic?`<div class="kv"><div class="kv-l">Main Topic</div><div class="kv-v">${esc(r.main_topic)}</div></div>`:''}
+        ${r.content_quality?`<div class="kv"><div class="kv-l">Quality</div><div class="kv-v">${esc(r.content_quality)}</div></div>`:''}
+      </div>
+    </div>`:''}
+    ${kps?`<div class="dsec"><div class="dsec-title">🔑 Key Points</div><ul class="kps">${kps}</ul></div>`:''}
+    ${r.what_you_learn?`<div class="dsec"><div class="dsec-title">💡 Takeaway</div><p style="font-size:13px;color:var(--muted)">${esc(r.what_you_learn)}</p></div>`:''}
+    ${(r.subtopics||[]).length?`<div class="dsec"><div class="dsec-title">📌 Subtopics</div><div class="chips">${r.subtopics.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div></div>`:''}
+    ${(r.similar_to||[]).length?`<div class="dsec"><div class="dsec-title">🔗 Similar To</div><div class="chips">${r.similar_to.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div></div>`:''}
+    <div class="dsec"><div class="dsec-title">🏷 Tags</div><div class="chips">${(m.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div>
+    ${m.url?`<div style="margin-top:10px"><a href="${esc(m.url)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent)">🔗 Open original</a></div>`:''}
+  `;
+  panels.appendChild(ov);
+
+  if (!isNote) {
+    // Visual
+    const vp=document.createElement('div'); vp.className='dpanel'; vp.id='dp1';
+    const colorMap={red:'#ef4444',blue:'#3b82f6',green:'#22c55e',yellow:'#eab308',orange:'#f97316',purple:'#a855f7',pink:'#ec4899',cyan:'#06b6d4',white:'#f8fafc',black:'#1e293b',gray:'#64748b',grey:'#64748b',brown:'#92400e',gold:'#f59e0b',silver:'#94a3b8',teal:'#14b8a6',indigo:'#6366f1',navy:'#1e3a8a'};
+    const colChips=(v.dominant_colors||[]).map(c=>{const k=c.toLowerCase().split(' ')[0];return`<div class="color-chip"><div class="cswatch" style="background:${colorMap[k]||'#64748b'}"></div><span style="font-size:12px">${esc(c)}</span></div>`;}).join('');
+    let fHtml='';
+    if(m.platform==='youtube'&&r.video_id) {
+      const yf=[0,1,2,3].map(i=>`https://img.youtube.com/vi/${r.video_id}/${i}.jpg`);
+      fHtml=`<div class="dsec"><div class="dsec-title">🎬 Frames (${r.frames_count||4} analyzed)</div><div class="frames-grid">${yf.map((f,i)=>`<div class="frame-card"><img src="${esc(f)}" loading="lazy"><div class="frame-lbl">Frame ${i+1}</div></div>`).join('')}</div></div>`;
+    }
+    vp.innerHTML=`
+      ${fHtml}
+      ${colChips?`<div class="dsec"><div class="dsec-title">🎨 Colors</div><div class="color-row">${colChips}</div></div>`:''}
+      <div class="dsec"><div class="dsec-title">👁 Visual</div>
+        <div class="kv-grid">
+          ${v.main_subject?`<div class="kv"><div class="kv-l">Main Subject</div><div class="kv-v">${esc(v.main_subject)}</div></div>`:''}
+          ${v.setting?`<div class="kv"><div class="kv-l">Setting</div><div class="kv-v">${esc(v.setting)}</div></div>`:''}
+          ${v.aesthetic?`<div class="kv"><div class="kv-l">Aesthetic</div><div class="kv-v">${esc(v.aesthetic)}</div></div>`:''}
+          ${v.lighting?`<div class="kv"><div class="kv-l">Lighting</div><div class="kv-v">${esc(v.lighting)}</div></div>`:''}
+          ${v.mood?`<div class="kv"><div class="kv-l">Mood</div><div class="kv-v">${esc(v.mood)}</div></div>`:''}
+          ${v.production_quality?`<div class="kv"><div class="kv-l">Production</div><div class="kv-v">${esc(v.production_quality)}</div></div>`:''}
+          ${v.faces?`<div class="kv"><div class="kv-l">People</div><div class="kv-v">${esc(v.faces)}</div></div>`:''}
+          ${v.text_on_screen?`<div class="kv"><div class="kv-l">On-Screen Text</div><div class="kv-v">${esc(v.text_on_screen)}</div></div>`:''}
+        </div>
+      </div>
+      ${v.visual_style?`<div class="dsec"><div class="dsec-title">🖼 Style</div><p style="font-size:13px;color:var(--muted);line-height:1.6">${esc(v.visual_style)}</p></div>`:''}
+      ${(v.objects||[]).length?`<div class="dsec"><div class="dsec-title">📦 Objects</div><div class="chips">${v.objects.map(o=>`<span class="chip">${esc(o)}</span>`).join('')}</div></div>`:''}
+    `;
+    panels.appendChild(vp);
+
+    // Transcript
+    const tp=document.createElement('div'); tp.className='dpanel'; tp.id='dp2';
+    const segs=r.transcript_segments||[];
+    tp.innerHTML=segs.length
+      ?`<div class="dsec"><div class="dsec-title">🎙 Transcript · ${segs.length} segments</div><div class="tbox">${segs.map(s=>`<div class="tseg"><span class="tseg-t">${esc(s.time)}</span><span class="tseg-x">${esc(s.text)}</span></div>`).join('')}</div></div>`
+      :`<div class="no-data">No transcript available for this content.</div>`;
+    panels.appendChild(tp);
+
+    // Creator
+    const cp=document.createElement('div'); cp.className='dpanel'; cp.id='dp3';
+    cp.innerHTML=`
+      ${r.creator?`<div class="dsec"><div class="dsec-title">👤 Creator</div>
+        <div style="background:var(--surface);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${m.platform==='instagram'?'📸':'🎬'}</div>
+          <div><div style="font-size:15px;font-weight:700">${esc(r.creator)}</div><div style="font-size:12px;color:var(--muted)">${r.subscriber_count?String(r.subscriber_count)+' followers · ':''} ${r.creator_niche||''}</div></div>
+        </div></div>`:''}
+      <div class="dsec"><div class="dsec-title">📋 Details</div>
+        <div class="kv-grid">
+          ${r.published_at?`<div class="kv"><div class="kv-l">Published</div><div class="kv-v">${esc(String(r.published_at).slice(0,10))}</div></div>`:''}
+          ${r.duration?`<div class="kv"><div class="kv-l">Duration</div><div class="kv-v">${fmtSec(r.duration)}</div></div>`:''}
+          ${r.views?`<div class="kv"><div class="kv-l">Views</div><div class="kv-v">${fmtNum(r.views)}</div></div>`:''}
+          ${r.likes?`<div class="kv"><div class="kv-l">Likes</div><div class="kv-v">${fmtNum(r.likes)}</div></div>`:''}
+          ${r.language?`<div class="kv"><div class="kv-l">Language</div><div class="kv-v">${esc(r.language)}</div></div>`:''}
+          ${r.why_popular?`<div class="kv" style="grid-column:span 2"><div class="kv-l">Why It Gets Views</div><div class="kv-v" style="font-size:12px">${esc(r.why_popular)}</div></div>`:''}
+        </div>
+      </div>
+      ${r.description?`<div class="dsec"><div class="dsec-title">📄 Description</div><p style="font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-wrap">${esc(String(r.description).slice(0,600))}</p></div>`:''}
+      ${(r.keywords||[]).length?`<div class="dsec"><div class="dsec-title">🔖 Keywords</div><div class="chips">${r.keywords.slice(0,20).map(k=>`<span class="chip">${esc(k)}</span>`).join('')}</div></div>`:''}
+      ${m.user_note?`<div class="dsec"><div class="dsec-title">💬 Your Note</div><p style="font-size:13px;color:var(--muted);line-height:1.6;font-style:italic">${esc(m.user_note)}</p></div>`:''}
+    `;
+    panels.appendChild(cp);
+  }
+
+  // Story
+  const stIdx=isNote?1:4;
+  const sp=document.createElement('div'); sp.className='dpanel'; sp.id='dp'+stIdx;
+  sp.innerHTML=`<button class="narr-btn" id="narrBtn" onclick="generateNarrative()">✨ Generate Story</button><div id="narrBox"></div>`;
+  panels.appendChild(sp);
+
+  document.getElementById('dov').classList.add('open');
+  closeSidebar();
+}
+
+async function generateNarrative() {
+  if(!_dm) return;
+  const m=_dm, r=m.rich||{}, v=r.visual||{};
+  if(_nc[m.id]) { document.getElementById('narrBox').innerHTML=`<div class="narr-box">${esc(_nc[m.id]).replace(/\n/g,'<br>')}</div>`; document.getElementById('narrBtn').style.display='none'; return; }
+  const btn=document.getElementById('narrBtn');
+  btn.disabled=true; btn.innerHTML='<div class="spin"></div><span>Writing…</span>';
+  try {
+    let text;
+    if(backendUrl) {
+      const d=await backendPost('/api/narrative',{title:m.title,summary:m.summary,creator:r.creator,views:r.views,category:r.category,content_type:r.content_type,tone:r.tone,key_points:r.key_points,what_you_learn:r.what_you_learn,why_popular:r.why_popular,aesthetic:v.aesthetic,main_subject:v.main_subject,mood:v.mood,visual_style:v.visual_style,transcript_excerpt:(r.transcript_full||'').slice(0,1000),user_note:m.user_note});
+      text=d.narrative;
+    } else {
+      const ctx=[m.title&&`Title:${m.title}`,m.summary&&`Summary:${m.summary}`,r.creator&&`Creator:${r.creator}`,r.category&&`Category:${r.category}`,(r.key_points||[]).length&&`Key points:${r.key_points.join(' | ')}`,r.what_you_learn&&`Takeaway:${r.what_you_learn}`,v.aesthetic&&`Aesthetic:${v.aesthetic}`,v.mood&&`Mood:${v.mood}`,m.user_note&&`Why saved:${m.user_note}`].filter(Boolean).join('\n');
+      text=await groq([{role:'system',content:'You are a warm storyteller. Write 3-5 paragraphs in flowing prose — no bullet points.'},{role:'user',content:`Write a human narrative about this saved content:\n\n${ctx}`}],900);
+    }
+    _nc[m.id]=text;
+    document.getElementById('narrBox').innerHTML=`<div class="narr-box">${esc(text).replace(/\n/g,'<br>')}</div>`;
+    btn.style.display='none';
+  } catch(e) { btn.disabled=false; btn.innerHTML='✨ Generate Story'; document.getElementById('narrBox').innerHTML=`<div class="no-data">${esc(e.message)}</div>`; }
+}
+
+function embedVideo() {
+  if(!_dm||_dm.platform!=='youtube'||!_dm.rich?.video_id) return;
+  document.getElementById('dEmbed').innerHTML=`<iframe src="https://www.youtube.com/embed/${_dm.rich.video_id}?autoplay=1" allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>`;
+  document.getElementById('dEmbed').style.display='block';
+  document.getElementById('dhero').style.display='none';
+}
+
+function swDTab(idx,btn) {
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
+  const p=document.getElementById('dp'+idx); if(p) p.classList.add('active');
+}
+
+function closeDetail() {
+  document.getElementById('dov').classList.remove('open');
+  document.getElementById('dEmbed').innerHTML=''; document.getElementById('dEmbed').style.display='none';
+  document.getElementById('dhero').style.display=''; _dm=null;
+}
+
+// ══════════════════════════════════════════════════
+//  BROWSER ANALYSIS (YouTube + Instagram + Generic)
+// ══════════════════════════════════════════════════
+function getYTId(url){const m=url.match(/(?:v=|\/embed\/|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
+function getIGShortcode(url){const m=url.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);return m?m[1]:null;}
+
+async function fetchWithProxy(url,timeout=12000){
+  for(const p of [`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,`https://corsproxy.io/?${encodeURIComponent(url)}`]){
+    try{const r=await fetch(p,{signal:AbortSignal.timeout(timeout)});if(r.ok)return await r.text();}catch{}
+  }return '';
+}
+
+async function getYTOEmbed(url){try{const r=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');if(r.ok)return await r.json();}catch{}return {};}
+
+async function scrapeYTPage(videoId){
+  const html=await fetchWithProxy('https://www.youtube.com/watch?v='+videoId,18000);if(!html)return{};
+  const re=(p,d='')=>{try{return(html.match(p)||[,d])[1];}catch{return d;}};
+  let vd={},mf={};
+  try{const m=html.match(/ytInitialPlayerResponse\s*=\s*(\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\})*)*\}))*\})/);if(m){const pd=JSON.parse(m[1]);vd=pd.videoDetails||{};mf=pd.microformat?.playerMicroformatRenderer||{};}}catch{}
+  return{title:vd.title||re(/<title>([^<]+)<\/title>/).replace(/ - YouTube$/,''),author:vd.author||re(/"author":"([^"]+)"/),viewCount:vd.viewCount||re(/"viewCount":"(\d+)"/),likeCount:re(/"label":"([^"]+) likes"/),'',lengthSeconds:parseInt(vd.lengthSeconds||'0'),keywords:vd.keywords||[],category:mf.category||'',publishDate:mf.publishDate||'',subscriberCount:re(/"subscriberCountText":\{"simpleText":"([^"]+)"/),'',description:(vd.shortDescription||'').slice(0,800)};
+}
+
+async function fetchTranscript(videoId){
+  for(const lang of['en','en-US','']){
+    const url=`https://www.youtube.com/api/timedtext?v=${videoId}${lang?'&lang='+lang:''}&fmt=json3`;
+    const txt=await fetchWithProxy(url,8000);if(!txt)continue;
+    try{const d=JSON.parse(txt);if(!d.events?.length)continue;
+      const segs=d.events.filter(e=>e.segs).map(e=>({time:fmtSec(e.tStartMs/1000),text:e.segs.map(s=>s.utf8||'').join('').replace(/\n/g,' ').trim()})).filter(s=>s.text);
+      if(segs.length>5)return{segments:segs,full:segs.map(s=>s.text).join(' ')};}catch{}
+  }return{segments:[],full:''};}
+
+async function analyzeFramesVision(videoId){
+  const urls=[0,1,2,3].map(i=>`https://img.youtube.com/vi/${videoId}/${i}.jpg`);
+  const text=await groqVision([{role:'user',content:[{type:'text',text:`Analyze these 4 YouTube video frames. Return ONLY this JSON:\n{"main_subject":"","side_subjects":[],"setting":"","dominant_colors":["","",""],"color_mood":"","aesthetic":"","lighting":"","production_quality":"","visual_style":"","composition":"","text_on_screen":"","faces":"","objects":[],"mood":"","brand_style":""}`},...urls.map(u=>({type:'image_url',image_url:{url:u}}))]}],1200);
+  return parseJSON(text);}
+
+async function buildBreakdown(page,caption,visual,url,userNote){
+  const ctx=[page.title&&`Title:${page.title}`,page.author&&`Creator:${page.author}`,page.subscriberCount&&`Subs:${page.subscriberCount}`,page.viewCount&&`Views:${page.viewCount}`,page.likeCount&&`Likes:${page.likeCount}`,page.lengthSeconds&&`Duration:${page.lengthSeconds}s`,page.category&&`Category:${page.category}`,page.description&&`Desc:${page.description.slice(0,500)}`,caption.full&&`Transcript:${caption.full.slice(0,2500)}`,visual.main_subject&&`Visual subject:${visual.main_subject}`,visual.aesthetic&&`Aesthetic:${visual.aesthetic}`,visual.mood&&`Mood:${visual.mood}`,userNote&&`Note:${userNote}`].filter(Boolean).join('\n');
+  const text=await groq([{role:'system',content:'Media analyst. Return ONLY valid JSON.'},{role:'user',content:`Deep breakdown:\n${ctx}\n\nReturn ONLY:\n{"title":"max 9 words","summary":"3-4 sentences","main_topic":"","subtopics":[],"category":"Food|Tech|Fashion|Travel|Education|Entertainment|Music|Sports|Gaming|Other","sub_category":"","content_type":"Tutorial|Review|Vlog|Music Video|Other","target_audience":"","tone":"","language":"","key_points":[],"what_you_learn":"","why_popular":"","tags":[],"creator_niche":"","content_quality":"High|Medium|Low","sentiment":"","similar_to":[]}`}],1400);
+  return parseJSON(text);}
+
+async function analyzeYouTube(url,userNote,setStep){
+  const videoId=getYTId(url);if(!videoId)throw new Error('Could not get YouTube ID');
+  setStep(1,'active');
+  const[oEmbed,page]=await Promise.all([getYTOEmbed(url),scrapeYTPage(videoId)]);
+  const merged={...page,title:page.title||oEmbed.title||'',author:page.author||oEmbed.author_name||'',thumbnail:oEmbed.thumbnail_url||`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`};
+  setStep(1,'done',`✓ ${(merged.title||'').slice(0,40)}`);
+  setStep(2,'active');
+  let visual={};
+  try{visual=await analyzeFramesVision(videoId);setStep(2,'done',`✓ Frames: ${visual.aesthetic||''} · ${visual.mood||''}`);}
+  catch(e){setStep(2,'fail','⚠ Frame analysis skipped');}
+  setStep(3,'active');
+  let caption={segments:[],full:''};
+  try{caption=await fetchTranscript(videoId);setStep(3,'done',`✓ Transcript: ${caption.segments.length} segments`);}
+  catch(e){setStep(3,'fail','⚠ No transcript');}
+  setStep(4,'active');
+  const bd=await buildBreakdown(merged,caption,visual,url,userNote);
+  setStep(4,'done','✓ Done!');
+  return{type:'video',platform:'youtube',url,thumbnail:merged.thumbnail,title:bd.title||merged.title,summary:bd.summary||'',tags:bd.tags||[],user_note:userNote,rich:{video_id:videoId,creator:merged.author,subscriber_count:merged.subscriberCount,views:merged.viewCount,likes:merged.likeCount,duration:merged.lengthSeconds,published_at:merged.publishDate,description:merged.description,keywords:merged.keywords,category:bd.category||merged.category,sub_category:bd.sub_category,content_type:bd.content_type,main_topic:bd.main_topic,subtopics:bd.subtopics||[],key_points:bd.key_points||[],tone:bd.tone,target_audience:bd.target_audience,language:bd.language,content_quality:bd.content_quality,sentiment:bd.sentiment,creator_niche:bd.creator_niche,similar_to:bd.similar_to||[],what_you_learn:bd.what_you_learn,why_popular:bd.why_popular,visual,transcript_segments:caption.segments,transcript_full:caption.full}};}
+
+async function analyzeInstagram(url,userNote,setStep){
+  setStep(1,'active');
+  document.getElementById('pr2t').textContent='AI visual analysis…';
+  document.getElementById('pr3t').textContent='Content breakdown…';
+  document.getElementById('pr4t').textContent='Saving…';
+  const sc=getIGShortcode(url);
+  const html=await fetchWithProxy(url,18000);
+  const re=(p,d='')=>{try{return(html.match(p)||[,d])[1]?.trim()||d;}catch{return d;}};
+  const title=re(/og:title["\s]+content="([^"]+)"/i);
+  const desc=re(/og:description["\s]+content="([^"]+)"/i);
+  const thumb=re(/og:image["\s]+content="([^"]+)"/i);
+  let creator='',caption=desc;
+  const cm=desc.match(/^(.+?) on Instagram[:\s]*"?([\s\S]*)/i);
+  if(cm){creator=cm[1].trim();caption=cm[2].replace(/"$/,'').trim();}
+  setStep(1,'done',`✓ ${creator?'@'+creator:sc||'fetched'}`);
+  setStep(2,'active');
+  let visual={};
+  if(thumb){try{const t=await groqVision([{role:'user',content:[{type:'text',text:'Analyze this Instagram reel thumbnail. Return ONLY JSON: {"main_subject":"","side_subjects":[],"setting":"","dominant_colors":[],"color_mood":"","aesthetic":"","lighting":"","production_quality":"","visual_style":"","composition":"","text_on_screen":"","faces":"","objects":[],"mood":"","brand_style":""}'}  ,{type:'image_url',image_url:{url:thumb}}]}],1000);visual=parseJSON(t);setStep(2,'done',`✓ ${visual.aesthetic||''} · ${visual.mood||''}`);}catch(e){setStep(2,'fail','⚠ Visual skipped');}}
+  setStep(3,'active');
+  const ctx=[creator&&`Creator:@${creator}`,title&&`Title:${title}`,caption&&`Caption:${caption.slice(0,500)}`,visual.main_subject&&`Subject:${visual.main_subject}`,visual.aesthetic&&`Aesthetic:${visual.aesthetic}`,'Platform:Instagram Reel',userNote&&`Note:${userNote}`].filter(Boolean).join('\n');
+  const t=await groq([{role:'system',content:'Social media analyst. JSON only.'},{role:'user',content:`Analyze Instagram Reel:\n${ctx}\n\nReturn ONLY:\n{"title":"max 9 words","summary":"3-4 sentences","category":"Fashion|Food|Travel|Fitness|Music|Comedy|Education|Art|Beauty|Lifestyle|Other","sub_category":"","content_type":"Tutorial|Dance|Comedy|Aesthetic|Vlog|Motivation|Story|Other","tone":"","language":"","key_points":[],"what_you_learn":"","why_popular":"","tags":[],"creator_niche":"","sentiment":"","similar_to":[]}`}],1200);
+  const bd=parseJSON(t);
+  setStep(3,'done','✓ Done!'); setStep(4,'done','✓ Saved!');
+  return{type:'video',platform:'instagram',url,thumbnail:thumb,title:bd.title||title||'Instagram Reel',summary:bd.summary||'',tags:bd.tags||[],user_note:userNote,rich:{video_id:sc,creator,description:caption,category:bd.category,sub_category:bd.sub_category,content_type:bd.content_type,key_points:bd.key_points||[],tone:bd.tone,language:bd.language,sentiment:bd.sentiment,creator_niche:bd.creator_niche,similar_to:bd.similar_to||[],what_you_learn:bd.what_you_learn,why_popular:bd.why_popular,visual,transcript_segments:[],transcript_full:''}};}
+
+async function analyzeGenericUrl(url,userNote){
+  let title=url,desc='',thumb='';
+  try{const html=await fetchWithProxy(url,10000);if(html){title=(html.match(/<title[^>]*>([^<]+)/i)||[])[1]?.trim().replace(/ - .*/,'')||url;desc=(html.match(/og:description["\s]+content="([^"]+)"/i)||[])[1]?.trim().slice(0,600)||'';thumb=(html.match(/og:image["\s]+content="([^"]+)"/i)||[])[1]?.trim()||'';}}catch{}
+  const a=parseJSON(await groq([{role:'user',content:`Analyze this saved content:\n\nURL:${url}\nTitle:${title}\nDesc:${desc}\nNote:${userNote}\n\nReturn ONLY JSON:\n{"title":"short title","summary":"2-3 sentences","tags":["t1","t2","t3","t4","t5"],"category":"category"}`}],600));
+  return{type:'article',platform:'web',url,thumbnail:thumb,title:a.title||title,summary:a.summary||'',tags:a.tags||[],user_note:userNote,rich:{creator:new URL(url).hostname,category:a.category||''}};}
+
+// ══════════════════════════════════════════════════
+//  MOBILE SIDEBAR
+// ══════════════════════════════════════════════════
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+
+// ══════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════
+function toast(msg,type='ok'){
+  const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;
+  document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),type==='err'?4500:2500);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeSave();closeDetail();closeConnModal();document.getElementById('connOv').classList.remove('open');}
 });
 
-updateConnBar();
-load();
+updateConnUI();
+loadAll();
 </script>
 </body>
 </html>
