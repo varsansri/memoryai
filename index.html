@@ -566,7 +566,7 @@ async function connectBackend() {
   const btn = document.getElementById('connGo');
   btn.disabled=true; btn.textContent='Testing…';
   try {
-    const r = await fetch(raw+'/api/memories', {signal:AbortSignal.timeout(8000)});
+    const r = await fetchWithTimeout(raw+'/api/memories', 8000);
     if (!r.ok) throw new Error('Server error '+r.status);
     backendUrl = raw; localStorage.setItem(BK, raw);
     updateConnUI(); closeConnModal();
@@ -1173,7 +1173,7 @@ function getIGShortcode(url){const m=url.match(/instagram\.com\/(?:reel|p|tv)\/(
 
 async function fetchWithProxy(url,timeout=12000){
   for(const p of [`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,`https://corsproxy.io/?${encodeURIComponent(url)}`]){
-    try{const r=await fetch(p,{signal:AbortSignal.timeout(timeout)});if(r.ok)return await r.text();}catch{}
+    try{const r=await fetchWithTimeout(p,timeout);if(r.ok)return await r.text();}catch{}
   }return '';
 }
 
@@ -1274,20 +1274,29 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeSave();closeDetail();closeConnModal();document.getElementById('connOv').classList.remove('open');}
 });
 
+function fetchWithTimeout(url, ms) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, {signal: ctrl.signal}).finally(() => clearTimeout(tid));
+}
+
 async function autoConnect() {
-  try {
-    const r = await fetch(backendUrl + '/api/memories', {signal: AbortSignal.timeout(5000)});
-    if (r.ok) { localStorage.setItem(BK, backendUrl); updateConnUI(); loadAll(); return; }
-  } catch(_) {}
-  // stored URL failed — try DEFAULT
-  if (backendUrl !== DEFAULT_BACKEND) {
+  const urls = [backendUrl, DEFAULT_BACKEND].filter((u,i,a) => u && a.indexOf(u)===i);
+  for (const url of urls) {
     try {
-      const r = await fetch(DEFAULT_BACKEND + '/api/memories', {signal: AbortSignal.timeout(5000)});
-      if (r.ok) { backendUrl = DEFAULT_BACKEND; localStorage.setItem(BK, backendUrl); updateConnUI(); loadAll(); return; }
+      const r = await fetchWithTimeout(url + '/api/memories', 6000);
+      if (r.ok) {
+        backendUrl = url;
+        localStorage.setItem(BK, url);
+        updateConnUI();
+        loadAll();
+        return;
+      }
     } catch(_) {}
   }
-  // nothing works — browser-only mode
-  backendUrl = ''; updateConnUI(); loadAll();
+  backendUrl = '';
+  updateConnUI();
+  loadAll();
 }
 autoConnect();
 </script>
