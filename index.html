@@ -827,11 +827,64 @@ function renderAIResponse(reply, sources) {
   return html;
 }
 
+function extractUrl(text) {
+  const m = text.match(/https?:\/\/[^\s]+/);
+  return m ? m[0] : null;
+}
+
+async function saveUrlFromChat(url) {
+  const msgEl = appendMsg('ai',
+    `<div style="font-size:13px;color:var(--muted)">🔗 Detected link — saving <b style="color:var(--accent)">${url.slice(0,50)}...</b></div>
+     <div id="chatProg" style="font-size:12px;color:var(--muted);margin-top:8px;line-height:2"></div>`
+  );
+  const prog = msgEl.querySelector('#chatProg');
+  const step = (txt, done) => { prog.innerHTML += `<div>${done?'✅':'⏳'} ${txt}</div>`; };
+
+  try {
+    const isYT = /youtube\.com|youtu\.be/.test(url);
+    const isIG = /instagram\.com/.test(url);
+    let mem;
+    if (backendUrl) {
+      step('Sending to phone backend…', false);
+      const d = await backendPost('/api/save', {url, user_note:''});
+      mem = norm(d);
+      step('Analysed & saved', true);
+    } else if (isYT) {
+      step('Fetching YouTube data…', false);
+      mem = await analyzeYouTube(url, '', (n,s,l)=>step(l||s,s==='done'));
+    } else if (isIG) {
+      step('Fetching Instagram data…', false);
+      mem = await analyzeInstagram(url, '', (n,s,l)=>step(l||s,s==='done'));
+    } else {
+      step('Fetching page…', false);
+      mem = await analyzeGenericUrl(url, '');
+      step('Saved', true);
+    }
+    if (mem) {
+      addMem(mem); allMems = getMems().map(norm); renderSidebar();
+      msgEl.querySelector('div').innerHTML =
+        `✅ Saved: <b style="color:var(--text)">${esc(mem.title||url)}</b>`;
+      prog.innerHTML = '<span style="color:var(--ok)">Ask me anything about it!</span>';
+    }
+  } catch(e) {
+    prog.innerHTML = `<span style="color:var(--err)">❌ ${e.message}</span>`;
+  }
+}
+
 async function sendQuery() {
   const ta = document.getElementById('queryIn');
   const q = ta.value.trim(); if (!q) return;
   ta.value=''; autoResize(ta);
   document.getElementById('sendBtn').disabled = true;
+
+  // If input is a URL — save it instead of chatting
+  const detectedUrl = extractUrl(q);
+  if (detectedUrl) {
+    appendMsg('user', q);
+    document.getElementById('sendBtn').disabled = false;
+    await saveUrlFromChat(detectedUrl);
+    return;
+  }
 
   appendMsg('user', q);
   chatHistory.push({role:'user', content:q});
