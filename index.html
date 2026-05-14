@@ -77,15 +77,26 @@ body{height:100%;height:100dvh;font-family:-apple-system,BlinkMacSystemFont,'Seg
 .topbar-title{font-size:16px;font-weight:700;flex:1}
 
 /* ── Welcome screen ── */
-.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;overflow-y:auto}
-.welcome-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#0d8c6d);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;letter-spacing:-.5px;margin:0 auto 20px}
-.welcome-title{font-size:26px;font-weight:700;margin-bottom:8px}
-.welcome-sub{font-size:15px;color:var(--muted);max-width:480px;line-height:1.6;margin-bottom:32px}
-.welcome-examples{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px;width:100%}
-.example-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:left;cursor:pointer;transition:background .15s,border-color .15s}
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 16px 16px;text-align:center;overflow-y:auto;gap:0}
+.welcome-title{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.5px;cursor:pointer}
+.welcome-sub{font-size:13px;color:var(--muted);max-width:480px;line-height:1.5;margin-bottom:20px}
+
+/* ── Home collection boxes ── */
+.home-collections{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:640px;margin-bottom:20px}
+.home-col-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;text-align:left}
+.home-col-hdr{display:flex;align-items:center;gap:7px;padding:11px 12px 8px}
+.home-col-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;flex:1}
+.home-col-count{font-size:10px;background:var(--surface2);color:var(--muted);padding:2px 7px;border-radius:10px;font-weight:600}
+.home-col-plus{width:24px;height:24px;border-radius:7px;background:var(--accent);border:none;color:#fff;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.home-col-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 8px}
+.home-view-btn{width:100%;padding:9px;background:transparent;border:none;border-top:1px solid var(--border);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;transition:background .15s}
+.home-view-btn:hover{background:var(--surface2)}
+
+.welcome-examples{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:640px;width:100%}
+.example-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:left;cursor:pointer;transition:background .15s,border-color .15s}
 .example-card:hover{background:var(--surface2);border-color:var(--accent)}
-.example-card p{font-size:13px;color:var(--muted);line-height:1.5}
-.example-card span{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.example-card p{font-size:12px;color:var(--muted);line-height:1.5}
+.example-card span{font-size:11px;color:var(--muted);display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 
 /* ── Chat area ── */
 .chat-area{flex:1;overflow-y:auto;padding:0;display:none;scroll-behavior:smooth}
@@ -244,8 +255,8 @@ textarea.fi{resize:none;height:90px}
   .sidebar-overlay.open{display:block}
   .sidebar-bottom{width:auto}
   .welcome-examples{grid-template-columns:1fr}
-  .welcome-title{font-size:20px}
-  .welcome-sub{font-size:13px}
+  .welcome-title{font-size:18px}
+  .home-collections{grid-template-columns:1fr 1fr}
   .kv-grid{grid-template-columns:1fr}
   .frames-grid{grid-template-columns:1fr 1fr}
   .input-bar{padding:8px 10px 12px}
@@ -324,9 +335,34 @@ textarea.fi{resize:none;height:90px}
 
     <!-- Welcome -->
     <div class="welcome" id="welcome">
-      <div class="welcome-logo" onclick="location.reload()" style="cursor:pointer">NS</div>
-      <div class="welcome-title">What can I help you find?</div>
-      <div class="welcome-sub">Ask about anything you've saved — videos, notes, articles. I remember everything and can find specific details, quotes, and dates.</div>
+      <div class="welcome-title" onclick="location.reload()" style="cursor:pointer">NoteSorb</div>
+      <div class="welcome-sub">Save anything, find everything — videos, notes, articles with AI.</div>
+
+      <!-- Collection boxes on home screen -->
+      <div class="home-collections">
+        <!-- Media -->
+        <div class="home-col-box">
+          <div class="home-col-hdr">
+            <span class="home-col-title">📹 Media</span>
+            <span class="home-col-count" id="homeMediaCount">0</span>
+            <button class="home-col-plus" onclick="openSave('video')">+</button>
+          </div>
+          <div class="home-col-grid" id="homeMediaGrid"></div>
+          <button class="home-view-btn" onclick="toggleColList('media')">View Collection →</button>
+        </div>
+        <!-- Notes -->
+        <div class="home-col-box">
+          <div class="home-col-hdr">
+            <span class="home-col-title">📝 Notes</span>
+            <span class="home-col-count" id="homeNotesCount">0</span>
+            <button class="home-col-plus" onclick="openSave('note')">+</button>
+          </div>
+          <div class="home-col-grid" id="homeNotesGrid"></div>
+          <button class="home-view-btn" onclick="toggleColList('notes')">View Collection →</button>
+        </div>
+      </div>
+
+      <!-- Example prompts -->
       <div class="welcome-examples" id="welcomeExamples">
         <div class="example-card" onclick="useExample(this)">
           <span>Memory search</span>
@@ -655,6 +691,38 @@ function renderSidebar() {
         <div class="sitem-sub">${esc((m.user_note||'').slice(0,30))}</div>
       </div>
     </div>`).join('');
+
+  // ── Home screen counts ──
+  const hmEl = document.getElementById('homeMediaCount');
+  const hnEl = document.getElementById('homeNotesCount');
+  if(hmEl) hmEl.textContent = media.length;
+  if(hnEl) hnEl.textContent = notes.length;
+
+  // ── Home media grid ──
+  const hmg = document.getElementById('homeMediaGrid');
+  if(hmg) {
+    if(!media.length) {
+      hmg.innerHTML = '<div class="cgrid-empty" style="grid-column:1/-1;aspect-ratio:auto;padding:18px;font-size:12px;color:var(--muted)">No media yet — tap + to add</div>';
+    } else {
+      const g4 = media.slice(0,4), emp = 4-g4.length;
+      hmg.innerHTML = g4.map(m=>{
+        const icon=m.platform==='youtube'?'🎬':m.platform==='instagram'?'📸':'📄';
+        const inner=m.thumbnail?`<img src="${esc(m.thumbnail)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.outerHTML='<div class=cgrid-ph>${icon}</div>'">`:`<div class="cgrid-ph">${icon}</div>`;
+        return `<div class="cgrid-item" onclick="openDetail(${m.id})" title="${esc(m.title||'Untitled')}">${inner}<div class="col-label">${esc(m.title||'Untitled')}</div></div>`;
+      }).join('') + Array(emp).fill('<div class="cgrid-empty">+</div>').join('');
+    }
+  }
+
+  // ── Home notes grid ──
+  const hng = document.getElementById('homeNotesGrid');
+  if(hng) {
+    if(!notes.length) {
+      hng.innerHTML = '<div class="cgrid-empty" style="grid-column:1/-1;aspect-ratio:auto;padding:18px;font-size:12px;color:var(--muted)">No notes yet — tap + to add</div>';
+    } else {
+      const g4=notes.slice(0,4), emp=4-g4.length;
+      hng.innerHTML = g4.map(m=>`<div class="cgrid-item" onclick="openDetail(${m.id})" title="${esc(m.title||'Note')}"><div class="cgrid-ph">📝</div><div class="col-label">${esc(m.title||'Note')}</div></div>`).join('') + Array(emp).fill('<div class="cgrid-empty">+</div>').join('');
+    }
+  }
 }
 
 function toggleColList(type) {
