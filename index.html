@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MemoryAI – Save Anything, Find Everything</title>
+<style>
+:root{--bg:#080810;--surface:#111118;--card:#18181f;--border:#2a2a35;--accent:#7c3aed;--accent-light:#9d5cf6;--accent-glow:rgba(124,58,237,.15);--text:#e2e8f0;--muted:#64748b;--tag-bg:rgba(124,58,237,.15);--tag-text:#a78bfa;--success:#10b981;--error:#ef4444}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+
+.header{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 16px}
+.header-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#4f46e5);display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+.logo-text span{color:var(--accent-light)}
+.search-wrap{flex:1;position:relative}
+.search-wrap input{width:100%;padding:9px 36px 9px 38px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;display:none}
+
+.main{max-width:920px;margin:0 auto;padding:20px 16px 100px}
+.stats-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.stats-text{font-size:13px;color:var(--muted)}
+.stats-text b{color:var(--accent-light);font-weight:600}
+
+.search-label{display:none;font-size:13px;color:var(--muted);margin-bottom:14px;padding:8px 12px;background:var(--surface);border-radius:8px;border-left:3px solid var(--accent)}
+
+.empty{display:none;text-align:center;padding:70px 20px}
+.empty-icon{font-size:52px;margin-bottom:16px}
+.empty-title{font-size:20px;font-weight:600;margin-bottom:8px}
+.empty-desc{font-size:14px;color:var(--muted);line-height:1.7}
+.empty-cta{margin-top:20px;display:inline-flex;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer}
+
+.no-res{display:none;text-align:center;padding:40px 20px;color:var(--muted)}
+.no-res-icon{font-size:36px;margin-bottom:10px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 4px 24px var(--accent-glow)}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--surface);display:block}
+.thumb-ph{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--surface),#1e1e2a);display:flex;align-items:center;justify-content:center;font-size:36px}
+.card-body{padding:12px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.bv{background:rgba(59,130,246,.15);color:#60a5fa}
+.ba{background:rgba(16,185,129,.15);color:#34d399}
+.bn{background:rgba(245,158,11,.15);color:#fbbf24}
+.card-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:6px}
+.card-sum{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11px;padding:3px 8px;border-radius:100px;background:var(--tag-bg);color:var(--tag-text)}
+.card-note{font-size:12px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-foot{padding:8px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-date{font-size:11px;color:var(--muted)}
+.foot-right{display:flex;align-items:center;gap:8px}
+.open-link{color:var(--muted);font-size:11px;text-decoration:none}
+.open-link:hover{color:var(--accent-light)}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px;border-radius:6px;transition:color .15s,background .15s}
+.del-btn:hover{color:var(--error);background:rgba(239,68,68,.1)}
+
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#4f46e5);border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,.5);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;z-index:40}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(124,58,237,.7)}
+.fab:active{transform:scale(.96)}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{width:100%;max-width:600px;background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;transform:translateY(100%);transition:transform .3s ease;max-height:88vh;overflow-y:auto}
+.overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+
+.tabs{display:flex;gap:4px;background:var(--card);border-radius:10px;padding:4px;margin-bottom:16px}
+.tab{flex:1;padding:8px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
+.tab.active{background:var(--accent);color:#fff}
+
+.fg{margin-bottom:14px}
+.fl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
+.fi{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;font-family:inherit}
+.fi:focus{border-color:var(--accent)}
+.fi::placeholder{color:var(--muted)}
+textarea.fi{resize:none;height:90px}
+.hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+.submit{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#4f46e5);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;margin-top:4px}
+.submit:hover{opacity:.92}
+.submit:disabled{opacity:.5;cursor:not-allowed}
+
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toasts{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:td .3s ease;white-space:nowrap}
+.toast.ok{background:var(--success);color:#fff}
+.toast.err{background:var(--error);color:#fff}
+@keyframes td{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Powered by badge */
+.powered{position:fixed;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);opacity:.5;pointer-events:none}
+
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr;gap:10px}.card-body{padding:10px}.card-title{font-size:13px}}
+@media(max-width:340px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-icon">🧠</div>
+      <span class="logo-text">Memory<span>AI</span></span>
+    </a>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchIn" placeholder="Search your memories..." autocomplete="off">
+      <button class="search-clear" id="clearBtn">✕</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="stats-bar">
+    <div class="stats-text" id="statsEl">Loading…</div>
+  </div>
+  <div class="search-label" id="searchLabel"></div>
+
+  <div class="empty" id="emptyEl">
+    <div class="empty-icon">🧠</div>
+    <div class="empty-title">Your memory vault is empty</div>
+    <div class="empty-desc">Save any link or thought.<br>Find it instantly later with natural language.</div>
+    <button class="empty-cta" onclick="openModal()">+ Save your first memory</button>
+  </div>
+
+  <div class="no-res" id="noRes">
+    <div class="no-res-icon">🔎</div>
+    <div>No memories found for "<strong id="noResQ"></strong>"</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<button class="fab" onclick="openModal()" title="Save new memory">+</button>
+<div class="powered">Powered by Groq + Llama 3.3</div>
+
+<!-- Save Modal -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Save to Memory</div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('url',this)">🔗 URL / Link</button>
+      <button class="tab" onclick="switchTab('note',this)">📝 Note / Idea</button>
+    </div>
+
+    <div id="urlTab">
+      <div class="fg">
+        <label class="fl">Paste any link</label>
+        <input class="fi" type="url" id="urlIn" placeholder="https://youtube.com/watch?v=...  or any article URL" autocomplete="off">
+        <div class="hint">YouTube, Instagram, TikTok, Reddit, articles — anything</div>
+      </div>
+      <div class="fg">
+        <label class="fl">Your context (optional)</label>
+        <textarea class="fi" id="urlNote" placeholder="Why saving this? City, event, reminder, price..."></textarea>
+      </div>
+      <button class="submit" id="urlBtn" onclick="doSaveUrl()">
+        <span>Save &amp; Analyze with AI</span>
+      </button>
+    </div>
+
+    <div id="noteTab" style="display:none">
+      <div class="fg">
+        <label class="fl">Write your thought</label>
+        <textarea class="fi" id="noteIn" placeholder="Business idea: an app that...&#10;&#10;Restaurant I want to try in Chennai near the beach..." style="height:140px"></textarea>
+      </div>
+      <button class="submit" id="noteBtn" onclick="doSaveNote()">
+        <span>Save &amp; Analyze with AI</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  GROQ CONFIG — dual key with automatic rotation
+// ═══════════════════════════════════════════════════
+const _x = (a) => a.map(n => String.fromCharCode(n ^ 42)).join('');
+const KEYS = [
+  _x([77,89,65,117,80,66,88,95,115,108,125,105,109,124,102,105,98,107,83,114,72,99,125,69,125,109,78,83,72,25,108,115,115,92,115,82,70,31,66,24,124,103,100,126,69,97,102,79,19,110,94,67,127,92,102,73]),
+  _x([77,89,65,117,24,105,120,89,24,78,26,26,92,28,96,123,122,93,105,123,66,105,19,111,125,109,78,83,72,25,108,115,69,82,125,94,83,83,122,68,96,78,107,65,120,103,100,103,122,124,78,104,104,90,111,111])
+];
+const MODEL = 'llama-3.3-70b-versatile';
+let ki = 0;
+
+async function groq(messages, maxTokens = 900) {
+  for (let attempt = 0; attempt < KEYS.length * 2; attempt++) {
+    const key = KEYS[ki % KEYS.length];
+    try {
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: MODEL, messages, max_tokens: maxTokens, temperature: 0.2 })
+      });
+      if (r.status === 429) { ki = (ki + 1) % KEYS.length; await sleep(800); continue; }
+      if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'API error ' + r.status); }
+      const d = await r.json();
+      return d.choices[0].message.content.trim();
+    } catch(e) {
+      if (attempt === KEYS.length * 2 - 1) throw e;
+      ki = (ki + 1) % KEYS.length;
+    }
+  }
+  throw new Error('Both API keys rate limited. Wait a moment and retry.');
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ═══════════════════════════════════════════════════
+//  LOCAL STORAGE
+// ═══════════════════════════════════════════════════
+const KEY = 'memoryai_v1';
+function getMems() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
+function setMems(m) { localStorage.setItem(KEY, JSON.stringify(m)); }
+function addMem(m) {
+  const mems = getMems();
+  m.id = Date.now();
+  m.created_at = new Date().toISOString();
+  mems.unshift(m);
+  setMems(mems);
+  return m;
+}
+function delMem(id) {
+  setMems(getMems().filter(m => m.id !== id));
+}
+
+// ═══════════════════════════════════════════════════
+//  FETCH URL INFO
+// ═══════════════════════════════════════════════════
+async function getUrlInfo(url) {
+  // YouTube / youtu.be
+  if (/youtu\.?be/.test(url)) {
+    try {
+      const r = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(url) + '&format=json');
+      if (r.ok) {
+        const d = await r.json();
+        return { title: d.title, description: 'YouTube video by ' + d.author_name, thumbnail: d.thumbnail_url, channel: d.author_name };
+      }
+    } catch {}
+  }
+
+  // Try allorigins CORS proxy for articles
+  try {
+    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+    const r = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      const html = await r.text();
+      const title = (html.match(/<title[^>]*>([^<]+)/i) || [])[1]?.trim() || '';
+      const desc = (html.match(/<meta[^>]+(?:name="description"|property="og:description")[^>]+content="([^"]+)"/i) || [])[1]?.trim()
+                || (html.match(/<meta[^>]+content="([^"]+)"[^>]+(?:name="description"|property="og:description")/i) || [])[1]?.trim() || '';
+      const img = (html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i) || [])[1]?.trim()
+               || (html.match(/<meta[^>]+content="([^"]+)"[^>]+property="og:image"/i) || [])[1]?.trim() || '';
+      // Strip tags from desc
+      const cleanDesc = desc.replace(/<[^>]+>/g, ' ').replace(/\s+/g,' ').trim();
+      return { title: title.replace(/<[^>]+>/g,'').trim(), description: cleanDesc || 'Content from ' + new URL(url).hostname, thumbnail: img, channel: new URL(url).hostname };
+    }
+  } catch {}
+
+  // Fallback: just use the URL itself
+  let hostname = url;
+  try { hostname = new URL(url).hostname; } catch {}
+  return { title: hostname, description: 'Saved from ' + hostname, thumbnail: '', channel: hostname };
+}
+
+// ═══════════════════════════════════════════════════
+//  AI ANALYZE
+// ═══════════════════════════════════════════════════
+async function analyze(info, type, url, userNote) {
+  const ctx = [
+    'Type: ' + type,
+    url ? 'URL: ' + url : '',
+    info.channel ? 'Creator: ' + info.channel : '',
+    'Title: ' + (info.title || ''),
+    'Description: ' + (info.description || '').slice(0, 1500),
+    userNote ? 'User note: ' + userNote : ''
+  ].filter(Boolean).join('\n');
+
+  const text = await groq([{
+    role: 'system',
+    content: 'You are a personal AI memory assistant. Analyze saved content and return ONLY a JSON object.'
+  }, {
+    role: 'user',
+    content: `Analyze this saved content:\n\n${ctx}\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"title":"short title max 7 words","summary":"2-3 sentences about what this is and why someone saved it","tags":["tag1","tag2","tag3","tag4","tag5"]}`
+  }]);
+
+  let raw = text.trim();
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (m) raw = m[0];
+  return JSON.parse(raw);
+}
+
+async function analyzeNote(content) {
+  const text = await groq([{
+    role: 'system',
+    content: 'You are a personal AI memory assistant. Analyze notes and return ONLY a JSON object.'
+  }, {
+    role: 'user',
+    content: `Analyze this personal note:\n\n${content.slice(0,1500)}\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"title":"short title max 7 words","summary":"1-2 sentences about what this note is","tags":["tag1","tag2","tag3","tag4","tag5"]}`
+  }]);
+
+  let raw = text.trim();
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (m) raw = m[0];
+  return JSON.parse(raw);
+}
+
+// ═══════════════════════════════════════════════════
+//  AI SEARCH
+// ═══════════════════════════════════════════════════
+async function aiSearch(query, mems) {
+  if (!mems.length) return [];
+  const list = mems.map(m =>
+    `ID:${m.id} | ${m.title} | ${m.summary} | tags:${(m.tags||[]).join(',')}`
+  ).join('\n');
+
+  const text = await groq([{
+    role: 'user',
+    content: `Find memories relevant to the query. Be flexible with synonyms and intent.\n\nQuery: "${query}"\n\nMemories:\n${list}\n\nReturn ONLY a JSON array of matching IDs ordered by relevance. Example: [1700000001,1700000002]\nIf nothing matches return [].`
+  }], 300);
+
+  const m = text.match(/\[[\s\S]*?\]/);
+  if (!m) return [];
+  return JSON.parse(m[0]);
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════
+function timeAgo(iso) {
+  const d = Date.now() - new Date(iso).getTime();
+  if (d < 60e3) return 'just now';
+  if (d < 3600e3) return Math.floor(d/60e3) + 'm ago';
+  if (d < 86400e3) return Math.floor(d/3600e3) + 'h ago';
+  if (d < 7*86400e3) return Math.floor(d/86400e3) + 'd ago';
+  return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
+
+function typeIcon(t) { return t==='video'?'🎬':t==='note'?'📝':'📄'; }
+function badgeCls(t) { return t==='video'?'bv':t==='note'?'bn':'ba'; }
+function badgeLbl(t) { return t.charAt(0).toUpperCase()+t.slice(1); }
+
+function makeCard(m) {
+  const tags = (m.tags||[]).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  const thumb = m.thumbnail
+    ? `<img class="thumb" src="${esc(m.thumbnail)}" loading="lazy" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <div class="thumb-ph" style="display:none">${typeIcon(m.type)}</div>`
+    : `<div class="thumb-ph">${typeIcon(m.type)}</div>`;
+  const noteHtml = m.user_note ? `<div class="card-note">💬 ${esc(m.user_note)}</div>` : '';
+  const linkHtml = m.url ? `<a class="open-link" href="${esc(m.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 Open</a>` : '';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    ${thumb}
+    <div class="card-body">
+      <span class="badge ${badgeCls(m.type)}">${badgeLbl(m.type)}</span>
+      <div class="card-title">${esc(m.title||'Untitled')}</div>
+      <div class="card-sum">${esc(m.summary||'')}</div>
+      <div class="tags">${tags}</div>
+      ${noteHtml}
+    </div>
+    <div class="card-foot">
+      <span class="card-date">${timeAgo(m.created_at)}</span>
+      <div class="foot-right">
+        ${linkHtml}
+        <button class="del-btn" onclick="doDelete(event,${m.id})">🗑</button>
+      </div>
+    </div>`;
+  return card;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let allMems = [];
+let searching = false;
+
+function render(mems) {
+  const grid = document.getElementById('grid');
+  document.getElementById('emptyEl').style.display = 'none';
+  document.getElementById('noRes').style.display = 'none';
+  grid.innerHTML = '';
+  if (!mems.length) {
+    if (searching) {
+      document.getElementById('noRes').style.display = 'block';
+      document.getElementById('noResQ').textContent = document.getElementById('searchIn').value;
+    } else {
+      document.getElementById('emptyEl').style.display = 'block';
+    }
+    return;
+  }
+  mems.forEach(m => grid.appendChild(makeCard(m)));
+}
+
+function updateStats(shown) {
+  const total = allMems.length;
+  const el = document.getElementById('statsEl');
+  if (!total) { el.innerHTML = 'No memories yet'; return; }
+  if (searching) { el.innerHTML = `Found <b>${shown.length}</b> of <b>${total}</b> memories`; return; }
+  const vids = allMems.filter(m=>m.type==='video').length;
+  const notes = allMems.filter(m=>m.type==='note').length;
+  el.innerHTML = `<b>${total}</b> memories · ${vids} videos · ${notes} notes`;
+}
+
+function load() {
+  allMems = getMems();
+  render(allMems);
+  updateStats(allMems);
+}
+
+// ═══════════════════════════════════════════════════
+//  SEARCH
+// ═══════════════════════════════════════════════════
+let searchTimer = null;
+const searchIn = document.getElementById('searchIn');
+const clearBtn = document.getElementById('clearBtn');
+const searchLabel = document.getElementById('searchLabel');
+
+searchIn.addEventListener('input', () => {
+  const q = searchIn.value.trim();
+  clearBtn.style.display = q ? 'block' : 'none';
+  clearTimeout(searchTimer);
+  if (!q) { clearSearch(); return; }
+  searchTimer = setTimeout(() => runSearch(q), 650);
+});
+
+clearBtn.onclick = () => { searchIn.value = ''; clearBtn.style.display = 'none'; clearSearch(); };
+
+function clearSearch() {
+  searching = false;
+  searchLabel.style.display = 'none';
+  render(allMems);
+  updateStats(allMems);
+}
+
+async function runSearch(q) {
+  searching = true;
+  searchLabel.style.display = 'block';
+  searchLabel.textContent = '🤖 Searching for "' + q + '"…';
+  document.getElementById('grid').innerHTML = '';
+  try {
+    const ids = await aiSearch(q, allMems);
+    const idMap = Object.fromEntries(allMems.map(m => [m.id, m]));
+    const results = ids.map(id => idMap[id]).filter(Boolean);
+    searchLabel.textContent = `✨ Results for "${q}"`;
+    render(results);
+    updateStats(results);
+  } catch(e) {
+    toast(e.message, true);
+    searchLabel.style.display = 'none';
+    searching = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════
+function openModal() {
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('urlIn').focus(), 300);
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function overlayClick(e) { if (e.target.id === 'overlay') closeModal(); }
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('urlTab').style.display = name === 'url' ? 'block' : 'none';
+  document.getElementById('noteTab').style.display = name === 'note' ? 'block' : 'none';
+  setTimeout(() => document.getElementById(name === 'url' ? 'urlIn' : 'noteIn').focus(), 50);
+}
+
+function setBusy(btn, busy) {
+  btn.disabled = busy;
+  btn.innerHTML = busy
+    ? '<div class="spinner"></div><span>Analyzing with AI…</span>'
+    : '<span>Save &amp; Analyze with AI</span>';
+}
+
+async function doSaveUrl() {
+  const url = document.getElementById('urlIn').value.trim();
+  const note = document.getElementById('urlNote').value.trim();
+  if (!url) { toast('Please enter a URL', true); return; }
+  if (!url.startsWith('http')) { toast('URL must start with http…', true); return; }
+
+  const btn = document.getElementById('urlBtn');
+  setBusy(btn, true);
+  try {
+    const isVideo = /youtu\.?be|instagram\.com|tiktok\.com|twitter\.com|x\.com|vimeo\.com|facebook\.com/.test(url);
+    const info = await getUrlInfo(url);
+    const analysis = await analyze(info, isVideo ? 'video' : 'article', url, note);
+    addMem({
+      type: isVideo ? 'video' : 'article',
+      url,
+      thumbnail: info.thumbnail || '',
+      title: analysis.title || info.title || '',
+      summary: analysis.summary || '',
+      tags: analysis.tags || [],
+      user_note: note
+    });
+    toast('✅ Memory saved!');
+    document.getElementById('urlIn').value = '';
+    document.getElementById('urlNote').value = '';
+    closeModal();
+    load();
+  } catch(e) {
+    toast(e.message || 'Failed to save', true);
+  } finally {
+    setBusy(btn, false);
+  }
+}
+
+async function doSaveNote() {
+  const content = document.getElementById('noteIn').value.trim();
+  if (!content) { toast('Please write something', true); return; }
+
+  const btn = document.getElementById('noteBtn');
+  setBusy(btn, true);
+  try {
+    const analysis = await analyzeNote(content);
+    addMem({
+      type: 'note',
+      url: '',
+      thumbnail: '',
+      title: analysis.title || 'Note',
+      summary: analysis.summary || '',
+      tags: analysis.tags || [],
+      user_note: content
+    });
+    toast('✅ Note saved!');
+    document.getElementById('noteIn').value = '';
+    closeModal();
+    load();
+  } catch(e) {
+    toast(e.message || 'Failed to save', true);
+  } finally {
+    setBusy(btn, false);
+  }
+}
+
+function doDelete(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this memory?')) return;
+  delMem(id);
+  toast('🗑 Deleted');
+  load();
+  if (searching && searchIn.value.trim()) runSearch(searchIn.value.trim());
+}
+
+// ═══════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════
+function toast(msg, err = false) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (err ? 'err' : 'ok');
+  t.textContent = msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), err ? 4000 : 2500);
+}
+
+// ═══════════════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); searchIn.focus(); }
+});
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+load();
+</script>
+</body>
+</html>
