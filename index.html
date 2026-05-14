@@ -3,182 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>MemoryAI – Save Anything, Find Everything</title>
+<title>MemoryAI – Deep Video Intelligence</title>
 <style>
-:root{--bg:#080810;--surface:#111118;--card:#18181f;--border:#2a2a35;--accent:#7c3aed;--accent-light:#9d5cf6;--accent-glow:rgba(124,58,237,.15);--text:#e2e8f0;--muted:#64748b;--tag-bg:rgba(124,58,237,.15);--tag-text:#a78bfa;--success:#10b981;--error:#ef4444}
+:root{--bg:#080810;--surface:#111118;--card:#18181f;--border:#2a2a35;--accent:#7c3aed;--accent2:#4f46e5;--glow:rgba(124,58,237,.15);--text:#e2e8f0;--muted:#64748b;--tag-bg:rgba(124,58,237,.15);--tag:#a78bfa;--ok:#10b981;--err:#ef4444;--warn:#f59e0b}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-body{background:var(--bg);color:var(--text);min-height:100vh}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text)}
 
-.header{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 16px}
-.header-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:12px}
+/* ── Header ── */
+.hdr{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 16px}
+.hdr-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:12px}
 .logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#4f46e5);display:flex;align-items:center;justify-content:center;font-size:16px}
-.logo-text{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.5px}
-.logo-text span{color:var(--accent-light)}
-.search-wrap{flex:1;position:relative}
-.search-wrap input{width:100%;padding:9px 36px 9px 38px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
-.search-wrap input:focus{border-color:var(--accent)}
-.search-wrap input::placeholder{color:var(--muted)}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
-.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;display:none}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-size:18px;font-weight:700;letter-spacing:-.5px}.logo-text span{color:#a78bfa}
+.sw{flex:1;position:relative}
+.sw input{width:100%;padding:9px 36px 9px 38px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+.sw input:focus{border-color:var(--accent)}.sw input::placeholder{color:var(--muted)}
+.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.sc{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;display:none}
 
-.main{max-width:920px;margin:0 auto;padding:20px 16px 100px}
+/* ── Main ── */
+.main{max-width:960px;margin:0 auto;padding:20px 16px 100px}
 .stats-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.stats-text{font-size:13px;color:var(--muted)}
-.stats-text b{color:var(--accent-light);font-weight:600}
-
-.search-label{display:none;font-size:13px;color:var(--muted);margin-bottom:14px;padding:8px 12px;background:var(--surface);border-radius:8px;border-left:3px solid var(--accent)}
-
+.stats-text{font-size:13px;color:var(--muted)}.stats-text b{color:#a78bfa;font-weight:600}
+.sl{display:none;font-size:13px;color:var(--muted);margin-bottom:14px;padding:8px 12px;background:var(--surface);border-radius:8px;border-left:3px solid var(--accent)}
 .empty{display:none;text-align:center;padding:70px 20px}
-.empty-icon{font-size:52px;margin-bottom:16px}
-.empty-title{font-size:20px;font-weight:600;margin-bottom:8px}
+.empty-icon{font-size:52px;margin-bottom:16px}.empty-title{font-size:20px;font-weight:600;margin-bottom:8px}
 .empty-desc{font-size:14px;color:var(--muted);line-height:1.7}
 .empty-cta{margin-top:20px;display:inline-flex;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer}
-
 .no-res{display:none;text-align:center;padding:40px 20px;color:var(--muted)}
-.no-res-icon{font-size:36px;margin-bottom:10px}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-
+/* ── Grid & Cards ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
-.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 4px 24px var(--accent-glow)}
-.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--surface);display:block}
-.thumb-ph{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--surface),#1e1e2a);display:flex;align-items:center;justify-content:center;font-size:36px}
+.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 4px 24px var(--glow)}
+.thumb-wrap{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden}
+.thumb{width:100%;height:100%;object-fit:cover;background:var(--surface);display:block}
+.thumb-ph{width:100%;height:100%;background:linear-gradient(135deg,var(--surface),#1e1e2a);display:flex;align-items:center;justify-content:center;font-size:36px}
+.duration-badge{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.8);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
 .card-body{padding:12px}
 .badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.bv{background:rgba(59,130,246,.15);color:#60a5fa}
-.ba{background:rgba(16,185,129,.15);color:#34d399}
-.bn{background:rgba(245,158,11,.15);color:#fbbf24}
-.card-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:6px}
-.card-sum{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.byt{background:rgba(239,68,68,.15);color:#f87171}.bw{background:rgba(16,185,129,.15);color:#34d399}.bn{background:rgba(245,158,11,.15);color:#fbbf24}.big{background:rgba(168,85,247,.15);color:#c084fc}.btt{background:rgba(0,0,0,.3);color:#94a3b8}
+.card-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:5px}
+.card-meta{font-size:11px;color:var(--muted);margin-bottom:7px;display:flex;gap:8px;flex-wrap:wrap}
+.card-meta span{display:flex;align-items:center;gap:3px}
+.card-sum{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tags{display:flex;flex-wrap:wrap;gap:4px}
-.tag{font-size:11px;padding:3px 8px;border-radius:100px;background:var(--tag-bg);color:var(--tag-text)}
-.card-note{font-size:12px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tag{font-size:11px;padding:3px 8px;border-radius:100px;background:var(--tag-bg);color:var(--tag)}
+.color-dots{display:flex;gap:4px;margin-top:8px}
+.cdot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.1)}
 .card-foot{padding:8px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .card-date{font-size:11px;color:var(--muted)}
-.foot-right{display:flex;align-items:center;gap:8px}
-.open-link{color:var(--muted);font-size:11px;text-decoration:none}
-.open-link:hover{color:var(--accent-light)}
+.foot-r{display:flex;align-items:center;gap:8px}
+.open-link{color:var(--muted);font-size:11px;text-decoration:none}.open-link:hover{color:#a78bfa}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px;border-radius:6px;transition:color .15s,background .15s}
-.del-btn:hover{color:var(--error);background:rgba(239,68,68,.1)}
+.del-btn:hover{color:var(--err);background:rgba(239,68,68,.1)}
 
-.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#4f46e5);border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,.5);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;z-index:40}
-.fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(124,58,237,.7)}
-.fab:active{transform:scale(.96)}
+/* ── FAB ── */
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,.5);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;z-index:40}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(124,58,237,.7)}.fab:active{transform:scale(.96)}
 
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-.overlay.open{opacity:1;pointer-events:all}
+/* ── Save Overlay ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov.open{opacity:1;pointer-events:all}
 .modal{width:100%;max-width:600px;background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;transform:translateY(100%);transition:transform .3s ease;max-height:88vh;overflow-y:auto}
-.overlay.open .modal{transform:translateY(0)}
-.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
-
-.tabs{display:flex;gap:4px;background:var(--card);border-radius:10px;padding:4px;margin-bottom:16px}
-.tab{flex:1;padding:8px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
-.tab.active{background:var(--accent);color:#fff}
-
+.ov.open .modal{transform:translateY(0)}
+.mhandle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.mtitle{font-size:18px;font-weight:700;margin-bottom:16px}
+.tabs2{display:flex;gap:4px;background:var(--card);border-radius:10px;padding:4px;margin-bottom:16px}
+.tab2{flex:1;padding:8px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
+.tab2.active{background:var(--accent);color:#fff}
 .fg{margin-bottom:14px}
 .fl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
 .fi{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;font-family:inherit}
-.fi:focus{border-color:var(--accent)}
-.fi::placeholder{color:var(--muted)}
+.fi:focus{border-color:var(--accent)}.fi::placeholder{color:var(--muted)}
 textarea.fi{resize:none;height:90px}
 .hint{font-size:11px;color:var(--muted);margin-top:4px}
+.sbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;margin-top:4px}
+.sbtn:hover{opacity:.92}.sbtn:disabled{opacity:.5;cursor:not-allowed}
 
-.submit{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#4f46e5);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;margin-top:4px}
-.submit:hover{opacity:.92}
-.submit:disabled{opacity:.5;cursor:not-allowed}
+/* ── Progress steps ── */
+.progress-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;display:none}
+.pstep{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:var(--muted)}
+.pstep.done{color:var(--ok)}.pstep.active{color:var(--text)}.pstep.fail{color:var(--err)}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
+.pstep.done .pdot{background:var(--ok)}.pstep.active .pdot{background:var(--accent);animation:pulse 1s infinite}
+.pstep.fail .pdot{background:var(--err)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ── Detail Overlay ── */
+.dov{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+.dov.open{opacity:1;pointer-events:all}
+.dmodal{width:100%;max-width:780px;max-height:90vh;background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transform:scale(.96);transition:transform .25s}
+.dov.open .dmodal{transform:scale(1)}
+.dmodal-scroll{overflow-y:auto;flex:1}
+.dhero{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden}
+.dhero img{width:100%;height:100%;object-fit:cover}
+.dhero-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.7);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dframes{position:absolute;bottom:0;left:0;right:0;display:flex;gap:4px;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.dframe{width:70px;height:40px;border-radius:4px;object-fit:cover;border:1px solid rgba(255,255,255,.2);cursor:pointer;transition:border-color .15s}
+.dframe:hover{border-color:#a78bfa}
+.dinfo{padding:16px}
+.dtitle{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:10px}
+.dstats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px;padding:12px;background:var(--card);border-radius:10px}
+.dstat{display:flex;flex-direction:column;gap:2px}
+.dstat-val{font-size:16px;font-weight:700;color:var(--text)}
+.dstat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.dtabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
+.dtab{padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);white-space:nowrap;transition:all .15s}
+.dtab.active{background:var(--accent);color:#fff}
+.dpanel{display:none}.dpanel.active{display:block}
+.section{margin-bottom:18px}
+.section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv{background:var(--card);border-radius:8px;padding:10px}
+.kv-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kv-value{font-size:13px;font-weight:500}
+.key-points{list-style:none;display:flex;flex-direction:column;gap:6px}
+.key-points li{font-size:13px;color:var(--muted);padding-left:16px;position:relative;line-height:1.5}
+.key-points li::before{content:'›';position:absolute;left:0;color:var(--accent)}
+.frames-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.frame-card{border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.frame-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.frame-label{font-size:10px;color:var(--muted);padding:4px 6px;background:var(--card)}
+.color-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.color-chip{display:flex;align-items:center;gap:6px;background:var(--card);border-radius:6px;padding:6px 10px}
+.color-swatch{width:20px;height:20px;border-radius:4px;border:1px solid rgba(255,255,255,.1)}
+.color-name{font-size:12px}
+.transcript-box{background:var(--card);border-radius:10px;padding:12px;max-height:300px;overflow-y:auto}
+.tseg{display:flex;gap:10px;padding:4px 0;font-size:13px;line-height:1.5}
+.tseg-time{color:var(--accent);font-size:11px;font-weight:600;min-width:36px;padding-top:2px;flex-shrink:0}
+.tseg-text{color:var(--muted)}
+.no-data{font-size:13px;color:var(--muted);font-style:italic;text-align:center;padding:20px}
+.creator-card{background:var(--card);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px}
+.creator-icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.creator-name{font-size:16px;font-weight:700;margin-bottom:2px}
+.creator-sub{font-size:12px;color:var(--muted)}
+.topics-row{display:flex;flex-wrap:wrap;gap:6px}
+.topic-chip{padding:5px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500}
+.aesthetic-bar{background:var(--card);border-radius:10px;padding:12px;margin-bottom:10px}
+.abar-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.abar-value{font-size:14px;font-weight:600}
 
-.toasts{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:td .3s ease;white-space:nowrap}
-.toast.ok{background:var(--success);color:#fff}
-.toast.err{background:var(--error);color:#fff}
+/* ── Spinner / Toast ── */
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toasts{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:td .3s ease;white-space:nowrap}
+.toast.ok{background:var(--ok);color:#fff}.toast.err{background:var(--err);color:#fff}
 @keyframes td{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 
-/* Powered by badge */
-.powered{position:fixed;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);opacity:.5;pointer-events:none}
-
-@media(max-width:480px){.grid{grid-template-columns:1fr 1fr;gap:10px}.card-body{padding:10px}.card-title{font-size:13px}}
+@media(max-width:500px){.grid{grid-template-columns:1fr 1fr;gap:10px}.card-body{padding:10px}.dframes{display:none}.kv-grid{grid-template-columns:1fr}.frames-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:340px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-inner">
-    <a class="logo" href="#">
-      <div class="logo-icon">🧠</div>
-      <span class="logo-text">Memory<span>AI</span></span>
-    </a>
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchIn" placeholder="Search your memories..." autocomplete="off">
-      <button class="search-clear" id="clearBtn">✕</button>
+<header class="hdr">
+  <div class="hdr-inner">
+    <a class="logo" href="#"><div class="logo-icon">🧠</div><span class="logo-text">Memory<span>AI</span></span></a>
+    <div class="sw">
+      <span class="si">🔍</span>
+      <input type="text" id="sIn" placeholder="Search memories…" autocomplete="off">
+      <button class="sc" id="sClear">✕</button>
     </div>
   </div>
 </header>
 
 <main class="main">
-  <div class="stats-bar">
-    <div class="stats-text" id="statsEl">Loading…</div>
-  </div>
-  <div class="search-label" id="searchLabel"></div>
-
+  <div class="stats-bar"><div class="stats-text" id="statsEl">Loading…</div></div>
+  <div class="sl" id="sLabel"></div>
   <div class="empty" id="emptyEl">
     <div class="empty-icon">🧠</div>
     <div class="empty-title">Your memory vault is empty</div>
-    <div class="empty-desc">Save any link or thought.<br>Find it instantly later with natural language.</div>
+    <div class="empty-desc">Paste any YouTube link for a complete AI breakdown —<br>transcript, frame analysis, stats, aesthetics, everything.</div>
     <button class="empty-cta" onclick="openModal()">+ Save your first memory</button>
   </div>
-
-  <div class="no-res" id="noRes">
-    <div class="no-res-icon">🔎</div>
-    <div>No memories found for "<strong id="noResQ"></strong>"</div>
-  </div>
-
+  <div class="no-res" id="noRes"><div style="font-size:36px;margin-bottom:10px">🔎</div><div>Nothing found for "<strong id="noResQ"></strong>"</div></div>
   <div class="grid" id="grid"></div>
 </main>
 
-<button class="fab" onclick="openModal()" title="Save new memory">+</button>
-<div class="powered">Powered by Groq + Llama 3.3</div>
+<button class="fab" onclick="openModal()">+</button>
 
-<!-- Save Modal -->
-<div class="overlay" id="overlay" onclick="overlayClick(event)">
+<!-- ─── Save Modal ─── -->
+<div class="ov" id="ov" onclick="ovClick(event)">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Save to Memory</div>
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('url',this)">🔗 URL / Link</button>
-      <button class="tab" onclick="switchTab('note',this)">📝 Note / Idea</button>
+    <div class="mhandle"></div>
+    <div class="mtitle">Save to Memory</div>
+    <div class="tabs2">
+      <button class="tab2 active" onclick="swTab('url',this)">🔗 URL</button>
+      <button class="tab2" onclick="swTab('note',this)">📝 Note</button>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-box" id="progBox">
+      <div class="pstep" id="p1"><div class="pdot"></div><span id="p1t">Fetching video info…</span></div>
+      <div class="pstep" id="p2"><div class="pdot"></div><span id="p2t">Getting engagement stats…</span></div>
+      <div class="pstep" id="p3"><div class="pdot"></div><span id="p3t">Analyzing video frames with AI vision…</span></div>
+      <div class="pstep" id="p4"><div class="pdot"></div><span id="p4t">Extracting transcript…</span></div>
+      <div class="pstep" id="p5"><div class="pdot"></div><span id="p5t">Building complete breakdown…</span></div>
     </div>
 
     <div id="urlTab">
       <div class="fg">
         <label class="fl">Paste any link</label>
-        <input class="fi" type="url" id="urlIn" placeholder="https://youtube.com/watch?v=...  or any article URL" autocomplete="off">
-        <div class="hint">YouTube, Instagram, TikTok, Reddit, articles — anything</div>
+        <input class="fi" type="url" id="urlIn" placeholder="https://youtube.com/watch?v=… or any URL" autocomplete="off">
+        <div class="hint">YouTube gets full breakdown: transcript · frame analysis · stats · aesthetics · creator info</div>
       </div>
       <div class="fg">
-        <label class="fl">Your context (optional)</label>
-        <textarea class="fi" id="urlNote" placeholder="Why saving this? City, event, reminder, price..."></textarea>
+        <label class="fl">Your note (optional)</label>
+        <textarea class="fi" id="urlNote" placeholder="Why saving this? Context, reminder…"></textarea>
       </div>
-      <button class="submit" id="urlBtn" onclick="doSaveUrl()">
-        <span>Save &amp; Analyze with AI</span>
-      </button>
+      <button class="sbtn" id="urlBtn" onclick="doSaveUrl()"><span>Deep Analyze &amp; Save</span></button>
     </div>
 
     <div id="noteTab" style="display:none">
       <div class="fg">
-        <label class="fl">Write your thought</label>
-        <textarea class="fi" id="noteIn" placeholder="Business idea: an app that...&#10;&#10;Restaurant I want to try in Chennai near the beach..." style="height:140px"></textarea>
+        <label class="fl">Write anything</label>
+        <textarea class="fi" id="noteIn" placeholder="Business idea, thought, reminder…" style="height:130px"></textarea>
       </div>
-      <button class="submit" id="noteBtn" onclick="doSaveNote()">
-        <span>Save &amp; Analyze with AI</span>
-      </button>
+      <button class="sbtn" id="noteBtn" onclick="doSaveNote()"><span>Save &amp; Analyze</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Detail Modal ─── -->
+<div class="dov" id="dov" onclick="dOvClick(event)">
+  <div class="dmodal" id="dmodal">
+    <div class="dhero" id="dhero">
+      <img id="dHeroImg" src="" alt="">
+      <div class="dframes" id="dFrames"></div>
+      <button class="dhero-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="dmodal-scroll">
+      <div class="dinfo">
+        <div id="dBadge" style="margin-bottom:8px"></div>
+        <div class="dtitle" id="dTitle"></div>
+        <div class="dstats" id="dStats"></div>
+        <div class="dtabs" id="dTabs"></div>
+        <div id="dPanels"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -186,404 +250,697 @@ textarea.fi{resize:none;height:90px}
 <div class="toasts" id="toasts"></div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  GROQ CONFIG — dual key with automatic rotation
-// ═══════════════════════════════════════════════════
-const _x = (a) => a.map(n => String.fromCharCode(n ^ 42)).join('');
+// ══════════════════════════════════════════════════
+//  GROQ — dual key, XOR-encoded, auto-rotate
+// ══════════════════════════════════════════════════
+const _x = a => a.map(n => String.fromCharCode(n^42)).join('');
 const KEYS = [
   _x([77,89,65,117,80,66,88,95,115,108,125,105,109,124,102,105,98,107,83,114,72,99,125,69,125,109,78,83,72,25,108,115,115,92,115,82,70,31,66,24,124,103,100,126,69,97,102,79,19,110,94,67,127,92,102,73]),
   _x([77,89,65,117,24,105,120,89,24,78,26,26,92,28,96,123,122,93,105,123,66,105,19,111,125,109,78,83,72,25,108,115,69,82,125,94,83,83,122,68,96,78,107,65,120,103,100,103,122,124,78,104,104,90,111,111])
 ];
-const MODEL = 'llama-3.3-70b-versatile';
+const TXT_MDL  = 'llama-3.3-70b-versatile';
+const VIS_MDL  = 'meta-llama/llama-4-scout-17b-16e-instruct';
 let ki = 0;
 
-async function groq(messages, maxTokens = 900) {
-  for (let attempt = 0; attempt < KEYS.length * 2; attempt++) {
+async function groqCall(messages, maxTok = 1000, model = TXT_MDL) {
+  for (let a = 0; a < KEYS.length * 2; a++) {
     const key = KEYS[ki % KEYS.length];
     try {
       const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: MODEL, messages, max_tokens: maxTokens, temperature: 0.2 })
+        headers: { 'Authorization': 'Bearer '+key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, messages, max_tokens: maxTok, temperature: 0.15 })
       });
-      if (r.status === 429) { ki = (ki + 1) % KEYS.length; await sleep(800); continue; }
-      if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'API error ' + r.status); }
-      const d = await r.json();
-      return d.choices[0].message.content.trim();
-    } catch(e) {
-      if (attempt === KEYS.length * 2 - 1) throw e;
-      ki = (ki + 1) % KEYS.length;
-    }
+      if (r.status === 429) { ki++; await sleep(900); continue; }
+      if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'API '+r.status); }
+      return (await r.json()).choices[0].message.content.trim();
+    } catch(e) { if (a === KEYS.length*2-1) throw e; ki++; }
   }
-  throw new Error('Both API keys rate limited. Wait a moment and retry.');
+  throw new Error('Both keys rate-limited. Wait a moment.');
 }
 
+const groq = (msgs, tok=1000) => groqCall(msgs, tok, TXT_MDL);
+const groqVision = (msgs, tok=1200) => groqCall(msgs, tok, VIS_MDL);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const parseJSON = t => { const m = t.match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : {}; };
 
-// ═══════════════════════════════════════════════════
-//  LOCAL STORAGE
-// ═══════════════════════════════════════════════════
-const KEY = 'memoryai_v1';
-function getMems() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
-function setMems(m) { localStorage.setItem(KEY, JSON.stringify(m)); }
-function addMem(m) {
-  const mems = getMems();
-  m.id = Date.now();
-  m.created_at = new Date().toISOString();
-  mems.unshift(m);
-  setMems(mems);
-  return m;
-}
-function delMem(id) {
-  setMems(getMems().filter(m => m.id !== id));
+// ══════════════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════════════
+const SKEY = 'memoryai_v2';
+const getMems = () => { try { return JSON.parse(localStorage.getItem(SKEY)||'[]'); } catch { return []; } };
+const setMems = m => localStorage.setItem(SKEY, JSON.stringify(m));
+function addMem(m) { const a = getMems(); m.id = Date.now(); m.created_at = new Date().toISOString(); a.unshift(m); setMems(a); return m; }
+const delMem = id => setMems(getMems().filter(m => m.id !== id));
+
+// ══════════════════════════════════════════════════
+//  YOUTUBE EXTRACTION
+// ══════════════════════════════════════════════════
+function getYTId(url) {
+  const m = url.match(/(?:v=|\/embed\/|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
 }
 
-// ═══════════════════════════════════════════════════
-//  FETCH URL INFO
-// ═══════════════════════════════════════════════════
-async function getUrlInfo(url) {
-  // YouTube / youtu.be
-  if (/youtu\.?be/.test(url)) {
+async function fetchWithProxy(url, timeout=12000) {
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`
+  ];
+  for (const p of proxies) {
     try {
-      const r = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(url) + '&format=json');
-      if (r.ok) {
-        const d = await r.json();
-        return { title: d.title, description: 'YouTube video by ' + d.author_name, thumbnail: d.thumbnail_url, channel: d.author_name };
-      }
+      const r = await fetch(p, { signal: AbortSignal.timeout(timeout) });
+      if (r.ok) return await r.text();
     } catch {}
   }
-
-  // Try allorigins CORS proxy for articles
-  try {
-    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-    const r = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-    if (r.ok) {
-      const html = await r.text();
-      const title = (html.match(/<title[^>]*>([^<]+)/i) || [])[1]?.trim() || '';
-      const desc = (html.match(/<meta[^>]+(?:name="description"|property="og:description")[^>]+content="([^"]+)"/i) || [])[1]?.trim()
-                || (html.match(/<meta[^>]+content="([^"]+)"[^>]+(?:name="description"|property="og:description")/i) || [])[1]?.trim() || '';
-      const img = (html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i) || [])[1]?.trim()
-               || (html.match(/<meta[^>]+content="([^"]+)"[^>]+property="og:image"/i) || [])[1]?.trim() || '';
-      // Strip tags from desc
-      const cleanDesc = desc.replace(/<[^>]+>/g, ' ').replace(/\s+/g,' ').trim();
-      return { title: title.replace(/<[^>]+>/g,'').trim(), description: cleanDesc || 'Content from ' + new URL(url).hostname, thumbnail: img, channel: new URL(url).hostname };
-    }
-  } catch {}
-
-  // Fallback: just use the URL itself
-  let hostname = url;
-  try { hostname = new URL(url).hostname; } catch {}
-  return { title: hostname, description: 'Saved from ' + hostname, thumbnail: '', channel: hostname };
+  return '';
 }
 
-// ═══════════════════════════════════════════════════
-//  AI ANALYZE
-// ═══════════════════════════════════════════════════
-async function analyze(info, type, url, userNote) {
+async function getYTOEmbed(url) {
+  try {
+    const r = await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');
+    if (r.ok) return await r.json();
+  } catch {}
+  return {};
+}
+
+async function scrapeYTPage(videoId) {
+  const html = await fetchWithProxy('https://www.youtube.com/watch?v='+videoId, 18000);
+  if (!html) return {};
+
+  const re = (pat, def='') => { try { return (html.match(pat)||[,def])[1]; } catch { return def; } };
+
+  // Extract from ytInitialPlayerResponse
+  let vd = {}, mf = {};
+  try {
+    const m = html.match(/ytInitialPlayerResponse\s*=\s*(\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\})*)*\}))*\})/);
+    if (m) {
+      const pd = JSON.parse(m[1]);
+      vd = pd.videoDetails || {};
+      mf = pd.microformat?.playerMicroformatRenderer || {};
+    }
+  } catch {
+    // fallback to targeted regex
+  }
+
+  const views      = vd.viewCount     || re(/"viewCount":"(\d+)"/)  || re(/"views":"([^"]+)"/);
+  const title      = vd.title         || re(/<title>([^<]+)<\/title>/).replace(/ - YouTube$/,'');
+  const author     = vd.author        || re(/"author":"([^"]+)"/);
+  const channelId  = vd.channelId     || re(/"channelId":"([^"]+)"/);
+  const desc       = (vd.shortDescription || re(/"shortDescription":"((?:[^"\\]|\\.)*)"/)).slice(0,1000);
+  const lenSec     = parseInt(vd.lengthSeconds || re(/"lengthSeconds":"(\d+)"/) || '0');
+  const keywords   = vd.keywords      || [];
+  const category   = mf.category      || re(/"category":"([^"]+)"/);
+  const pubDate    = mf.publishDate   || re(/"publishDate":"([^"]+)"/);
+  const likeCount  = re(/"label":"([^"]+) likes"/) || re(/"accessibilityText":"([^"]+) likes"/) || '';
+  const subs       = re(/"subscriberCountText":\{"simpleText":"([^"]+)"/) ||
+                     re(/"subscriberCountText":\{"runs":\[\{"text":"([^"]+)"/) || '';
+  const isLive     = vd.isLiveContent || false;
+
+  return { title, author, channelId, description: desc, viewCount: views,
+    lengthSeconds: lenSec, keywords, category, publishDate: pubDate,
+    likeCount, subscriberCount: subs, isLive };
+}
+
+async function fetchTranscript(videoId) {
+  const langs = ['en','en-US','en-GB',''];
+  for (const lang of langs) {
+    const url = `https://www.youtube.com/api/timedtext?v=${videoId}${lang?'&lang='+lang:''}&fmt=json3&xorb=2&xobt=3&xovt=3`;
+    const txt = await fetchWithProxy(url, 8000);
+    if (!txt) continue;
+    try {
+      const d = JSON.parse(txt);
+      if (!d.events?.length) continue;
+      const segments = d.events.filter(e=>e.segs).map(e=>({
+        time: fmtSec(e.tStartMs/1000),
+        text: e.segs.map(s=>s.utf8||'').join('').replace(/\n/g,' ').trim()
+      })).filter(s=>s.text);
+      if (segments.length > 5) return { segments, full: segments.map(s=>s.text).join(' ') };
+    } catch {}
+  }
+  return { segments: [], full: '' };
+}
+
+// ══════════════════════════════════════════════════
+//  VISUAL ANALYSIS — Groq Vision on YT frame thumbnails
+// ══════════════════════════════════════════════════
+async function analyzeFrames(videoId) {
+  const urls = [0,1,2,3].map(i => `https://img.youtube.com/vi/${videoId}/${i}.jpg`);
+  const maxRes = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+  const imgContent = urls.map(u => ({ type:'image_url', image_url:{ url: u } }));
+
+  const text = await groqVision([{
+    role:'user',
+    content:[
+      { type:'text', text:`You are analyzing 4 frame thumbnails extracted from a YouTube video.
+Provide a detailed visual breakdown. Return ONLY this exact JSON (no markdown):
+{
+  "main_subject": "primary person/object/action visible",
+  "side_subjects": ["other notable elements"],
+  "setting": "location or environment description",
+  "dominant_colors": ["color name 1","color name 2","color name 3"],
+  "color_mood": "warm|cool|neutral|vibrant|muted|dark|moody|bright",
+  "aesthetic": "cinematic|documentary|vlog|tutorial|music-video|animation|news|sports|gaming|comedy|other",
+  "lighting": "natural daylight|golden hour|studio|ring-light|dramatic|low-key|neon|mixed",
+  "production_quality": "professional|semi-pro|amateur|lo-fi",
+  "visual_style": "detailed 1-sentence description of the overall visual style",
+  "composition": "wide-shot|close-up|talking-head|action|product-shot|landscape|mixed",
+  "text_on_screen": "any visible text overlays or titles, or 'none'",
+  "faces": "number of people visible and their apparent expressions",
+  "objects": ["key objects visible"],
+  "shapes_patterns": "notable geometric or design patterns visible",
+  "mood": "energetic|calm|dramatic|funny|tense|inspiring|educational|melancholic|hype",
+  "brand_style": "any visible brand elements or style signatures"
+}` },
+      ...imgContent
+    ]
+  }], 1200);
+
+  return parseJSON(text);
+}
+
+// ══════════════════════════════════════════════════
+//  COMPREHENSIVE AI BREAKDOWN
+// ══════════════════════════════════════════════════
+async function buildBreakdown(page, caption, visual, url, userNote) {
   const ctx = [
-    'Type: ' + type,
-    url ? 'URL: ' + url : '',
-    info.channel ? 'Creator: ' + info.channel : '',
-    'Title: ' + (info.title || ''),
-    'Description: ' + (info.description || '').slice(0, 1500),
-    userNote ? 'User note: ' + userNote : ''
+    page.title       && `Title: ${page.title}`,
+    page.author      && `Creator: ${page.author}`,
+    page.subscriberCount && `Subscribers: ${page.subscriberCount}`,
+    page.viewCount   && `Views: ${fmtNum(page.viewCount)}`,
+    page.likeCount   && `Likes: ${page.likeCount}`,
+    page.lengthSeconds&&`Duration: ${fmtSec(page.lengthSeconds)}`,
+    page.publishDate && `Published: ${page.publishDate}`,
+    page.category    && `Category: ${page.category}`,
+    page.description && `Description: ${page.description.slice(0,600)}`,
+    page.keywords?.length && `Keywords: ${page.keywords.slice(0,15).join(', ')}`,
+    caption.full     && `Transcript excerpt: ${caption.full.slice(0,2500)}`,
+    visual.main_subject  && `Visual main subject: ${visual.main_subject}`,
+    visual.aesthetic     && `Visual aesthetic: ${visual.aesthetic}`,
+    visual.mood          && `Visual mood: ${visual.mood}`,
+    visual.setting       && `Setting: ${visual.setting}`,
+    userNote         && `User note: ${userNote}`,
   ].filter(Boolean).join('\n');
 
   const text = await groq([{
-    role: 'system',
-    content: 'You are a personal AI memory assistant. Analyze saved content and return ONLY a JSON object.'
-  }, {
-    role: 'user',
-    content: `Analyze this saved content:\n\n${ctx}\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"title":"short title max 7 words","summary":"2-3 sentences about what this is and why someone saved it","tags":["tag1","tag2","tag3","tag4","tag5"]}`
-  }]);
+    role:'system',
+    content:'You are an expert media analyst. Return ONLY valid JSON with no markdown.'
+  },{
+    role:'user',
+    content:`Perform a complete deep breakdown of this content:\n\n${ctx}\n\nReturn ONLY this JSON:
+{
+  "title": "concise descriptive title (max 9 words)",
+  "summary": "3-4 sentence comprehensive summary of what this content is, what happens, and why it matters",
+  "main_topic": "the single primary topic",
+  "subtopics": ["topic2","topic3","topic4"],
+  "category": "Food|Tech|Fashion|Travel|Education|Entertainment|Music|Sports|Gaming|News|Finance|Health|Art|Science|Comedy|Lifestyle|Other",
+  "sub_category": "more specific niche",
+  "content_type": "Tutorial|Review|Vlog|Documentary|Music Video|Reaction|Commentary|News|Podcast|Entertainment|Cooking|Fitness|Other",
+  "target_audience": "who this content is for",
+  "tone": "Casual|Professional|Humorous|Educational|Inspirational|Controversial|Emotional|Informative",
+  "language": "detected primary language",
+  "key_points": ["main insight 1","main insight 2","main insight 3","main insight 4"],
+  "what_you_learn": "1 sentence on the takeaway",
+  "why_popular": "1 sentence guess at why this gets views",
+  "tags": ["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"],
+  "creator_niche": "description of this creator's style and niche",
+  "content_quality": "High|Medium|Low",
+  "sentiment": "Positive|Negative|Neutral|Mixed",
+  "has_call_to_action": "yes|no",
+  "pacing": "Fast|Medium|Slow",
+  "similar_to": ["similar creator or show 1","similar creator or show 2"]
+}`
+  }], 1400);
 
-  let raw = text.trim();
-  const m = raw.match(/\{[\s\S]*\}/);
-  if (m) raw = m[0];
-  return JSON.parse(raw);
+  return parseJSON(text);
+}
+
+// ══════════════════════════════════════════════════
+//  FULL YOUTUBE PIPELINE
+// ══════════════════════════════════════════════════
+async function analyzeYouTube(url, userNote, setStep) {
+  const videoId = getYTId(url);
+  if (!videoId) throw new Error('Could not extract YouTube video ID from URL');
+
+  setStep(1, 'active');
+  const [oEmbed, page] = await Promise.all([ getYTOEmbed(url), scrapeYTPage(videoId) ]);
+  const mergedPage = { ...page, title: page.title || oEmbed.title || '', author: page.author || oEmbed.author_name || '', thumbnail: oEmbed.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` };
+  setStep(1, 'done', `✓ Video info: "${(mergedPage.title||'').slice(0,40)}"`);
+
+  setStep(2, 'active');
+  // Stats already in page scrape
+  setStep(2, 'done', `✓ Stats: ${fmtNum(mergedPage.viewCount||'0')} views${mergedPage.likeCount?' · '+mergedPage.likeCount+' likes':''}`);
+
+  setStep(3, 'active');
+  let visual = {};
+  try { visual = await analyzeFrames(videoId); setStep(3,'done',`✓ Frames analyzed: ${visual.aesthetic||''} · ${visual.mood||''}`); }
+  catch(e) { setStep(3,'fail','⚠ Frame analysis skipped'); console.warn(e); }
+
+  setStep(4, 'active');
+  let caption = { segments:[], full:'' };
+  try { caption = await fetchTranscript(videoId); setStep(4,'done',`✓ Transcript: ${caption.segments.length} segments`); }
+  catch(e) { setStep(4,'fail','⚠ Transcript not available'); }
+
+  setStep(5, 'active');
+  const breakdown = await buildBreakdown(mergedPage, caption, visual, url, userNote);
+  setStep(5,'done','✓ Complete breakdown ready!');
+
+  const frames = [0,1,2,3].map(i=>`https://img.youtube.com/vi/${videoId}/${i}.jpg`);
+
+  return {
+    type: 'video', platform: 'youtube', url,
+    thumbnail: mergedPage.thumbnail,
+    title: breakdown.title || mergedPage.title || '',
+    summary: breakdown.summary || '',
+    tags: breakdown.tags || [],
+    user_note: userNote,
+    rich: {
+      video_id: videoId,
+      creator: mergedPage.author,
+      channel_id: mergedPage.channelId,
+      subscriber_count: mergedPage.subscriberCount,
+      views: mergedPage.viewCount,
+      likes: mergedPage.likeCount,
+      duration: mergedPage.lengthSeconds,
+      published_at: mergedPage.publishDate,
+      description: mergedPage.description,
+      keywords: mergedPage.keywords,
+      category: breakdown.category || mergedPage.category,
+      sub_category: breakdown.sub_category,
+      content_type: breakdown.content_type,
+      main_topic: breakdown.main_topic,
+      subtopics: breakdown.subtopics || [],
+      key_points: breakdown.key_points || [],
+      tone: breakdown.tone,
+      target_audience: breakdown.target_audience,
+      language: breakdown.language,
+      content_quality: breakdown.content_quality,
+      sentiment: breakdown.sentiment,
+      creator_niche: breakdown.creator_niche,
+      similar_to: breakdown.similar_to || [],
+      what_you_learn: breakdown.what_you_learn,
+      why_popular: breakdown.why_popular,
+      frames,
+      visual,
+      transcript_segments: caption.segments,
+      transcript_full: caption.full,
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════
+//  GENERIC URL / NOTE ANALYSIS
+// ══════════════════════════════════════════════════
+async function analyzeGenericUrl(url, userNote) {
+  let title = url, desc = '', thumb = '', channel = '';
+  try {
+    const html = await fetchWithProxy(url, 10000);
+    if (html) {
+      title = (html.match(/<title[^>]*>([^<]+)/i)||[])[1]?.trim().replace(/ - .*$/,'') || url;
+      const metas = [
+        html.match(/og:description["\s]+content="([^"]+)"/i),
+        html.match(/name="description"[^>]+content="([^"]+)"/i),
+        html.match(/content="([^"]+)"[^>]+name="description"/i)
+      ];
+      desc = (metas.find(Boolean)||[])[1]?.trim().slice(0,800) || '';
+      thumb = (html.match(/og:image["\s]+content="([^"]+)"/i)||[])[1]?.trim() || '';
+      channel = (new URL(url)).hostname;
+    }
+  } catch {}
+  const ctx = `URL: ${url}\nTitle: ${title}\nHost: ${channel}\nDescription: ${desc}\nNote: ${userNote}`;
+  const result = await groq([{ role:'user', content:`Analyze this saved content:\n\n${ctx}\n\nReturn ONLY this JSON:\n{"title":"short title","summary":"2-3 sentences about what this is","tags":["t1","t2","t3","t4","t5"],"category":"category name"}` }], 600);
+  const a = parseJSON(result);
+  return { type:'article', platform:'web', url, thumbnail:thumb, title:a.title||title, summary:a.summary||'', tags:a.tags||[], user_note:userNote, rich:{creator:channel, category:a.category} };
 }
 
 async function analyzeNote(content) {
-  const text = await groq([{
-    role: 'system',
-    content: 'You are a personal AI memory assistant. Analyze notes and return ONLY a JSON object.'
-  }, {
-    role: 'user',
-    content: `Analyze this personal note:\n\n${content.slice(0,1500)}\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"title":"short title max 7 words","summary":"1-2 sentences about what this note is","tags":["tag1","tag2","tag3","tag4","tag5"]}`
-  }]);
-
-  let raw = text.trim();
-  const m = raw.match(/\{[\s\S]*\}/);
-  if (m) raw = m[0];
-  return JSON.parse(raw);
+  const result = await groq([{ role:'user', content:`Analyze this personal note:\n\n${content.slice(0,1500)}\n\nReturn ONLY this JSON:\n{"title":"short title","summary":"1-2 sentences","tags":["t1","t2","t3","t4","t5"]}` }], 500);
+  const a = parseJSON(result);
+  return { type:'note', platform:'note', url:'', thumbnail:'', title:a.title||'Note', summary:a.summary||'', tags:a.tags||[], user_note:content, rich:{} };
 }
 
-// ═══════════════════════════════════════════════════
-//  AI SEARCH
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  SEARCH
+// ══════════════════════════════════════════════════
 async function aiSearch(query, mems) {
   if (!mems.length) return [];
-  const list = mems.map(m =>
-    `ID:${m.id} | ${m.title} | ${m.summary} | tags:${(m.tags||[]).join(',')}`
+  const list = mems.map(m=>
+    `ID:${m.id}|${m.title}|${m.summary}|${(m.tags||[]).join(',')}|${m.rich?.main_topic||''}|${m.rich?.category||''}`
   ).join('\n');
-
-  const text = await groq([{
-    role: 'user',
-    content: `Find memories relevant to the query. Be flexible with synonyms and intent.\n\nQuery: "${query}"\n\nMemories:\n${list}\n\nReturn ONLY a JSON array of matching IDs ordered by relevance. Example: [1700000001,1700000002]\nIf nothing matches return [].`
-  }], 300);
-
-  const m = text.match(/\[[\s\S]*?\]/);
-  if (!m) return [];
-  return JSON.parse(m[0]);
+  const t = await groq([{ role:'user', content:`Find memories matching query. Be flexible.\n\nQuery: "${query}"\n\nMemories:\n${list}\n\nReturn ONLY a JSON array of matching IDs by relevance. Example: [1700001,1700002]\nIf none match return [].` }], 300);
+  const m = t.match(/\[[\s\S]*?\]/);
+  return m ? JSON.parse(m[0]) : [];
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  RENDER
-// ═══════════════════════════════════════════════════
-function timeAgo(iso) {
-  const d = Date.now() - new Date(iso).getTime();
-  if (d < 60e3) return 'just now';
-  if (d < 3600e3) return Math.floor(d/60e3) + 'm ago';
-  if (d < 86400e3) return Math.floor(d/3600e3) + 'h ago';
-  if (d < 7*86400e3) return Math.floor(d/86400e3) + 'd ago';
-  return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+// ══════════════════════════════════════════════════
+const fmtSec = s => { const m=Math.floor(s/60),ss=Math.floor(s%60); return `${m}:${ss.toString().padStart(2,'0')}`; };
+const fmtNum = n => { const x=parseInt(n||'0'); if(x>=1e9)return(x/1e9).toFixed(1)+'B'; if(x>=1e6)return(x/1e6).toFixed(1)+'M'; if(x>=1e3)return(x/1e3).toFixed(1)+'K'; return String(x||''); };
+const timeAgo = iso => { const d=Date.now()-new Date(iso).getTime(); if(d<60e3)return'just now'; if(d<3600e3)return Math.floor(d/60e3)+'m ago'; if(d<86400e3)return Math.floor(d/3600e3)+'h ago'; if(d<7*86400e3)return Math.floor(d/86400e3)+'d ago'; return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'}); };
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function platformBadge(m) {
+  if (m.platform==='youtube') return '<span class="badge byt">▶ YouTube</span>';
+  if (m.type==='note') return '<span class="badge bn">📝 Note</span>';
+  if (m.platform==='web') return '<span class="badge bw">🌐 Article</span>';
+  return '<span class="badge btt">📎 Saved</span>';
 }
 
-function typeIcon(t) { return t==='video'?'🎬':t==='note'?'📝':'📄'; }
-function badgeCls(t) { return t==='video'?'bv':t==='note'?'bn':'ba'; }
-function badgeLbl(t) { return t.charAt(0).toUpperCase()+t.slice(1); }
+function colorDots(visual) {
+  if (!visual?.dominant_colors?.length) return '';
+  const map = { red:'#ef4444',blue:'#3b82f6',green:'#22c55e',yellow:'#eab308',orange:'#f97316',purple:'#a855f7',pink:'#ec4899',cyan:'#06b6d4',white:'#f8fafc',black:'#1e293b',gray:'#64748b',grey:'#64748b',brown:'#92400e',beige:'#d4c5a9',gold:'#f59e0b',silver:'#94a3b8',teal:'#14b8a6',indigo:'#6366f1',lime:'#84cc16',navy:'#1e3a8a' };
+  return '<div class="color-dots">'+visual.dominant_colors.slice(0,4).map(c=>{const k=c.toLowerCase().split(' ')[0];const col=map[k]||'#64748b';return`<div class="cdot" style="background:${col}" title="${esc(c)}"></div>`;}).join('')+'</div>';
+}
 
 function makeCard(m) {
+  const r = m.rich || {};
   const tags = (m.tags||[]).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
   const thumb = m.thumbnail
-    ? `<img class="thumb" src="${esc(m.thumbnail)}" loading="lazy" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-       <div class="thumb-ph" style="display:none">${typeIcon(m.type)}</div>`
-    : `<div class="thumb-ph">${typeIcon(m.type)}</div>`;
-  const noteHtml = m.user_note ? `<div class="card-note">💬 ${esc(m.user_note)}</div>` : '';
-  const linkHtml = m.url ? `<a class="open-link" href="${esc(m.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 Open</a>` : '';
+    ? `<img class="thumb" src="${esc(m.thumbnail)}" loading="lazy" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="thumb-ph" style="display:none">🎬</div>`
+    : `<div class="thumb-ph">${m.type==='note'?'📝':m.platform==='youtube'?'🎬':'📄'}</div>`;
+  const durBadge = r.duration ? `<div class="duration-badge">${fmtSec(r.duration)}</div>` : '';
+  const metaParts = [];
+  if (r.creator) metaParts.push(`<span>👤 ${esc(r.creator.slice(0,20))}</span>`);
+  if (r.views) metaParts.push(`<span>👁 ${fmtNum(r.views)}</span>`);
+  if (r.category) metaParts.push(`<span>📂 ${esc(r.category)}</span>`);
+  const meta = metaParts.length ? `<div class="card-meta">${metaParts.join('')}</div>` : '';
+  const colors = colorDots(r.visual);
 
   const card = document.createElement('div');
   card.className = 'card';
+  card.onclick = () => openDetail(m.id);
   card.innerHTML = `
-    ${thumb}
+    <div class="thumb-wrap">${thumb}${durBadge}</div>
     <div class="card-body">
-      <span class="badge ${badgeCls(m.type)}">${badgeLbl(m.type)}</span>
+      ${platformBadge(m)}
       <div class="card-title">${esc(m.title||'Untitled')}</div>
+      ${meta}
       <div class="card-sum">${esc(m.summary||'')}</div>
       <div class="tags">${tags}</div>
-      ${noteHtml}
+      ${colors}
     </div>
     <div class="card-foot">
       <span class="card-date">${timeAgo(m.created_at)}</span>
-      <div class="foot-right">
-        ${linkHtml}
-        <button class="del-btn" onclick="doDelete(event,${m.id})">🗑</button>
+      <div class="foot-r">
+        ${m.url?`<a class="open-link" href="${esc(m.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>`:''}
+        <button class="del-btn" onclick="event.stopPropagation();doDelete(event,${m.id})">🗑</button>
       </div>
     </div>`;
   return card;
 }
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-let allMems = [];
-let searching = false;
-
+let allMems = [], searching = false;
 function render(mems) {
   const grid = document.getElementById('grid');
   document.getElementById('emptyEl').style.display = 'none';
   document.getElementById('noRes').style.display = 'none';
   grid.innerHTML = '';
   if (!mems.length) {
-    if (searching) {
-      document.getElementById('noRes').style.display = 'block';
-      document.getElementById('noResQ').textContent = document.getElementById('searchIn').value;
-    } else {
-      document.getElementById('emptyEl').style.display = 'block';
-    }
+    if (searching) { document.getElementById('noRes').style.display='block'; document.getElementById('noResQ').textContent=document.getElementById('sIn').value; }
+    else document.getElementById('emptyEl').style.display='block';
     return;
   }
   mems.forEach(m => grid.appendChild(makeCard(m)));
 }
-
 function updateStats(shown) {
-  const total = allMems.length;
-  const el = document.getElementById('statsEl');
-  if (!total) { el.innerHTML = 'No memories yet'; return; }
-  if (searching) { el.innerHTML = `Found <b>${shown.length}</b> of <b>${total}</b> memories`; return; }
-  const vids = allMems.filter(m=>m.type==='video').length;
+  const total = allMems.length, el = document.getElementById('statsEl');
+  if (!total) { el.innerHTML='No memories yet'; return; }
+  if (searching) { el.innerHTML=`Found <b>${shown.length}</b> of <b>${total}</b>`; return; }
+  const yt = allMems.filter(m=>m.platform==='youtube').length;
   const notes = allMems.filter(m=>m.type==='note').length;
-  el.innerHTML = `<b>${total}</b> memories · ${vids} videos · ${notes} notes`;
+  el.innerHTML = `<b>${total}</b> memories · ${yt} YouTube · ${notes} notes`;
 }
+function load() { allMems = getMems(); render(allMems); updateStats(allMems); }
 
-function load() {
-  allMems = getMems();
-  render(allMems);
-  updateStats(allMems);
-}
-
-// ═══════════════════════════════════════════════════
-//  SEARCH
-// ═══════════════════════════════════════════════════
-let searchTimer = null;
-const searchIn = document.getElementById('searchIn');
-const clearBtn = document.getElementById('clearBtn');
-const searchLabel = document.getElementById('searchLabel');
-
-searchIn.addEventListener('input', () => {
-  const q = searchIn.value.trim();
-  clearBtn.style.display = q ? 'block' : 'none';
-  clearTimeout(searchTimer);
-  if (!q) { clearSearch(); return; }
-  searchTimer = setTimeout(() => runSearch(q), 650);
+// ── Search ──
+let stimer = null;
+const sIn = document.getElementById('sIn'), sClear = document.getElementById('sClear'), sLabel = document.getElementById('sLabel');
+sIn.addEventListener('input', () => {
+  const q = sIn.value.trim();
+  sClear.style.display = q?'block':'none';
+  clearTimeout(stimer);
+  if (!q) { searching=false; sLabel.style.display='none'; render(allMems); updateStats(allMems); return; }
+  stimer = setTimeout(() => runSearch(q), 700);
 });
-
-clearBtn.onclick = () => { searchIn.value = ''; clearBtn.style.display = 'none'; clearSearch(); };
-
-function clearSearch() {
-  searching = false;
-  searchLabel.style.display = 'none';
-  render(allMems);
-  updateStats(allMems);
-}
-
+sClear.onclick = () => { sIn.value=''; sClear.style.display='none'; searching=false; sLabel.style.display='none'; render(allMems); updateStats(allMems); };
 async function runSearch(q) {
-  searching = true;
-  searchLabel.style.display = 'block';
-  searchLabel.textContent = '🤖 Searching for "' + q + '"…';
-  document.getElementById('grid').innerHTML = '';
-  try {
-    const ids = await aiSearch(q, allMems);
-    const idMap = Object.fromEntries(allMems.map(m => [m.id, m]));
-    const results = ids.map(id => idMap[id]).filter(Boolean);
-    searchLabel.textContent = `✨ Results for "${q}"`;
-    render(results);
-    updateStats(results);
-  } catch(e) {
-    toast(e.message, true);
-    searchLabel.style.display = 'none';
-    searching = false;
+  searching=true; sLabel.style.display='block'; sLabel.textContent=`🤖 Searching "${q}"…`;
+  document.getElementById('grid').innerHTML='';
+  try { const ids=await aiSearch(q,allMems); const map=Object.fromEntries(allMems.map(m=>[m.id,m])); const res=ids.map(id=>map[id]).filter(Boolean); sLabel.textContent=`✨ Results for "${q}"`; render(res); updateStats(res); }
+  catch(e) { toast(e.message,true); sLabel.style.display='none'; searching=false; }
+}
+
+// ══════════════════════════════════════════════════
+//  DETAIL MODAL
+// ══════════════════════════════════════════════════
+function openDetail(id) {
+  const m = allMems.find(x=>x.id===id); if(!m) return;
+  const r = m.rich || {}, v = r.visual || {};
+
+  document.getElementById('dHeroImg').src = m.thumbnail || '';
+  document.getElementById('dTitle').textContent = m.title || 'Untitled';
+  document.getElementById('dBadge').innerHTML = platformBadge(m);
+
+  // Frames strip
+  const framesEl = document.getElementById('dFrames');
+  if (r.frames?.length) {
+    framesEl.innerHTML = r.frames.map((f,i)=>`<img class="dframe" src="${esc(f)}" alt="Frame ${i+1}" onclick="document.getElementById('dHeroImg').src='${esc(f)}'"">`).join('');
+    framesEl.style.display = 'flex';
+  } else { framesEl.style.display = 'none'; }
+
+  // Stats
+  const stats = [];
+  if (r.views)        stats.push({ val:fmtNum(r.views), lbl:'Views' });
+  if (r.likes)        stats.push({ val:r.likes, lbl:'Likes' });
+  if (r.duration)     stats.push({ val:fmtSec(r.duration), lbl:'Duration' });
+  if (r.subscriber_count) stats.push({ val:r.subscriber_count, lbl:'Subscribers' });
+  if (r.published_at) stats.push({ val:r.published_at.slice(0,10), lbl:'Published' });
+  if (r.language)     stats.push({ val:r.language, lbl:'Language' });
+  document.getElementById('dStats').innerHTML = stats.map(s=>`<div class="dstat"><div class="dstat-val">${esc(s.val)}</div><div class="dstat-lbl">${esc(s.lbl)}</div></div>`).join('');
+
+  // Tabs
+  const tabs = ['Overview','Visual','Transcript','Creator'];
+  const tabsEl = document.getElementById('dTabs');
+  tabsEl.innerHTML = tabs.map((t,i)=>`<button class="dtab${i===0?' active':''}" onclick="switchDTab(${i},this)">${t}</button>`).join('');
+
+  // Panels
+  const panelsEl = document.getElementById('dPanels');
+  panelsEl.innerHTML = '';
+
+  // ─ Overview ─
+  const ov = document.createElement('div');
+  ov.className = 'dpanel active'; ov.id = 'dp0';
+  const kps = (r.key_points||[]).map(p=>`<li>${esc(p)}</li>`).join('');
+  const subs = (r.subtopics||[]).map(t=>`<span class="topic-chip">${esc(t)}</span>`).join('');
+  const sim = (r.similar_to||[]).map(t=>`<span class="topic-chip">${esc(t)}</span>`).join('');
+  ov.innerHTML = `
+    <div class="section"><div class="section-title">📝 Summary</div><p style="font-size:14px;line-height:1.7;color:var(--muted)">${esc(m.summary)}</p></div>
+    <div class="section"><div class="section-title">📂 Classification</div>
+      <div class="kv-grid">
+        ${r.category?`<div class="kv"><div class="kv-label">Category</div><div class="kv-value">${esc(r.category)}</div></div>`:''}
+        ${r.sub_category?`<div class="kv"><div class="kv-label">Sub-Category</div><div class="kv-value">${esc(r.sub_category)}</div></div>`:''}
+        ${r.content_type?`<div class="kv"><div class="kv-label">Content Type</div><div class="kv-value">${esc(r.content_type)}</div></div>`:''}
+        ${r.tone?`<div class="kv"><div class="kv-label">Tone</div><div class="kv-value">${esc(r.tone)}</div></div>`:''}
+        ${r.sentiment?`<div class="kv"><div class="kv-label">Sentiment</div><div class="kv-value">${esc(r.sentiment)}</div></div>`:''}
+        ${r.target_audience?`<div class="kv"><div class="kv-label">Audience</div><div class="kv-value">${esc(r.target_audience)}</div></div>`:''}
+        ${r.content_quality?`<div class="kv"><div class="kv-label">Quality</div><div class="kv-value">${esc(r.content_quality)}</div></div>`:''}
+        ${r.main_topic?`<div class="kv"><div class="kv-label">Main Topic</div><div class="kv-value">${esc(r.main_topic)}</div></div>`:''}
+      </div>
+    </div>
+    ${kps?`<div class="section"><div class="section-title">🔑 Key Points</div><ul class="key-points">${kps}</ul></div>`:''}
+    ${r.what_you_learn?`<div class="section"><div class="section-title">💡 Takeaway</div><p style="font-size:13px;color:var(--muted)">${esc(r.what_you_learn)}</p></div>`:''}
+    ${subs?`<div class="section"><div class="section-title">📌 Subtopics</div><div class="topics-row">${subs}</div></div>`:''}
+    ${sim?`<div class="section"><div class="section-title">🔗 Similar To</div><div class="topics-row">${sim}</div></div>`:''}
+    <div class="section"><div class="section-title">🏷 Tags</div><div class="tags">${(m.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div>
+  `;
+  panelsEl.appendChild(ov);
+
+  // ─ Visual ─
+  const vp = document.createElement('div');
+  vp.className = 'dpanel'; vp.id = 'dp1';
+  const colorMap = { red:'#ef4444',blue:'#3b82f6',green:'#22c55e',yellow:'#eab308',orange:'#f97316',purple:'#a855f7',pink:'#ec4899',cyan:'#06b6d4',white:'#f8fafc',black:'#1e293b',gray:'#64748b',grey:'#64748b',brown:'#92400e',beige:'#d4c5a9',gold:'#f59e0b',silver:'#94a3b8',teal:'#14b8a6',indigo:'#6366f1',lime:'#84cc16',navy:'#1e3a8a' };
+  const colChips = (v.dominant_colors||[]).map(c=>{const k=c.toLowerCase().split(' ')[0];const col=colorMap[k]||'#64748b';return`<div class="color-chip"><div class="color-swatch" style="background:${col}"></div><span class="color-name">${esc(c)}</span></div>`;}).join('');
+  const framesGrid = (r.frames||[]).map((f,i)=>`<div class="frame-card"><img src="${esc(f)}" alt="Frame ${i+1}" loading="lazy"><div class="frame-label">Frame ${i+1}</div></div>`).join('');
+  const objs = (v.objects||[]).map(o=>`<span class="topic-chip">${esc(o)}</span>`).join('');
+  vp.innerHTML = `
+    ${framesGrid?`<div class="section"><div class="section-title">🎬 Video Frames</div><div class="frames-grid">${framesGrid}</div></div>`:''}
+    ${colChips?`<div class="section"><div class="section-title">🎨 Color Palette</div><div class="color-row">${colChips}</div></div>`:''}
+    <div class="section"><div class="section-title">👁 Visual Breakdown</div>
+      <div class="kv-grid">
+        ${v.main_subject?`<div class="kv"><div class="kv-label">Main Subject</div><div class="kv-value">${esc(v.main_subject)}</div></div>`:''}
+        ${v.setting?`<div class="kv"><div class="kv-label">Setting</div><div class="kv-value">${esc(v.setting)}</div></div>`:''}
+        ${v.aesthetic?`<div class="kv"><div class="kv-label">Aesthetic</div><div class="kv-value">${esc(v.aesthetic)}</div></div>`:''}
+        ${v.lighting?`<div class="kv"><div class="kv-label">Lighting</div><div class="kv-value">${esc(v.lighting)}</div></div>`:''}
+        ${v.composition?`<div class="kv"><div class="kv-label">Composition</div><div class="kv-value">${esc(v.composition)}</div></div>`:''}
+        ${v.production_quality?`<div class="kv"><div class="kv-label">Production</div><div class="kv-value">${esc(v.production_quality)}</div></div>`:''}
+        ${v.mood?`<div class="kv"><div class="kv-label">Visual Mood</div><div class="kv-value">${esc(v.mood)}</div></div>`:''}
+        ${v.color_mood?`<div class="kv"><div class="kv-label">Color Mood</div><div class="kv-value">${esc(v.color_mood)}</div></div>`:''}
+        ${v.faces?`<div class="kv"><div class="kv-label">People</div><div class="kv-value">${esc(v.faces)}</div></div>`:''}
+        ${v.text_on_screen?`<div class="kv"><div class="kv-label">On-screen Text</div><div class="kv-value">${esc(v.text_on_screen)}</div></div>`:''}
+      </div>
+    </div>
+    ${v.visual_style?`<div class="section"><div class="section-title">🖼 Visual Style</div><p style="font-size:13px;color:var(--muted);line-height:1.6">${esc(v.visual_style)}</p></div>`:''}
+    ${objs?`<div class="section"><div class="section-title">📦 Objects Detected</div><div class="topics-row">${objs}</div></div>`:''}
+    ${(v.side_subjects||[]).length?`<div class="section"><div class="section-title">➕ Side Subjects</div><div class="topics-row">${(v.side_subjects||[]).map(s=>`<span class="topic-chip">${esc(s)}</span>`).join('')}</div></div>`:''}
+  `;
+  panelsEl.appendChild(vp);
+
+  // ─ Transcript ─
+  const tp = document.createElement('div');
+  tp.className = 'dpanel'; tp.id = 'dp2';
+  const segs = r.transcript_segments || [];
+  if (segs.length) {
+    tp.innerHTML = `<div class="section"><div class="section-title">📝 Full Transcript (${segs.length} segments)</div>
+      <div class="transcript-box">${segs.map(s=>`<div class="tseg"><span class="tseg-time">${esc(s.time)}</span><span class="tseg-text">${esc(s.text)}</span></div>`).join('')}</div></div>`;
+  } else {
+    tp.innerHTML = `<div class="no-data">No transcript available for this video.<br><br>This may be because auto-captions are disabled or the video has manual captions only.</div>`;
   }
+  panelsEl.appendChild(tp);
+
+  // ─ Creator ─
+  const cp = document.createElement('div');
+  cp.className = 'dpanel'; cp.id = 'dp3';
+  const kwds = (r.keywords||[]).slice(0,20).map(k=>`<span class="topic-chip">${esc(k)}</span>`).join('');
+  cp.innerHTML = `
+    ${r.creator?`<div class="section"><div class="section-title">👤 Creator</div>
+      <div class="creator-card">
+        <div class="creator-icon">🎬</div>
+        <div><div class="creator-name">${esc(r.creator)}</div>
+          <div class="creator-sub">${r.subscriber_count?esc(r.subscriber_count)+' subscribers · ':''} ${r.creator_niche||''}</div>
+        </div>
+      </div></div>`:'' }
+    <div class="section"><div class="section-title">📋 Video Details</div>
+      <div class="kv-grid">
+        ${r.published_at?`<div class="kv"><div class="kv-label">Published</div><div class="kv-value">${esc(r.published_at.slice(0,10))}</div></div>`:''}
+        ${r.duration?`<div class="kv"><div class="kv-label">Duration</div><div class="kv-value">${fmtSec(r.duration)}</div></div>`:''}
+        ${r.views?`<div class="kv"><div class="kv-label">Views</div><div class="kv-value">${fmtNum(r.views)}</div></div>`:''}
+        ${r.likes?`<div class="kv"><div class="kv-label">Likes</div><div class="kv-value">${esc(r.likes)}</div></div>`:''}
+        ${r.language?`<div class="kv"><div class="kv-label">Language</div><div class="kv-value">${esc(r.language)}</div></div>`:''}
+        ${r.why_popular?`<div class="kv" style="grid-column:span 2"><div class="kv-label">Why It Gets Views</div><div class="kv-value" style="font-size:12px">${esc(r.why_popular)}</div></div>`:''}
+      </div>
+    </div>
+    ${r.description?`<div class="section"><div class="section-title">📄 Description</div><p style="font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-wrap">${esc(r.description.slice(0,600))}${r.description.length>600?'…':''}</p></div>`:''}
+    ${kwds?`<div class="section"><div class="section-title">🔖 Video Keywords</div><div class="topics-row">${kwds}</div></div>`:''}
+    ${m.user_note?`<div class="section"><div class="section-title">💬 Your Note</div><p style="font-size:13px;color:var(--muted);line-height:1.6;font-style:italic">${esc(m.user_note)}</p></div>`:''}
+  `;
+  panelsEl.appendChild(cp);
+
+  document.getElementById('dov').classList.add('open');
 }
 
-// ═══════════════════════════════════════════════════
-//  MODAL
-// ═══════════════════════════════════════════════════
-function openModal() {
-  document.getElementById('overlay').classList.add('open');
-  setTimeout(() => document.getElementById('urlIn').focus(), 300);
-}
-function closeModal() { document.getElementById('overlay').classList.remove('open'); }
-function overlayClick(e) { if (e.target.id === 'overlay') closeModal(); }
-
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+function switchDTab(idx, btn) {
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('urlTab').style.display = name === 'url' ? 'block' : 'none';
-  document.getElementById('noteTab').style.display = name === 'note' ? 'block' : 'none';
-  setTimeout(() => document.getElementById(name === 'url' ? 'urlIn' : 'noteIn').focus(), 50);
+  document.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
+  const p = document.getElementById('dp'+idx);
+  if(p) p.classList.add('active');
+}
+
+function closeDetail() { document.getElementById('dov').classList.remove('open'); }
+function dOvClick(e) { if(e.target.id==='dov') closeDetail(); }
+
+// ══════════════════════════════════════════════════
+//  MODAL & SAVE
+// ══════════════════════════════════════════════════
+function openModal() { document.getElementById('ov').classList.add('open'); setTimeout(()=>document.getElementById('urlIn').focus(),300); }
+function closeModal() { document.getElementById('ov').classList.remove('open'); resetProgress(); }
+function ovClick(e) { if(e.target.id==='ov') closeModal(); }
+function swTab(name,btn) {
+  document.querySelectorAll('.tab2').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.getElementById('urlTab').style.display = name==='url'?'block':'none';
+  document.getElementById('noteTab').style.display = name==='note'?'block':'none';
+  setTimeout(()=>document.getElementById(name==='url'?'urlIn':'noteIn').focus(),50);
+}
+
+function setStep(n, state, label) {
+  const el = document.getElementById('p'+n), tEl = document.getElementById('p'+n+'t');
+  el.className = 'pstep '+state;
+  if (label) tEl.textContent = label;
+}
+
+function resetProgress() {
+  document.getElementById('progBox').style.display='none';
+  [1,2,3,4,5].forEach(n=>{ const el=document.getElementById('p'+n); el.className='pstep'; });
+  document.getElementById('p1t').textContent='Fetching video info…';
+  document.getElementById('p2t').textContent='Getting engagement stats…';
+  document.getElementById('p3t').textContent='Analyzing video frames with AI vision…';
+  document.getElementById('p4t').textContent='Extracting transcript…';
+  document.getElementById('p5t').textContent='Building complete breakdown…';
 }
 
 function setBusy(btn, busy) {
   btn.disabled = busy;
-  btn.innerHTML = busy
-    ? '<div class="spinner"></div><span>Analyzing with AI…</span>'
-    : '<span>Save &amp; Analyze with AI</span>';
+  btn.innerHTML = busy ? '<div class="spin"></div><span>Analyzing…</span>' : '<span>Deep Analyze &amp; Save</span>';
 }
 
 async function doSaveUrl() {
   const url = document.getElementById('urlIn').value.trim();
   const note = document.getElementById('urlNote').value.trim();
-  if (!url) { toast('Please enter a URL', true); return; }
-  if (!url.startsWith('http')) { toast('URL must start with http…', true); return; }
+  if (!url) { toast('Please enter a URL',true); return; }
+  if (!url.startsWith('http')) { toast('URL must start with http',true); return; }
 
   const btn = document.getElementById('urlBtn');
   setBusy(btn, true);
+  const isYT = /youtu\.?be|youtube\.com/.test(url);
+
+  if (isYT) {
+    document.getElementById('progBox').style.display = 'block';
+  }
+
   try {
-    const isVideo = /youtu\.?be|instagram\.com|tiktok\.com|twitter\.com|x\.com|vimeo\.com|facebook\.com/.test(url);
-    const info = await getUrlInfo(url);
-    const analysis = await analyze(info, isVideo ? 'video' : 'article', url, note);
-    addMem({
-      type: isVideo ? 'video' : 'article',
-      url,
-      thumbnail: info.thumbnail || '',
-      title: analysis.title || info.title || '',
-      summary: analysis.summary || '',
-      tags: analysis.tags || [],
-      user_note: note
-    });
+    let mem;
+    if (isYT) {
+      mem = await analyzeYouTube(url, note, setStep);
+    } else {
+      mem = await analyzeGenericUrl(url, note);
+    }
+    addMem(mem);
     toast('✅ Memory saved!');
     document.getElementById('urlIn').value = '';
     document.getElementById('urlNote').value = '';
     closeModal();
     load();
   } catch(e) {
-    toast(e.message || 'Failed to save', true);
+    toast(e.message||'Failed',true);
   } finally {
     setBusy(btn, false);
+    if (isYT) setTimeout(resetProgress, 500);
   }
 }
 
 async function doSaveNote() {
   const content = document.getElementById('noteIn').value.trim();
-  if (!content) { toast('Please write something', true); return; }
-
+  if (!content) { toast('Write something first',true); return; }
   const btn = document.getElementById('noteBtn');
-  setBusy(btn, true);
+  btn.disabled=true; btn.innerHTML='<div class="spin"></div><span>Saving…</span>';
   try {
-    const analysis = await analyzeNote(content);
-    addMem({
-      type: 'note',
-      url: '',
-      thumbnail: '',
-      title: analysis.title || 'Note',
-      summary: analysis.summary || '',
-      tags: analysis.tags || [],
-      user_note: content
-    });
-    toast('✅ Note saved!');
+    const mem = await analyzeNote(content);
+    addMem(mem); toast('✅ Note saved!');
     document.getElementById('noteIn').value = '';
-    closeModal();
-    load();
-  } catch(e) {
-    toast(e.message || 'Failed to save', true);
-  } finally {
-    setBusy(btn, false);
-  }
+    closeModal(); load();
+  } catch(e) { toast(e.message||'Failed',true); }
+  finally { btn.disabled=false; btn.innerHTML='<span>Save &amp; Analyze</span>'; }
 }
 
 function doDelete(e, id) {
   e.stopPropagation();
-  if (!confirm('Delete this memory?')) return;
-  delMem(id);
-  toast('🗑 Deleted');
-  load();
-  if (searching && searchIn.value.trim()) runSearch(searchIn.value.trim());
+  if(!confirm('Delete?')) return;
+  delMem(id); toast('🗑 Deleted'); load();
+  if (searching&&sIn.value.trim()) runSearch(sIn.value.trim());
 }
 
-// ═══════════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════════
-function toast(msg, err = false) {
-  const t = document.createElement('div');
-  t.className = 'toast ' + (err ? 'err' : 'ok');
-  t.textContent = msg;
-  document.getElementById('toasts').appendChild(t);
-  setTimeout(() => t.remove(), err ? 4000 : 2500);
+// ── Toast ──
+function toast(msg, err=false) {
+  const t=document.createElement('div'); t.className='toast '+(err?'err':'ok'); t.textContent=msg;
+  document.getElementById('toasts').appendChild(t); setTimeout(()=>t.remove(),err?4500:2500);
 }
 
-// ═══════════════════════════════════════════════════
-//  KEYBOARD
-// ═══════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); searchIn.focus(); }
+  if(e.key==='Escape') { closeModal(); closeDetail(); }
+  if((e.metaKey||e.ctrlKey)&&e.key==='k') { e.preventDefault(); sIn.focus(); }
 });
 
-// ═══════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════
 load();
 </script>
 </body>
