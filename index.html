@@ -540,7 +540,8 @@ const delMem = id => setMems(getMems().filter(m=>m.id!==id));
 // ══════════════════════════════════════════════════
 const BK = 'memoryai_backend_url';
 const DEFAULT_BACKEND = 'https://black-shared-weeks-civilization.trycloudflare.com';
-let backendUrl = localStorage.getItem(BK) || DEFAULT_BACKEND;
+let _stored = localStorage.getItem(BK);
+let backendUrl = (_stored && _stored.startsWith('http')) ? _stored : DEFAULT_BACKEND;
 
 function updateConnUI() {
   const dot = document.getElementById('connDot');
@@ -1273,8 +1274,22 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeSave();closeDetail();closeConnModal();document.getElementById('connOv').classList.remove('open');}
 });
 
-updateConnUI();
-loadAll();
+async function autoConnect() {
+  try {
+    const r = await fetch(backendUrl + '/api/memories', {signal: AbortSignal.timeout(5000)});
+    if (r.ok) { localStorage.setItem(BK, backendUrl); updateConnUI(); loadAll(); return; }
+  } catch(_) {}
+  // stored URL failed — try DEFAULT
+  if (backendUrl !== DEFAULT_BACKEND) {
+    try {
+      const r = await fetch(DEFAULT_BACKEND + '/api/memories', {signal: AbortSignal.timeout(5000)});
+      if (r.ok) { backendUrl = DEFAULT_BACKEND; localStorage.setItem(BK, backendUrl); updateConnUI(); loadAll(); return; }
+    } catch(_) {}
+  }
+  // nothing works — browser-only mode
+  backendUrl = ''; updateConnUI(); loadAll();
+}
+autoConnect();
 </script>
 </body>
 </html>
