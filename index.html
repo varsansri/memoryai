@@ -208,7 +208,7 @@ textarea.fi{resize:none;height:90px}
       <div class="fg">
         <label class="fl">Paste any link</label>
         <input class="fi" type="url" id="urlIn" placeholder="https://youtube.com/watch?v=… or any URL" autocomplete="off">
-        <div class="hint">YouTube gets full breakdown: transcript · frame analysis · stats · aesthetics · creator info</div>
+        <div class="hint">YouTube & Instagram get full breakdown: visual analysis · stats · aesthetics · creator info · AI summary</div>
       </div>
       <div class="fg">
         <label class="fl">Your note (optional)</label>
@@ -549,6 +549,165 @@ async function analyzeYouTube(url, userNote, setStep) {
 }
 
 // ══════════════════════════════════════════════════
+//  INSTAGRAM PIPELINE
+// ══════════════════════════════════════════════════
+function getIGShortcode(url) {
+  const m = url.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+async function scrapeIGPage(url) {
+  const html = await fetchWithProxy(url, 18000);
+  if (!html) return {};
+  const re = (pat, def='') => { try { return (html.match(pat)||[,def])[1]?.trim()||def; } catch { return def; } };
+  const title = re(/og:title["\s]+content="([^"]+)"/i) || re(/<title[^>]*>([^<]+)/i, '');
+  const desc  = re(/og:description["\s]+content="([^"]+)"/i) || '';
+  const thumb = re(/og:image["\s]+content="([^"]+)"/i) || '';
+  let creator = '', caption = desc;
+  const cm = desc.match(/^(.+?) on Instagram[:\s]*"?([\s\S]*)/i);
+  if (cm) { creator = cm[1].trim(); caption = cm[2].replace(/"$/, '').trim(); }
+  const views = re(/"video_view_count":(\d+)/) || re(/"playCount":(\d+)/) || '';
+  const likes = re(/"like_count":(\d+)/) || re(/"edge_liked_by":\{"count":(\d+)/) || '';
+  const subs  = re(/"edge_followed_by":\{"count":(\d+)/) || '';
+  return { title, description: caption || desc, thumbnail: thumb, creator, views, likes, subscriberCount: subs };
+}
+
+async function analyzeIGVisual(thumbnailUrl) {
+  if (!thumbnailUrl) return {};
+  const text = await groqVision([{ role:'user', content:[
+    { type:'text', text:`Analyze this Instagram reel thumbnail/poster frame. Return ONLY this exact JSON (no markdown):
+{
+  "main_subject": "primary person/object/action visible",
+  "side_subjects": ["other notable elements"],
+  "setting": "location or environment description",
+  "dominant_colors": ["color1","color2","color3"],
+  "color_mood": "warm|cool|neutral|vibrant|muted|dark|moody|bright",
+  "aesthetic": "cinematic|aesthetic|vlog|tutorial|fashion|food|travel|fitness|comedy|dance|art|lifestyle|other",
+  "lighting": "natural daylight|golden hour|studio|ring-light|dramatic|low-key|neon|outdoor|mixed",
+  "production_quality": "professional|semi-pro|amateur|lo-fi",
+  "visual_style": "1-sentence description of the overall visual style",
+  "composition": "wide-shot|close-up|talking-head|action|product-shot|landscape|selfie|mixed",
+  "text_on_screen": "any visible text overlays or captions, or none",
+  "faces": "number of people visible and their apparent expressions",
+  "objects": ["key objects visible"],
+  "mood": "energetic|calm|dramatic|funny|romantic|tense|inspiring|trendy|chill",
+  "brand_style": "any visible brand elements, aesthetic signatures, or influencer style markers"
+}` },
+    { type:'image_url', image_url:{ url: thumbnailUrl } }
+  ]}], 1000);
+  return parseJSON(text);
+}
+
+async function buildIGBreakdown(page, visual, url, userNote) {
+  const ctx = [
+    page.creator         && `Creator: @${page.creator}`,
+    page.title           && `Post title/caption: ${page.title}`,
+    page.description     && `Caption: ${page.description.slice(0,700)}`,
+    page.views           && `Views: ${fmtNum(page.views)}`,
+    page.likes           && `Likes: ${page.likes}`,
+    page.subscriberCount && `Followers: ${page.subscriberCount}`,
+    visual.main_subject  && `Visual main subject: ${visual.main_subject}`,
+    visual.aesthetic     && `Visual aesthetic: ${visual.aesthetic}`,
+    visual.mood          && `Visual mood: ${visual.mood}`,
+    visual.setting       && `Setting: ${visual.setting}`,
+    visual.visual_style  && `Visual style: ${visual.visual_style}`,
+    `Platform: Instagram Reel`,
+    userNote             && `User note: ${userNote}`,
+  ].filter(Boolean).join('\n');
+
+  const text = await groq([{
+    role:'system', content:'You are an expert social media analyst. Return ONLY valid JSON with no markdown.'
+  },{
+    role:'user',
+    content:`Analyze this Instagram Reel:\n\n${ctx}\n\nReturn ONLY this JSON:
+{
+  "title": "concise descriptive title (max 9 words)",
+  "summary": "3-4 sentence summary of what this reel is about, the creator style, and why it is worth saving",
+  "main_topic": "single primary topic",
+  "subtopics": ["topic2","topic3","topic4"],
+  "category": "Fashion|Food|Travel|Fitness|Music|Comedy|Education|Art|Beauty|Lifestyle|Tech|Business|Sports|Gaming|Entertainment|Other",
+  "sub_category": "more specific niche",
+  "content_type": "Tutorial|Comedy Skit|Dance|Aesthetic|Vlog|Review|Motivation|Story|Educational|Transformation|Behind-the-Scenes|Trend|Other",
+  "target_audience": "who this reel is for",
+  "tone": "Casual|Humorous|Aesthetic|Educational|Inspirational|Emotional|Trendy|Raw",
+  "language": "detected primary language",
+  "key_points": ["insight 1","insight 2","insight 3"],
+  "what_you_learn": "1 sentence on what makes this memorable or useful",
+  "why_popular": "1 sentence on why this type of content gets engagement",
+  "tags": ["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"],
+  "creator_niche": "description of this creator style and niche",
+  "content_quality": "High|Medium|Low",
+  "sentiment": "Positive|Negative|Neutral|Mixed",
+  "pacing": "Fast|Medium|Slow",
+  "similar_to": ["similar creator or account 1","similar creator or account 2"]
+}`
+  }], 1200);
+  return parseJSON(text);
+}
+
+async function analyzeInstagram(url, userNote, setStep) {
+  document.getElementById('p1t').textContent = 'Fetching reel metadata…';
+  document.getElementById('p2t').textContent = 'AI visual analysis of thumbnail…';
+  document.getElementById('p3t').textContent = 'Building deep content breakdown…';
+  document.getElementById('p4t').textContent = 'Finalizing…';
+  document.getElementById('p5').style.display = 'none';
+
+  setStep(1, 'active');
+  const shortcode = getIGShortcode(url);
+  const page = await scrapeIGPage(url);
+  setStep(1, 'done', `✓ Reel: ${page.creator ? '@'+page.creator : shortcode || 'fetched'}`);
+
+  setStep(2, 'active');
+  let visual = {};
+  try {
+    visual = await analyzeIGVisual(page.thumbnail);
+    setStep(2, 'done', `✓ Visual: ${visual.aesthetic||''} · ${visual.mood||''}`);
+  } catch(e) { setStep(2, 'fail', '⚠ Visual analysis skipped'); }
+
+  setStep(3, 'active');
+  const breakdown = await buildIGBreakdown(page, visual, url, userNote);
+  setStep(3, 'done', '✓ Complete breakdown ready!');
+  setStep(4, 'done', '✓ Saved to memory!');
+  document.getElementById('p5').style.display = '';
+
+  return {
+    type: 'video', platform: 'instagram', url,
+    thumbnail: page.thumbnail || '',
+    title: breakdown.title || page.title || 'Instagram Reel',
+    summary: breakdown.summary || '',
+    tags: breakdown.tags || [],
+    user_note: userNote,
+    rich: {
+      video_id: shortcode,
+      creator: page.creator,
+      views: page.views,
+      likes: page.likes,
+      subscriber_count: page.subscriberCount,
+      description: page.description,
+      category: breakdown.category || '',
+      sub_category: breakdown.sub_category,
+      content_type: breakdown.content_type,
+      main_topic: breakdown.main_topic,
+      subtopics: breakdown.subtopics || [],
+      key_points: breakdown.key_points || [],
+      tone: breakdown.tone,
+      target_audience: breakdown.target_audience,
+      language: breakdown.language,
+      content_quality: breakdown.content_quality,
+      sentiment: breakdown.sentiment,
+      creator_niche: breakdown.creator_niche,
+      similar_to: breakdown.similar_to || [],
+      what_you_learn: breakdown.what_you_learn,
+      why_popular: breakdown.why_popular,
+      frames: page.thumbnail ? [page.thumbnail] : [],
+      visual,
+      transcript_segments: [],
+      transcript_full: '',
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════
 //  GENERIC URL / NOTE ANALYSIS
 // ══════════════════════════════════════════════════
 async function analyzeGenericUrl(url, userNote) {
@@ -601,9 +760,10 @@ const timeAgo = iso => { const d=Date.now()-new Date(iso).getTime(); if(d<60e3)r
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function platformBadge(m) {
-  if (m.platform==='youtube') return '<span class="badge byt">▶ YouTube</span>';
-  if (m.type==='note') return '<span class="badge bn">📝 Note</span>';
-  if (m.platform==='web') return '<span class="badge bw">🌐 Article</span>';
+  if (m.platform==='youtube')   return '<span class="badge byt">▶ YouTube</span>';
+  if (m.platform==='instagram') return '<span class="badge big">📸 Instagram</span>';
+  if (m.type==='note')          return '<span class="badge bn">📝 Note</span>';
+  if (m.platform==='web')       return '<span class="badge bw">🌐 Article</span>';
   return '<span class="badge btt">📎 Saved</span>';
 }
 
@@ -668,8 +828,9 @@ function updateStats(shown) {
   if (!total) { el.innerHTML='No memories yet'; return; }
   if (searching) { el.innerHTML=`Found <b>${shown.length}</b> of <b>${total}</b>`; return; }
   const yt = allMems.filter(m=>m.platform==='youtube').length;
+  const ig = allMems.filter(m=>m.platform==='instagram').length;
   const notes = allMems.filter(m=>m.type==='note').length;
-  el.innerHTML = `<b>${total}</b> memories · ${yt} YouTube · ${notes} notes`;
+  el.innerHTML = `<b>${total}</b> memories · ${yt} YouTube${ig?' · '+ig+' Instagram':''} · ${notes} notes`;
 }
 function load() { allMems = getMems(); render(allMems); updateStats(allMems); }
 
@@ -861,7 +1022,7 @@ function setStep(n, state, label) {
 
 function resetProgress() {
   document.getElementById('progBox').style.display='none';
-  [1,2,3,4,5].forEach(n=>{ const el=document.getElementById('p'+n); el.className='pstep'; });
+  [1,2,3,4,5].forEach(n=>{ const el=document.getElementById('p'+n); el.className='pstep'; el.style.display=''; });
   document.getElementById('p1t').textContent='Fetching video info…';
   document.getElementById('p2t').textContent='Getting engagement stats…';
   document.getElementById('p3t').textContent='Analyzing video frames with AI vision…';
@@ -883,8 +1044,9 @@ async function doSaveUrl() {
   const btn = document.getElementById('urlBtn');
   setBusy(btn, true);
   const isYT = /youtu\.?be|youtube\.com/.test(url);
+  const isIG = /instagram\.com\/(reel|p|tv)\//.test(url);
 
-  if (isYT) {
+  if (isYT || isIG) {
     document.getElementById('progBox').style.display = 'block';
   }
 
@@ -892,6 +1054,8 @@ async function doSaveUrl() {
     let mem;
     if (isYT) {
       mem = await analyzeYouTube(url, note, setStep);
+    } else if (isIG) {
+      mem = await analyzeInstagram(url, note, setStep);
     } else {
       mem = await analyzeGenericUrl(url, note);
     }
