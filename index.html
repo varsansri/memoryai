@@ -851,11 +851,11 @@ async function sendQuery() {
       const memCtx = allMems.slice(0,40).map(m=>
         `ID:${m.id}|[${m.type}]"${m.title}"|${m.summary.slice(0,120)}|note:${(m.user_note||'').slice(0,150)}|tags:${(m.tags||[]).join(',')}|date:${(m.created_at||'').slice(0,10)}`
       ).join('\n');
-      const sys = `You are a personal memory assistant. User has ${allMems.length} saved memories:\n${memCtx}\n\nReturn ONLY this JSON:\n{"reply":"conversational answer 2-4 sentences","sources":[{"id":<id>,"snippet":"exact quote from note/summary that answers question","highlight":"specific key phrase to highlight (name/number/date/fact)"}]}`;
+      const sys = `You are NoteSorb, a personal memory assistant. User has ${allMems.length} saved memories:\n${memCtx}\n\nAlways respond in this EXACT JSON format (no markdown, no extra text):\n{"reply":"your conversational answer here","sources":[{"id":<memory_id>,"snippet":"exact quote","highlight":"key phrase"}]}\nFor greetings or off-topic messages, still return JSON with a helpful reply and empty sources array.`;
       const text = await groq([{role:'system',content:sys},...chatHistory.slice(-6)], 800);
       const parsed = parseJSON(text);
-      reply = parsed.reply || text;
-      sources = (parsed.sources||[]).map(s=>{
+      reply = (parsed && parsed.reply) ? parsed.reply : (text || 'Sorry, no response.');
+      sources = (parsed && parsed.sources||[]).map(s=>{
         const m=allMems.find(x=>x.id===s.id)||{};
         return {...s, title:m.title||'', thumbnail:m.thumbnail||'', type:m.type||''};
       });
@@ -1281,10 +1281,12 @@ function fetchWithTimeout(url, ms) {
 }
 
 async function autoConnect() {
-  const urls = [backendUrl, DEFAULT_BACKEND].filter((u,i,a) => u && a.indexOf(u)===i);
-  for (const url of urls) {
+  // Try localhost first (phone accessing its own server), then tunnel, then stored URL
+  const candidates = ['http://localhost:8000', DEFAULT_BACKEND, backendUrl]
+    .filter((u,i,a) => u && a.indexOf(u)===i);
+  for (const url of candidates) {
     try {
-      const r = await fetchWithTimeout(url + '/api/memories', 6000);
+      const r = await fetchWithTimeout(url + '/api/memories', 5000);
       if (r.ok) {
         backendUrl = url;
         localStorage.setItem(BK, url);
