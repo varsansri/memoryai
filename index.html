@@ -30,19 +30,35 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .sidebar-search input:focus{border-color:var(--accent)}
 .sidebar-sections{flex:1;overflow-y:auto;padding:0 8px 8px}
 .sidebar-sections::-webkit-scrollbar{width:4px}.sidebar-sections::-webkit-scrollbar-track{background:transparent}.sidebar-sections::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px}
-.section-hdr{display:flex;align-items:center;gap:6px;padding:10px 6px 6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;cursor:pointer;user-select:none}
-.section-hdr svg{transition:transform .2s;opacity:.6}
-.section-hdr.collapsed svg{transform:rotate(-90deg)}
-.section-items{display:flex;flex-direction:column;gap:2px}
-.section-items.hidden{display:none}
-.sitem{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:8px;cursor:pointer;transition:background .12s;min-width:0}
-.sitem:hover{background:var(--surface)}
-.sitem.active{background:var(--surface2)}
+/* ── Collection box ── */
+.col-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.col-hdr{display:flex;align-items:center;gap:7px;padding:10px 12px;cursor:pointer;user-select:none}
+.col-hdr-icon{font-size:15px}
+.col-hdr-title{font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.7px;flex:1}
+.col-count{font-size:10px;background:var(--surface2);color:var(--muted);padding:2px 7px;border-radius:10px;font-weight:600}
+.col-plus{width:24px;height:24px;border-radius:7px;background:var(--accent);border:none;color:#fff;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
+.col-plus:hover{opacity:.8}
+.col-body{padding:0 8px 8px}
+.col-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.cgrid-item{aspect-ratio:16/9;border-radius:7px;overflow:hidden;cursor:pointer;position:relative;background:var(--surface2);transition:transform .15s}
+.cgrid-item:hover{transform:scale(1.04)}
+.cgrid-item img{width:100%;height:100%;object-fit:cover;display:block}
+.cgrid-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px}
+.cgrid-empty{aspect-ratio:16/9;border-radius:7px;background:rgba(255,255,255,.03);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.4}
+.col-label{font-size:9px;color:var(--muted);position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:10px 4px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col-empty-msg{font-size:12px;color:var(--muted);text-align:center;padding:10px 4px 4px;font-style:italic}
+.view-col-btn{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.view-col-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--accent)}
+/* full list below grid */
+.col-list{display:flex;flex-direction:column;gap:3px;margin-bottom:8px;display:none}
+.col-list.open{display:flex}
+.sitem{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .12s;min-width:0}
+.sitem:hover{background:var(--surface2)}
 .sitem-thumb{width:40px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--surface2)}
 .sitem-thumb-ph{width:40px;height:28px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 .sitem-info{flex:1;min-width:0}
-.sitem-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
-.sitem-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sitem-title{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.sitem-sub{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-bottom{flex-shrink:0;padding:12px;background:var(--sidebar);border-top:1px solid var(--border)}
 .add-mem-btn{width:100%;padding:11px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s}
 .add-mem-btn:hover{opacity:.88}
@@ -247,18 +263,40 @@ textarea.fi{resize:none;height:90px}
       <input type="text" id="filterIn" placeholder="Filter memories…" oninput="filterSidebar(this.value)">
     </div>
     <div class="sidebar-sections" id="sidebarSections">
-      <div class="section-hdr" onclick="toggleSection('media',this)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        📹 Media
-        <span id="mediaCount" style="margin-left:auto;font-size:10px;background:var(--surface);padding:1px 6px;border-radius:10px"></span>
+      <!-- Media Collection Box -->
+      <div class="col-box">
+        <div class="col-hdr">
+          <span class="col-hdr-icon">📹</span>
+          <span class="col-hdr-title">Media</span>
+          <span class="col-count" id="mediaCount">0</span>
+          <button class="col-plus" onclick="event.stopPropagation();openSave('video')" title="Add media">+</button>
+        </div>
+        <div class="col-body">
+          <div class="col-grid" id="mediaGrid"></div>
+          <div class="col-list" id="mediaSidebar"></div>
+          <button class="view-col-btn" onclick="toggleColList('media')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span id="mediaViewBtn">View Collection</span>
+          </button>
+        </div>
       </div>
-      <div class="section-items" id="mediaSidebar"></div>
-      <div class="section-hdr" onclick="toggleSection('notes',this)" style="margin-top:6px">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        📝 Notes
-        <span id="notesCount" style="margin-left:auto;font-size:10px;background:var(--surface);padding:1px 6px;border-radius:10px"></span>
+      <!-- Notes Collection Box -->
+      <div class="col-box">
+        <div class="col-hdr">
+          <span class="col-hdr-icon">📝</span>
+          <span class="col-hdr-title">Notes</span>
+          <span class="col-count" id="notesCount">0</span>
+          <button class="col-plus" onclick="event.stopPropagation();openSave('note')" title="Add note">+</button>
+        </div>
+        <div class="col-body">
+          <div class="col-grid" id="notesGrid"></div>
+          <div class="col-list" id="notesSidebar"></div>
+          <button class="view-col-btn" onclick="toggleColList('notes')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span id="notesViewBtn">View Collection</span>
+          </button>
+        </div>
       </div>
-      <div class="section-items" id="notesSidebar"></div>
     </div>
     <div class="sidebar-bottom">
       <div class="conn-chip" onclick="openConnModal()" id="connChip">
@@ -275,13 +313,13 @@ textarea.fi{resize:none;height:90px}
   <div class="main" id="main">
     <div class="topbar">
       <button class="topbar-menu" onclick="openSidebar()">☰</button>
-      <span class="topbar-title">🧠 MemoryAI</span>
+      <span class="topbar-title" onclick="location.reload()" style="cursor:pointer">🧠 MemoryAI</span>
       <button class="attach-btn" onclick="openSave()" style="margin-left:auto">+</button>
     </div>
 
     <!-- Welcome -->
     <div class="welcome" id="welcome">
-      <div class="welcome-logo">🧠</div>
+      <div class="welcome-logo" onclick="location.reload()" style="cursor:pointer">🧠</div>
       <div class="welcome-title">What can I help you find?</div>
       <div class="welcome-sub">Ask about anything you've saved — videos, notes, articles. I remember everything and can find specific details, quotes, and dates.</div>
       <div class="welcome-examples" id="welcomeExamples">
@@ -549,12 +587,33 @@ function toggleSection(id, hdr) {
 }
 
 function renderSidebar() {
-  const media = allMems.filter(m=>m.type!=='note'&&(!filterQ||m.title.toLowerCase().includes(filterQ)||m.summary.toLowerCase().includes(filterQ)));
-  const notes = allMems.filter(m=>m.type==='note'&&(!filterQ||m.title.toLowerCase().includes(filterQ)||(m.user_note||'').toLowerCase().includes(filterQ)));
+  const q = filterQ.toLowerCase();
+  const media = allMems.filter(m=>m.type!=='note'&&(!q||m.title.toLowerCase().includes(q)||(m.summary||'').toLowerCase().includes(q)));
+  const notes = allMems.filter(m=>m.type==='note'&&(!q||m.title.toLowerCase().includes(q)||(m.user_note||'').toLowerCase().includes(q)));
 
   document.getElementById('mediaCount').textContent = media.length;
   document.getElementById('notesCount').textContent = notes.length;
 
+  // ── Media grid (latest 4) ──
+  const mgEl = document.getElementById('mediaGrid');
+  const gridMedia = media.slice(0,4);
+  const emptyMedia = 4 - gridMedia.length;
+  mgEl.innerHTML = gridMedia.map(m => {
+    const icon = m.platform==='youtube'?'🎬':m.platform==='instagram'?'📸':'📄';
+    const inner = m.thumbnail
+      ? `<img src="${esc(m.thumbnail)}" loading="lazy" onerror="this.outerHTML='<div class=cgrid-ph>${icon}</div>'">`
+      : `<div class="cgrid-ph">${icon}</div>`;
+    return `<div class="cgrid-item" onclick="openDetail(${m.id})" title="${esc(m.title||'Untitled')}">
+      ${inner}
+      <div class="col-label">${esc(m.title||'Untitled')}</div>
+    </div>`;
+  }).join('') + Array(emptyMedia).fill('<div class="cgrid-empty">+</div>').join('');
+
+  if (!media.length) {
+    mgEl.innerHTML = '<div class="col-empty-msg" style="grid-column:1/-1">No media saved yet</div>';
+  }
+
+  // ── Media full list ──
   document.getElementById('mediaSidebar').innerHTML = media.map(m => {
     const thumb = m.thumbnail
       ? `<img class="sitem-thumb" src="${esc(m.thumbnail)}" loading="lazy" onerror="this.style.display='none'">`
@@ -566,8 +625,23 @@ function renderSidebar() {
         <div class="sitem-sub">${esc((m.rich?.creator||m.rich?.category||m.platform||'').slice(0,28))}</div>
       </div>
     </div>`;
-  }).join('') || '<div style="padding:10px 8px;font-size:12px;color:var(--muted)">No media saved yet</div>';
+  }).join('');
 
+  // ── Notes grid (latest 4) ──
+  const ngEl = document.getElementById('notesGrid');
+  const gridNotes = notes.slice(0,4);
+  const emptyNotes = 4 - gridNotes.length;
+  if (!notes.length) {
+    ngEl.innerHTML = '<div class="col-empty-msg" style="grid-column:1/-1">No notes yet</div>';
+  } else {
+    ngEl.innerHTML = gridNotes.map(m => `
+      <div class="cgrid-item" onclick="openDetail(${m.id})" title="${esc(m.title||'Note')}">
+        <div class="cgrid-ph">📝</div>
+        <div class="col-label">${esc(m.title||'Note')}</div>
+      </div>`).join('') + Array(emptyNotes).fill('<div class="cgrid-empty">+</div>').join('');
+  }
+
+  // ── Notes full list ──
   document.getElementById('notesSidebar').innerHTML = notes.map(m => `
     <div class="sitem" onclick="openDetail(${m.id})">
       <div class="sitem-thumb-ph">📝</div>
@@ -575,8 +649,14 @@ function renderSidebar() {
         <div class="sitem-title">${esc(m.title||'Note')}</div>
         <div class="sitem-sub">${esc((m.user_note||'').slice(0,30))}</div>
       </div>
-    </div>
-  `).join('') || '<div style="padding:10px 8px;font-size:12px;color:var(--muted)">No notes yet</div>';
+    </div>`).join('');
+}
+
+function toggleColList(type) {
+  const list = document.getElementById(type==='media'?'mediaSidebar':'notesSidebar');
+  const btn  = document.getElementById(type==='media'?'mediaViewBtn':'notesViewBtn');
+  const open = list.classList.toggle('open');
+  btn.textContent = open ? 'Hide Collection' : 'View Collection';
 }
 
 // ══════════════════════════════════════════════════
@@ -713,7 +793,18 @@ async function sendQuery() {
 // ══════════════════════════════════════════════════
 //  SAVE
 // ══════════════════════════════════════════════════
-function openSave() { document.getElementById('saveOv').classList.add('open'); setTimeout(()=>document.getElementById('urlIn').focus(),300); }
+function openSave(tab) {
+  document.getElementById('saveOv').classList.add('open');
+  if (tab==='note') {
+    document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.stab[onclick*="note"]')?.classList.add('active');
+    document.getElementById('urlTab').style.display='none';
+    document.getElementById('noteTab').style.display='block';
+    setTimeout(()=>document.getElementById('noteTitle').focus(),300);
+  } else {
+    setTimeout(()=>document.getElementById('urlIn').focus(),300);
+  }
+}
 function closeSave() { document.getElementById('saveOv').classList.remove('open'); resetProg(); }
 function savOvClick(e) { if(e.target.id==='saveOv') closeSave(); }
 function swSaveTab(n,btn) {
