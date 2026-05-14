@@ -85,7 +85,7 @@ body{height:100%;height:100dvh;font-family:-apple-system,BlinkMacSystemFont,'Seg
 .welcome-sub{font-size:13px;color:var(--muted);max-width:480px;line-height:1.5;margin-bottom:20px}
 
 /* ── Home collection boxes ── */
-.home-collections{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:640px;margin-bottom:20px}
+.home-collections{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;max-width:680px;margin-bottom:0}
 .home-col-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;text-align:left}
 .home-col-hdr{display:flex;align-items:center;gap:7px;padding:11px 12px 8px}
 .home-col-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;flex:1}
@@ -248,6 +248,28 @@ textarea.fi{resize:none;height:90px}
 .toast.ok{background:var(--ok);color:#fff}.toast.err{background:var(--err);color:#fff}
 @keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 
+/* ── Photo drop zone ── */
+.photo-drop{border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;color:var(--muted);min-height:110px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;font-size:13px}
+.photo-drop:hover{border-color:var(--accent);background:rgba(16,163,127,.04)}
+.photo-drop.has-img{padding:8px;border-style:solid;border-color:var(--accent)}
+.photo-drop img{max-width:100%;max-height:180px;border-radius:8px;object-fit:contain}
+.photo-drop-icon{font-size:28px;line-height:1}
+
+/* ── Feed Me black hole button ── */
+.feed-me-wrap{display:flex;flex-direction:column;align-items:center;margin:12px 0 20px;gap:8px;width:100%;max-width:640px}
+.feed-me-btn{position:relative;width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#0e0e0e,#000);border:none;cursor:pointer;box-shadow:0 0 0 1px rgba(16,163,127,.25),0 0 30px rgba(0,0,0,.9),0 0 60px rgba(16,163,127,.08);transition:transform .18s,box-shadow .18s}
+.feed-me-btn:hover{transform:scale(1.1);box-shadow:0 0 0 1px rgba(16,163,127,.55),0 0 40px rgba(0,0,0,.9),0 0 80px rgba(16,163,127,.22)}
+.feed-me-btn:active{transform:scale(.93)}
+.bh-ring{position:absolute;border-radius:50%;border:1px solid rgba(16,163,127,.38);animation:bhspin linear infinite;top:50%;left:50%}
+.bh-r1{width:104px;height:104px;margin-left:-52px;margin-top:-52px;animation-duration:5s;border-color:rgba(16,163,127,.22)}
+.bh-r2{width:88px;height:88px;margin-left:-44px;margin-top:-44px;animation-duration:3.4s;animation-direction:reverse;border-color:rgba(16,163,127,.32)}
+.bh-r3{width:72px;height:72px;margin-left:-36px;margin-top:-36px;animation-duration:2.1s;border-color:rgba(16,163,127,.42)}
+.bh-core{position:absolute;inset:20px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#050505,#000);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:rgba(16,163,127,.65);letter-spacing:.6px;text-align:center;line-height:1.2}
+.feed-me-btn.feeding .bh-core{color:#10a37f;text-shadow:0 0 10px #10a37f;animation:bhpulse 1s infinite}
+.feed-me-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;opacity:.7}
+@keyframes bhspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes bhpulse{0%,100%{opacity:.6}50%{opacity:1}}
+
 /* ── Mobile overlay sidebar ── */
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 
@@ -259,7 +281,7 @@ textarea.fi{resize:none;height:90px}
   .sidebar-bottom{width:auto}
   .welcome-examples{grid-template-columns:1fr}
   .welcome-title{font-size:18px}
-  .home-collections{grid-template-columns:1fr 1fr}
+  .home-collections{grid-template-columns:1fr 1fr 1fr}
   .kv-grid{grid-template-columns:1fr}
   .frames-grid{grid-template-columns:1fr 1fr}
   .input-bar{padding:8px 10px 12px}
@@ -316,6 +338,23 @@ textarea.fi{resize:none;height:90px}
           </button>
         </div>
       </div>
+      <!-- Photos Collection Box -->
+      <div class="col-box">
+        <div class="col-hdr">
+          <span class="col-hdr-icon">📷</span>
+          <span class="col-hdr-title">Photos</span>
+          <span class="col-count" id="photosCount">0</span>
+          <button class="col-plus" onclick="event.stopPropagation();openSave('photo')" title="Add photo">+</button>
+        </div>
+        <div class="col-body">
+          <div class="col-grid" id="photosGrid"></div>
+          <div class="col-list" id="photosSidebar"></div>
+          <button class="view-col-btn" onclick="toggleColList('photos')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span id="photosViewBtn">View Collection</span>
+          </button>
+        </div>
+      </div>
     </div>
     <div class="sidebar-bottom">
       <div class="conn-chip" onclick="openConnModal()" id="connChip">
@@ -366,6 +405,27 @@ textarea.fi{resize:none;height:90px}
           <div class="home-col-grid" id="homeNotesGrid"></div>
           <button class="home-view-btn" onclick="toggleColList('notes')">View Collection →</button>
         </div>
+        <!-- Photos -->
+        <div class="home-col-box">
+          <div class="home-col-hdr">
+            <span class="home-col-title">📷 Photos</span>
+            <span class="home-col-count" id="homePhotosCount">0</span>
+            <button class="home-col-plus" onclick="openSave('photo')">+</button>
+          </div>
+          <div class="home-col-grid" id="homePhotosGrid"></div>
+          <button class="home-view-btn" onclick="toggleColList('photos')">View Collection →</button>
+        </div>
+      </div>
+
+      <!-- Feed Me button -->
+      <div class="feed-me-wrap">
+        <button class="feed-me-btn" id="feedMeBtn" onclick="feedMe()" title="Tap to feed clipboard content to NoteSorb">
+          <div class="bh-ring bh-r1"></div>
+          <div class="bh-ring bh-r2"></div>
+          <div class="bh-ring bh-r3"></div>
+          <div class="bh-core">FEED<br>ME</div>
+        </button>
+        <span class="feed-me-label">paste from clipboard</span>
       </div>
 
       <!-- Example prompts -->
@@ -416,8 +476,9 @@ textarea.fi{resize:none;height:90px}
     <div class="sheet-handle"></div>
     <div class="sheet-title">Save to Memory</div>
     <div class="sheet-tabs">
-      <button class="stab active" onclick="swSaveTab('url',this)">🔗 URL / Video</button>
+      <button class="stab active" onclick="swSaveTab('url',this)">🔗 URL</button>
       <button class="stab" onclick="swSaveTab('note',this)">📝 Note</button>
+      <button class="stab" onclick="swSaveTab('photo',this)">📷 Photo</button>
     </div>
     <div class="progress-box" id="progBox">
       <div class="prog-row active" id="pr1"><div class="pdot"></div><span id="pr1t">Downloading video…</span></div>
@@ -444,6 +505,22 @@ textarea.fi{resize:none;height:90px}
         <textarea class="fi" id="noteIn" placeholder="Idea, reminder, conversation notes…" style="height:130px"></textarea>
       </div>
       <button class="save-btn" id="noteBtn" onclick="doSaveNote()"><span>Save &amp; Analyze</span></button>
+    </div>
+    <div id="photoTab" style="display:none">
+      <div class="fg">
+        <label class="fl">Upload screenshot or photo</label>
+        <div class="photo-drop" id="photoDrop" onclick="document.getElementById('photoFileIn').click()">
+          <div class="photo-drop-icon">📷</div>
+          <span>Tap to choose image</span>
+          <span style="font-size:11px;opacity:.6">AI will read text, understand content, extract info</span>
+        </div>
+        <input type="file" id="photoFileIn" accept="image/*" style="display:none" onchange="photoFileChosen(this)">
+      </div>
+      <div class="fg">
+        <label class="fl">Note (optional)</label>
+        <textarea class="fi" id="photoNote" placeholder="What is this screenshot about?"></textarea>
+      </div>
+      <button class="save-btn" id="photoBtn" onclick="doSavePhoto()"><span>Analyze &amp; Save</span></button>
     </div>
   </div>
 </div>
@@ -607,6 +684,7 @@ function norm(m) {
     if(/youtu/.test(u)) m.platform='youtube';
     else if(/instagram/.test(u)) m.platform='instagram';
     else if(m.type==='note') m.platform='note';
+    else if(m.type==='photo') m.platform='photo';
     else m.platform='web';
   }
   return m;
@@ -639,11 +717,13 @@ function toggleSection(id, hdr) {
 
 function renderSidebar() {
   const q = filterQ.toLowerCase();
-  const media = allMems.filter(m=>m.type!=='note'&&(!q||m.title.toLowerCase().includes(q)||(m.summary||'').toLowerCase().includes(q)));
+  const photos = allMems.filter(m=>m.type==='photo'&&(!q||m.title.toLowerCase().includes(q)||(m.summary||'').toLowerCase().includes(q)));
+  const media = allMems.filter(m=>m.type!=='note'&&m.type!=='photo'&&(!q||m.title.toLowerCase().includes(q)||(m.summary||'').toLowerCase().includes(q)));
   const notes = allMems.filter(m=>m.type==='note'&&(!q||m.title.toLowerCase().includes(q)||(m.user_note||'').toLowerCase().includes(q)));
 
   document.getElementById('mediaCount').textContent = media.length;
   document.getElementById('notesCount').textContent = notes.length;
+  document.getElementById('photosCount').textContent = photos.length;
 
   // ── Media grid (latest 4) ──
   const mgEl = document.getElementById('mediaGrid');
@@ -702,11 +782,32 @@ function renderSidebar() {
       </div>
     </div>`).join('');
 
+  // ── Photos grid (latest 4) ──
+  const pgEl = document.getElementById('photosGrid');
+  const gridPhotos = photos.slice(0,4);
+  const emptyPhotos = 4 - gridPhotos.length;
+  pgEl.innerHTML = gridPhotos.map(m => {
+    const inner = m.thumbnail
+      ? `<img src="${esc(m.thumbnail)}" loading="lazy" onerror="this.outerHTML='<div class=cgrid-ph>📷</div>'">`
+      : `<div class="cgrid-ph">📷</div>`;
+    return `<div class="cgrid-item" onclick="openDetail(${m.id})" title="${esc(m.title||'Photo')}">${inner}<div class="col-label">${esc(m.title||'Photo')}</div></div>`;
+  }).join('') + (gridPhotos.length ? Array(emptyPhotos).fill('<div class="cgrid-empty">+</div>').join('') : '<div class="col-empty-msg" style="grid-column:1/-1">No photos yet</div>');
+
+  // ── Photos full list ──
+  document.getElementById('photosSidebar').innerHTML = photos.map(m => {
+    const thumb = m.thumbnail
+      ? `<img class="sitem-thumb" src="${esc(m.thumbnail)}" loading="lazy" onerror="this.style.display='none'">`
+      : `<div class="sitem-thumb-ph">📷</div>`;
+    return `<div class="sitem" onclick="openDetail(${m.id})">${thumb}<div class="sitem-info"><div class="sitem-title">${esc(m.title||'Photo')}</div><div class="sitem-sub">${esc((m.rich?.what_it_shows||m.summary||'').slice(0,30))}</div></div></div>`;
+  }).join('');
+
   // ── Home screen counts ──
   const hmEl = document.getElementById('homeMediaCount');
   const hnEl = document.getElementById('homeNotesCount');
+  const hpEl = document.getElementById('homePhotosCount');
   if(hmEl) hmEl.textContent = media.length;
   if(hnEl) hnEl.textContent = notes.length;
+  if(hpEl) hpEl.textContent = photos.length;
 
   // ── Home media grid ──
   const hmg = document.getElementById('homeMediaGrid');
@@ -733,13 +834,30 @@ function renderSidebar() {
       hng.innerHTML = g4.map(m=>`<div class="cgrid-item" onclick="openDetail(${m.id})" title="${esc(m.title||'Note')}"><div class="cgrid-ph">📝</div><div class="col-label">${esc(m.title||'Note')}</div></div>`).join('') + Array(emp).fill('<div class="cgrid-empty">+</div>').join('');
     }
   }
+
+  // ── Home photos grid ──
+  const hpg = document.getElementById('homePhotosGrid');
+  if(hpg) {
+    if(!photos.length) {
+      hpg.innerHTML = '<div class="cgrid-empty" style="grid-column:1/-1;aspect-ratio:auto;padding:18px;font-size:12px;color:var(--muted)">No photos — tap + to add</div>';
+    } else {
+      const g4=photos.slice(0,4), emp=4-g4.length;
+      hpg.innerHTML = g4.map(m=>{
+        const inner=m.thumbnail?`<img src="${esc(m.thumbnail)}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<div class=cgrid-ph>📷</div>'">`:`<div class="cgrid-ph">📷</div>`;
+        return `<div class="cgrid-item" onclick="openDetail(${m.id})" title="${esc(m.title||'Photo')}">${inner}<div class="col-label">${esc(m.title||'Photo')}</div></div>`;
+      }).join('') + Array(emp).fill('<div class="cgrid-empty">+</div>').join('');
+    }
+  }
 }
 
 function toggleColList(type) {
-  const list = document.getElementById(type==='media'?'mediaSidebar':'notesSidebar');
-  const btn  = document.getElementById(type==='media'?'mediaViewBtn':'notesViewBtn');
+  const ids = {media:'mediaSidebar',notes:'notesSidebar',photos:'photosSidebar'};
+  const btns = {media:'mediaViewBtn',notes:'notesViewBtn',photos:'photosViewBtn'};
+  const list = document.getElementById(ids[type]); if(!list) return;
+  const btn  = document.getElementById(btns[type]);
   const open = list.classList.toggle('open');
-  btn.textContent = open ? 'Hide Collection' : 'View Collection';
+  if(btn) btn.textContent = open ? 'Hide Collection' : 'View Collection';
+  if(open) openSidebar();
 }
 
 // ══════════════════════════════════════════════════
@@ -832,7 +950,7 @@ function extractUrl(text) {
   return m ? m[0] : null;
 }
 
-async function saveUrlFromChat(url) {
+async function saveUrlFromChat(url, note='') {
   const msgEl = appendMsg('ai',
     `<div style="font-size:13px;color:var(--muted)">🔗 Detected link — saving <b style="color:var(--accent)">${url.slice(0,50)}...</b></div>
      <div id="chatProg" style="font-size:12px;color:var(--muted);margin-top:8px;line-height:2"></div>`
@@ -936,17 +1054,35 @@ function openSave(tab) {
     document.querySelector('.stab[onclick*="note"]')?.classList.add('active');
     document.getElementById('urlTab').style.display='none';
     document.getElementById('noteTab').style.display='block';
-    setTimeout(()=>document.getElementById('noteTitle').focus(),300);
+    document.getElementById('photoTab').style.display='none';
+    setTimeout(()=>document.getElementById('noteIn').focus(),300);
+  } else if (tab==='photo') {
+    document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.stab[onclick*="photo"]')?.classList.add('active');
+    document.getElementById('urlTab').style.display='none';
+    document.getElementById('noteTab').style.display='none';
+    document.getElementById('photoTab').style.display='block';
   } else {
+    document.getElementById('urlTab').style.display='block';
+    document.getElementById('noteTab').style.display='none';
+    document.getElementById('photoTab').style.display='none';
     setTimeout(()=>document.getElementById('urlIn').focus(),300);
   }
 }
-function closeSave() { document.getElementById('saveOv').classList.remove('open'); resetProg(); }
+function closeSave() {
+  document.getElementById('saveOv').classList.remove('open');
+  resetProg();
+  _photoB64=null; _photoMime=null;
+  document.getElementById('photoDrop').classList.remove('has-img');
+  document.getElementById('photoDrop').innerHTML='<div class="photo-drop-icon">📷</div><span>Tap to choose image</span><span style="font-size:11px;opacity:.6">AI will read text, understand content, extract info</span>';
+  document.getElementById('photoFileIn').value='';
+}
 function savOvClick(e) { if(e.target.id==='saveOv') closeSave(); }
 function swSaveTab(n,btn) {
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
   document.getElementById('urlTab').style.display=n==='url'?'block':'none';
   document.getElementById('noteTab').style.display=n==='note'?'block':'none';
+  document.getElementById('photoTab').style.display=n==='photo'?'block':'none';
 }
 
 function setPr(n, state, lbl) {
@@ -1016,6 +1152,86 @@ async function doSaveUrl() {
   finally{btn.disabled=false;btn.innerHTML='<span>Analyze &amp; Save</span>';if(isYT||isIG)setTimeout(resetProg,500);}
 }
 
+// ── Photo upload ──────────────────────────────────────────
+let _photoB64 = null, _photoMime = null;
+
+function photoFileChosen(input) {
+  const file = input.files[0]; if (!file) return;
+  _photoMime = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    _photoB64 = dataUrl.split(',')[1];
+    const drop = document.getElementById('photoDrop');
+    drop.classList.add('has-img');
+    drop.innerHTML = `<img src="${dataUrl}" onclick="document.getElementById('photoFileIn').click()">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function doSavePhoto() {
+  if (!_photoB64) { toast('Choose an image first', 'err'); return; }
+  const note = document.getElementById('photoNote').value.trim();
+  const btn = document.getElementById('photoBtn');
+  btn.disabled=true; btn.innerHTML='<div class="spin"></div><span>Analyzing…</span>';
+  try {
+    if (backendUrl) {
+      const res = await backendPost('/api/save-photo', {image_b64:_photoB64, mime:_photoMime, user_note:note});
+      const mems = await backendGet('/api/memories');
+      allMems = mems.map(norm); setMems(allMems);
+      toast('📷 Photo saved & analyzed!');
+    } else {
+      // Browser fallback — use Groq vision directly
+      const text = await groqVision([{
+        role:'user',
+        content:[
+          {type:'image_url',image_url:{url:`data:${_photoMime};base64,${_photoB64}`}},
+          {type:'text',text:'Analyze this screenshot/photo. Return ONLY JSON: {"title":"short title","summary":"2-3 sentence description","tags":["t1","t2","t3"],"text_content":"any text visible","what_it_shows":"what is this","category":"type","key_info":"most important info"}'}
+        ]
+      }], 800);
+      const a = parseJSON(text);
+      addMem({type:'photo',platform:'photo',url:'',thumbnail:`data:${_photoMime};base64,${_photoB64}`,title:a.title||'Photo',summary:a.summary||'',tags:a.tags||[],user_note:note,rich:{text_content:a.text_content,what_it_shows:a.what_it_shows,key_info:a.key_info}});
+      allMems = getMems().map(norm);
+      toast('📷 Photo saved (browser mode)!');
+    }
+    closeSave(); renderSidebar();
+  } catch(e) { toast('Failed: '+e.message,'err'); }
+  finally { btn.disabled=false; btn.innerHTML='<span>Analyze &amp; Save</span>'; }
+}
+
+// ── Feed Me (clipboard → memory) ──────────────────────────
+async function feedMe() {
+  const btn = document.getElementById('feedMeBtn');
+  btn.classList.add('feeding');
+  try {
+    let text = '';
+    try { text = await navigator.clipboard.readText(); }
+    catch(e) { toast('📋 Allow clipboard access then try again','err'); return; }
+    text = text.trim();
+    if (!text) { toast('Clipboard is empty','err'); return; }
+
+    if (/^https?:\/\//i.test(text)) {
+      toast('🌀 Feeding link…');
+      showChat();
+      appendMsg('user', '📎 '+text);
+      await saveUrlFromChat(text, '');
+    } else {
+      toast('🌀 Feeding note…');
+      if (backendUrl) {
+        const res = await backendPost('/api/save-note', {content:text});
+        const mems = await backendGet('/api/memories');
+        allMems = mems.map(norm); setMems(allMems);
+      } else {
+        const a = parseJSON(await groq([{role:'user',content:`Analyze this note:\n${text.slice(0,800)}\n\nReturn JSON:\n{"title":"short title","summary":"1-2 sentences","tags":["t1","t2","t3"]}`}],400));
+        addMem({type:'note',platform:'note',url:'',thumbnail:'',title:a.title||text.slice(0,50),summary:a.summary||'',tags:a.tags||[],user_note:text,rich:{}});
+        allMems = getMems().map(norm);
+      }
+      toast('✅ Fed to memory!');
+      renderSidebar();
+    }
+  } finally { btn.classList.remove('feeding'); }
+}
+
 async function doSaveNote() {
   const content=document.getElementById('noteIn').value.trim();
   if(!content){toast('Write something first','err');return;}
@@ -1055,7 +1271,7 @@ function openDetail(id) {
   document.getElementById('dPlayBtn').style.display=(m.platform==='youtube'&&r.video_id)?'flex':'none';
   document.getElementById('dTitle').textContent=m.title||'Untitled';
 
-  const badge=m.platform==='youtube'?'<span class="dbadge byt">▶ YouTube</span>':m.platform==='instagram'?'<span class="dbadge big">📸 Instagram</span>':m.type==='note'?'<span class="dbadge bn">📝 Note</span>':'<span class="dbadge bw">🌐 Web</span>';
+  const badge=m.platform==='youtube'?'<span class="dbadge byt">▶ YouTube</span>':m.platform==='instagram'?'<span class="dbadge big">📸 Instagram</span>':m.type==='note'?'<span class="dbadge bn">📝 Note</span>':m.type==='photo'?'<span class="dbadge big">📷 Photo</span>':'<span class="dbadge bw">🌐 Web</span>';
   document.getElementById('dBadge').innerHTML=badge;
 
   // Stats
@@ -1071,9 +1287,9 @@ function openDetail(id) {
   if(!stats.length) document.getElementById('dStats').style.display='none';
   else document.getElementById('dStats').style.display='';
 
-  // Tabs — show note content instead of transcript for notes
-  const isNote=m.type==='note';
-  const tabs=isNote?['Overview','✨ Story']:['Overview','Visual','Transcript','Creator','✨ Story'];
+  // Tabs
+  const isNote=m.type==='note', isPhoto=m.type==='photo';
+  const tabs=isNote?['Overview','✨ Story']:isPhoto?['Overview','✨ Story']:['Overview','Visual','Transcript','Creator','✨ Story'];
   document.getElementById('dTabs').innerHTML=tabs.map((t,i)=>`<button class="dtab${i===0?' active':''}" onclick="swDTab(${i},this)">${t}</button>`).join('');
 
   const panels=document.getElementById('dPanels'); panels.innerHTML='';
@@ -1084,7 +1300,13 @@ function openDetail(id) {
   ov.innerHTML=`
     ${m.summary?`<div class="dsec"><div class="dsec-title">📝 Summary</div><p style="font-size:14px;line-height:1.75;color:var(--muted)">${esc(m.summary)}</p></div>`:''}
     ${isNote&&m.user_note?`<div class="dsec"><div class="dsec-title">📄 Note Content</div><div class="note-content">${esc(m.user_note)}</div></div>`:''}
-    ${!isNote?`<div class="dsec"><div class="dsec-title">📂 Classification</div>
+    ${isPhoto?`
+      ${r.what_it_shows?`<div class="dsec"><div class="dsec-title">🔍 What It Shows</div><p style="font-size:14px;line-height:1.75;color:var(--muted)">${esc(r.what_it_shows)}</p></div>`:''}
+      ${r.key_info?`<div class="dsec"><div class="dsec-title">💡 Key Info</div><div class="note-content" style="font-size:13px">${esc(r.key_info)}</div></div>`:''}
+      ${r.text_content&&r.text_content!=='none'?`<div class="dsec"><div class="dsec-title">📝 Text In Image</div><div class="note-content" style="font-size:13px">${esc(r.text_content)}</div></div>`:''}
+      ${m.user_note?`<div class="dsec"><div class="dsec-title">🗒 Your Note</div><p style="font-size:13px;color:var(--muted)">${esc(m.user_note)}</p></div>`:''}
+    `:''}
+    ${!isNote&&!isPhoto?`<div class="dsec"><div class="dsec-title">📂 Classification</div>
       <div class="kv-grid">
         ${r.category?`<div class="kv"><div class="kv-l">Category</div><div class="kv-v">${esc(r.category)}</div></div>`:''}
         ${r.sub_category?`<div class="kv"><div class="kv-l">Sub-Category</div><div class="kv-v">${esc(r.sub_category)}</div></div>`:''}
@@ -1105,7 +1327,7 @@ function openDetail(id) {
   `;
   panels.appendChild(ov);
 
-  if (!isNote) {
+  if (!isNote && !isPhoto) {
     // Visual
     const vp=document.createElement('div'); vp.className='dpanel'; vp.id='dp1';
     const colorMap={red:'#ef4444',blue:'#3b82f6',green:'#22c55e',yellow:'#eab308',orange:'#f97316',purple:'#a855f7',pink:'#ec4899',cyan:'#06b6d4',white:'#f8fafc',black:'#1e293b',gray:'#64748b',grey:'#64748b',brown:'#92400e',gold:'#f59e0b',silver:'#94a3b8',teal:'#14b8a6',indigo:'#6366f1',navy:'#1e3a8a'};
@@ -1169,7 +1391,7 @@ function openDetail(id) {
   }
 
   // Story
-  const stIdx=isNote?1:4;
+  const stIdx=(isNote||isPhoto)?1:4;
   const sp=document.createElement('div'); sp.className='dpanel'; sp.id='dp'+stIdx;
   sp.innerHTML=`<button class="narr-btn" id="narrBtn" onclick="generateNarrative()">✨ Generate Story</button><div id="narrBox"></div>`;
   panels.appendChild(sp);
