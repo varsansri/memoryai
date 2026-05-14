@@ -13,10 +13,11 @@
   --user-bubble:#2f2f2f;--ai-bubble:transparent;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+html{height:100%;height:100dvh}
+body{height:100%;height:100dvh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 
 /* ── Layout ── */
-.app{display:flex;height:100vh;width:100vw;overflow:hidden}
+.app{display:flex;height:100%;height:100dvh;width:100%;overflow:hidden}
 
 /* ── Sidebar ── */
 .sidebar{width:280px;min-width:280px;background:var(--sidebar);display:flex;flex-direction:column;border-right:1px solid var(--border);transition:transform .25s;overflow:hidden;position:relative}
@@ -68,7 +69,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .conn-chip-dot.live{background:#22c55e;box-shadow:0 0 5px #22c55e}
 
 /* ── Main area ── */
-.main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
 
 /* ── Top bar (mobile) ── */
 .topbar{display:none;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -76,7 +77,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .topbar-title{font-size:16px;font-weight:700;flex:1}
 
 /* ── Welcome screen ── */
-.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px 120px;text-align:center;overflow-y:auto}
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;overflow-y:auto}
 .welcome-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#0d8c6d);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 20px}
 .welcome-title{font-size:26px;font-weight:700;margin-bottom:8px}
 .welcome-sub{font-size:15px;color:var(--muted);max-width:480px;line-height:1.6;margin-bottom:32px}
@@ -89,7 +90,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 /* ── Chat area ── */
 .chat-area{flex:1;overflow-y:auto;padding:0;display:none;scroll-behavior:smooth}
 .chat-area::-webkit-scrollbar{width:6px}.chat-area::-webkit-scrollbar-track{background:transparent}.chat-area::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
-.chat-inner{max-width:760px;margin:0 auto;padding:24px 20px 120px}
+.chat-inner{max-width:760px;margin:0 auto;padding:24px 20px 24px}
 .msg{margin-bottom:24px;animation:fadeUp .2s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .msg-user{display:flex;justify-content:flex-end}
@@ -119,7 +120,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 
 /* ── Input bar ── */
-.input-bar{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;background:linear-gradient(transparent,var(--bg) 35%)}
+.input-bar{flex-shrink:0;padding:10px 16px 14px;background:var(--bg);border-top:1px solid var(--border)}
 .input-inner{max-width:760px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;display:flex;align-items:flex-end;gap:0;transition:border-color .2s;box-shadow:0 4px 24px rgba(0,0,0,.3)}
 .input-inner:focus-within{border-color:var(--accent)}
 .input-inner textarea{flex:1;background:transparent;border:none;outline:none;padding:14px 16px;color:var(--text);font-size:15px;font-family:inherit;resize:none;max-height:200px;line-height:1.5;min-height:52px}
@@ -238,13 +239,17 @@ textarea.fi{resize:none;height:90px}
 
 @media(max-width:720px){
   .topbar{display:flex}
-  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%)}
+  .sidebar{position:fixed;left:0;top:0;height:100%;height:100dvh;z-index:100;transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
   .sidebar-overlay.open{display:block}
   .sidebar-bottom{width:auto}
   .welcome-examples{grid-template-columns:1fr}
+  .welcome-title{font-size:20px}
+  .welcome-sub{font-size:13px}
   .kv-grid{grid-template-columns:1fr}
   .frames-grid{grid-template-columns:1fr 1fr}
+  .input-bar{padding:8px 10px 12px}
+  .input-inner textarea{font-size:14px;min-height:44px}
 }
 </style>
 </head>
