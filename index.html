@@ -279,6 +279,23 @@ textarea.fi{resize:none;height:90px}
 .feed-me-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;opacity:.55}
 @keyframes bhpulse{0%,100%{opacity:.5}50%{opacity:1}}
 
+/* ── Per-collection chat ── */
+.coll-chat-toggle{width:100%;padding:6px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:4px;transition:all .18s;letter-spacing:.4px}
+.coll-chat-toggle:hover{background:var(--accent-dim);color:var(--accent);border-color:var(--glow)}
+.coll-chat-toggle.active{background:var(--accent-dim);color:var(--accent);border-color:var(--glow)}
+.coll-chat-panel{display:none;flex-direction:column;gap:6px;margin-top:8px;padding:8px;background:rgba(255,255,255,.015);border:1px solid var(--border);border-radius:10px}
+.coll-chat-panel.open{display:flex}
+.coll-chat-msgs{overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:50px;max-height:150px;font-size:12px;line-height:1.5}
+.coll-chat-msgs::-webkit-scrollbar{width:2px}.coll-chat-msgs::-webkit-scrollbar-thumb{background:var(--surface2)}
+.coll-cmsg-user{align-self:flex-end;background:var(--surface);border:1px solid var(--border);border-radius:10px 10px 3px 10px;padding:5px 9px;max-width:86%;color:var(--text2)}
+.coll-cmsg-ai{align-self:flex-start;background:var(--accent-dim);border:1px solid rgba(16,163,127,.15);border-radius:10px 10px 10px 3px;padding:5px 9px;max-width:90%;color:var(--text)}
+.coll-chat-input-row{display:flex;gap:5px;align-items:flex-end}
+.coll-chat-input-row textarea{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:inherit;padding:6px 9px;resize:none;outline:none;min-height:32px;max-height:72px;line-height:1.4;transition:border-color .18s}
+.coll-chat-input-row textarea:focus{border-color:rgba(16,163,127,.4)}
+.coll-chat-input-row textarea::placeholder{color:var(--muted)}
+.coll-send-btn{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s,transform .15s;box-shadow:0 2px 8px rgba(16,163,127,.25)}
+.coll-send-btn:hover{opacity:.9;transform:scale(1.05)}.coll-send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
 /* ── Mobile overlay sidebar ── */
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 
@@ -328,6 +345,14 @@ textarea.fi{resize:none;height:90px}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             <span id="mediaViewBtn">View Collection</span>
           </button>
+          <button class="coll-chat-toggle" id="mediaChatToggle" onclick="toggleCollChat('media')">💬 Ask AI about Media</button>
+          <div class="coll-chat-panel" id="mediaChatPanel">
+            <div class="coll-chat-msgs" id="mediaChatMsgs"></div>
+            <div class="coll-chat-input-row">
+              <textarea id="mediaChatIn" placeholder="Ask about your videos…" rows="1" oninput="autoResizeSmall(this)" onkeydown="collChatKey(event,'media')"></textarea>
+              <button class="coll-send-btn" id="mediaChatSend" onclick="sendCollChat('media')">↑</button>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Notes Collection Box -->
@@ -345,6 +370,14 @@ textarea.fi{resize:none;height:90px}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             <span id="notesViewBtn">View Collection</span>
           </button>
+          <button class="coll-chat-toggle" id="notesChatToggle" onclick="toggleCollChat('notes')">💬 Ask AI about Notes</button>
+          <div class="coll-chat-panel" id="notesChatPanel">
+            <div class="coll-chat-msgs" id="notesChatMsgs"></div>
+            <div class="coll-chat-input-row">
+              <textarea id="notesChatIn" placeholder="Ask about your notes…" rows="1" oninput="autoResizeSmall(this)" onkeydown="collChatKey(event,'notes')"></textarea>
+              <button class="coll-send-btn" id="notesChatSend" onclick="sendCollChat('notes')">↑</button>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Photos Collection Box -->
@@ -362,6 +395,14 @@ textarea.fi{resize:none;height:90px}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             <span id="photosViewBtn">View Collection</span>
           </button>
+          <button class="coll-chat-toggle" id="photosChatToggle" onclick="toggleCollChat('photos')">💬 Ask AI about Photos</button>
+          <div class="coll-chat-panel" id="photosChatPanel">
+            <div class="coll-chat-msgs" id="photosChatMsgs"></div>
+            <div class="coll-chat-input-row">
+              <textarea id="photosChatIn" placeholder="Ask about your photos…" rows="1" oninput="autoResizeSmall(this)" onkeydown="collChatKey(event,'photos')"></textarea>
+              <button class="coll-send-btn" id="photosChatSend" onclick="sendCollChat('photos')">↑</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1721,6 +1762,99 @@ document.addEventListener('click', e => {
   const btn = e.target.closest('button:not(.feed-me-btn)');
   if (btn && typeof Motion !== 'undefined') springPress(btn);
 });
+
+// ══════════════════════════════════════════════════
+//  PER-COLLECTION AI CHAT
+// ══════════════════════════════════════════════════
+const collChatHistory = {media:[], notes:[], photos:[]};
+
+function toggleCollChat(type) {
+  const panel = document.getElementById(type+'ChatPanel');
+  const toggle = document.getElementById(type+'ChatToggle');
+  const isOpen = panel.classList.toggle('open');
+  toggle.classList.toggle('active', isOpen);
+  if (isOpen) {
+    setTimeout(() => document.getElementById(type+'ChatIn')?.focus(), 150);
+    const msgs = document.getElementById(type+'ChatMsgs');
+    if (!msgs.children.length) {
+      const colMems = getCollMems(type);
+      const noun = {media:'videos & articles', notes:'notes', photos:'photos'}[type];
+      appendCollMsg(type, 'ai', `Hi! I have ${colMems.length} ${noun} in context. Ask anything — summaries, topics, find something specific…`);
+    }
+  }
+}
+
+function getCollMems(type) {
+  if (type === 'media') return allMems.filter(m => m.type!=='note'&&m.type!=='photo');
+  if (type === 'notes') return allMems.filter(m => m.type==='note');
+  return allMems.filter(m => m.type==='photo');
+}
+
+function collChatKey(e, type) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendCollChat(type); }
+}
+
+function autoResizeSmall(ta) {
+  ta.style.height='auto';
+  ta.style.height=Math.min(ta.scrollHeight,72)+'px';
+}
+
+function appendCollMsg(type, role, text) {
+  const msgs = document.getElementById(type+'ChatMsgs');
+  const div = document.createElement('div');
+  div.className = role==='user' ? 'coll-cmsg-user' : 'coll-cmsg-ai';
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendCollChat(type) {
+  const ta = document.getElementById(type+'ChatIn');
+  const q = ta.value.trim(); if (!q) return;
+  ta.value=''; autoResizeSmall(ta);
+  const sendBtn = document.getElementById(type+'ChatSend');
+  sendBtn.disabled = true;
+
+  appendCollMsg(type, 'user', q);
+  collChatHistory[type].push({role:'user', content:q});
+  const typingDiv = appendCollMsg(type, 'ai', '…');
+
+  const colMems = getCollMems(type);
+  const noun = {media:'Media (videos, articles)', notes:'Notes', photos:'Photos'}[type];
+
+  try {
+    let reply;
+    if (backendUrl) {
+      const d = await backendPost('/api/chat', {
+        messages: collChatHistory[type].slice(-6),
+        collection_filter: type
+      });
+      reply = d.reply;
+    } else {
+      const memCtx = colMems.slice(0,60).map(m=>{
+        const r=m.rich||{};
+        let line=`"${m.title}"|saved:${(m.created_at||'').slice(0,16)}`;
+        if(m.url) line+=`|url:${m.url}`;
+        if(m.summary) line+=`|${m.summary.slice(0,150)}`;
+        if(m.user_note) line+=`|note:${(m.user_note||'').slice(0,150)}`;
+        if(r.key_points?.length) line+=`|points:${r.key_points.slice(0,3).join('|')}`;
+        if(r.transcript_full) line+=`|transcript:${String(r.transcript_full).slice(0,180)}`;
+        if(r.text_content&&r.text_content!=='none') line+=`|text:${String(r.text_content).slice(0,100)}`;
+        if(r.what_it_shows) line+=`|shows:${String(r.what_it_shows).slice(0,100)}`;
+        return line;
+      }).join('\n');
+      const sys=`You are NoteSorb, focused ONLY on the user's ${noun} collection (${colMems.length} items). Answer using ONLY these saved items:\n${memCtx}\n\nBe specific — mention titles. If no relevant data, say so. Be concise (1-4 sentences). Return plain text only.`;
+      reply = await groq([{role:'system',content:sys},...collChatHistory[type].slice(-5)], 500);
+    }
+    typingDiv.textContent = reply;
+    collChatHistory[type].push({role:'assistant', content:reply});
+  } catch(e) {
+    typingDiv.textContent = 'Error: '+e.message;
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
 </script>
 </body>
 </html>
